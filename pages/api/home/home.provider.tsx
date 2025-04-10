@@ -6,21 +6,23 @@ import { v4 as uuidv4 } from 'uuid';
 import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
 
-// Import your union type from wherever you defined it
-import { ActionType } from './action.types';
+// Define your union type right here instead of importing
+type ActionType<T> =
+  | { type: 'reset' }
+  | { field: keyof T; value: T[keyof T] };
 
 import { Conversation } from '@/types/chat';
 import { OpenAIModels } from '@/types/openai';
 
 /**
  * homeReducer checks for a "reset" action first.
- * If not "reset", then we switch on `action.field`.
+ * If not "reset", then it's the shape { field, value }.
  */
 function homeReducer(
   state: HomeInitialState,
   action: ActionType<HomeInitialState>
 ): HomeInitialState {
-  // 1) If it's a "reset" action, return initial state
+  // 1) If it's a "reset" action, return initialState
   if (action.type === 'reset') {
     return initialState;
   }
@@ -31,7 +33,7 @@ function homeReducer(
       return { ...state, apiKey: action.value };
 
     case 'openModal':
-      // e.g. "profile", "templates", "help", "settings", or null
+      // e.g. 'profile', 'templates', 'help', 'settings', or null
       return { ...state, openModal: action.value };
 
     case 'conversations':
@@ -43,7 +45,7 @@ function homeReducer(
     case 'showChatbar':
       return { ...state, showChatbar: action.value };
 
-    // ... handle any other fields you need
+    // ... handle any other fields here
 
     default:
       // fallback for unrecognized field name
@@ -106,7 +108,6 @@ export default function HomeContextProvider({
   ) => {
     console.log('[HomeProvider] Updating conversation:', conversation.id, data);
 
-    // find and update in the array
     const updatedList = state.conversations.map((c) => {
       if (c.id === conversation.id) {
         return { ...c, [data.key]: data.value };
