@@ -6,30 +6,26 @@ import { v4 as uuidv4 } from 'uuid';
 import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
 
-// Example union type for your actions:
-export type ActionType<T> =
-  | { type: 'reset' }
-  | { field: keyof T; value: T[keyof T] };
+// Import your union type from wherever you defined it
+import { ActionType } from './action.types';
 
-// Example "Conversation" type
 import { Conversation } from '@/types/chat';
 import { OpenAIModels } from '@/types/openai';
 
 /**
- * Your homeReducer handles two kinds of actions:
- * 1) { type: 'reset' }
- * 2) { field: string; value: any }
+ * homeReducer checks for a "reset" action first.
+ * If not "reset", then we switch on `action.field`.
  */
 function homeReducer(
   state: HomeInitialState,
   action: ActionType<HomeInitialState>
 ): HomeInitialState {
-  // 1) If it's a "reset" action, return initialState early
-  if ('type' in action && action.type === 'reset') {
+  // 1) If it's a "reset" action, return initial state
+  if (action.type === 'reset') {
     return initialState;
   }
 
-  // 2) Otherwise, it's the { field, value } shape:
+  // 2) Otherwise, it's the shape { field, value }
   switch (action.field) {
     case 'apiKey':
       return { ...state, apiKey: action.value };
@@ -47,16 +43,14 @@ function homeReducer(
     case 'showChatbar':
       return { ...state, showChatbar: action.value };
 
-    // ... add explicit cases for other fields if desired
-    // fallback for unrecognized field:
+    // ... handle any other fields you need
+
     default:
+      // fallback for unrecognized field name
       return { ...state, [action.field]: action.value };
   }
 }
 
-/**
- * HomeContextProvider sets up your global "home" state + actions.
- */
 export default function HomeContextProvider({
   children,
 }: {
@@ -88,7 +82,7 @@ export default function HomeContextProvider({
     console.log('[HomeProvider] New conversation created:', newConv.id);
   };
 
-  // Example stubs for folder functions
+  // Example stubs for folder management
   const handleCreateFolder = (name: string, type: string) => {
     console.log('[HomeProvider] create folder not implemented yet', name, type);
   };
@@ -112,7 +106,7 @@ export default function HomeContextProvider({
   ) => {
     console.log('[HomeProvider] Updating conversation:', conversation.id, data);
 
-    // E.g. find the conversation in state, update it, store in local
+    // find and update in the array
     const updatedList = state.conversations.map((c) => {
       if (c.id === conversation.id) {
         return { ...c, [data.key]: data.value };
@@ -122,7 +116,7 @@ export default function HomeContextProvider({
 
     dispatch({ field: 'conversations', value: updatedList });
 
-    // If updating the selected conversation => also update that
+    // if updating the currently selected conversation => reflect that
     if (state.selectedConversation?.id === conversation.id) {
       const updatedConv = updatedList.find((c) => c.id === conversation.id);
       dispatch({ field: 'selectedConversation', value: updatedConv });
