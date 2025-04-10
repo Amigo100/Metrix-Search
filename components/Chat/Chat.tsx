@@ -1,3 +1,5 @@
+// /components/Chat/Chat.tsx
+
 import {
   IconChevronDown,
   IconCopy,
@@ -173,45 +175,13 @@ Instructions:
   // Compare doc vs transcript => highlight errors, inferred terms, next steps
   // ------------------------------------------------------------
   const handleAnalyzeDoc = async (doc: string, rawTranscript: string) => {
-    // We refine the prompt to highlight:
-    // 1) Potential transcription errors
-    // 2) Inferred terms
-    // 3) Recommendations relevant to the active template
-    // Return all in Markdown with bold headings.
     const analysisPrompt = `
 You are a clinical summarizer focusing on:
-1) **Potential Transcription Errors**: output as a list, e.g. 
-   Troponone >>> Troponin 
-   Amlopodine >>> Amlodipine 
-   (These are words likely misheard in the transcript.)
-2) **Inferred Terms** (i.e., terms that appear in the final doc but not explicitly stated in the transcript). Show them as 'Term >>> Reasoning'.
-3) **Recommendations**: 
-   - If the template is an "ED Triage Note" (early presentation), suggest headings like: 
-     - Bloods
-     - Imaging
-     - Examination
-     - Medications
-   - If it's a "Discharge Note", suggest headings like: 
-     - Patient Education
-     - Take Home Medications
-     - Safety-netting Advice
-     - Follow-up
-   - Provide any other logical next steps relevant to the template or context.
+1) **Potential Transcription Errors**: output as a list
+2) **Inferred Terms** 
+3) **Recommendations** (relevant to the active template)
 
-Please return your result in **Markdown** format with clear headings. Example:
-
-**Potential Transcription Errors**
-- Troponone >>> Troponin
-- Amlopodine >>> Amlodipine
-
-**Inferred Terms**
-- Non-radiating >>> Interpreted as "does not radiate"
-
-**Recommendations**
-- Bloods: 
-  - Repeat troponin in 3 hours
-- Imaging:
-  - Consider chest X-ray
+Please return your result in **Markdown** format with clear headings.
 
 Transcript:
 -----------
@@ -567,13 +537,7 @@ ${doc}
       {openModal === 'profile' && <ProfileModal />}
       {openModal === 'templates' && <TemplatesModal />}
       {openModal === 'help' && <HelpModal />}
-      {openModal === 'settings' && (
-        <SettingsModal
-          onClose={() => {
-            dispatch({ field: 'openModal', value: null });
-          }}
-        />
-      )}
+      {openModal === 'settings' && <SettingsModal />} {/* NO onClose prop here */}
     </div>
   );
 });
