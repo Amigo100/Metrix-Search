@@ -1,0 +1,15 @@
+cat > .gitignore << 'EOF'
+node_modules/
+.next/
+build/
+dist/
+venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+*.log
+*.lock
+coverage/
+out/
+EOF

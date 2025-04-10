@@ -1,0 +1,27 @@
+# combined_requirements.txt
+
+# Unified FastAPI version:
+fastapi==0.100.0
+uvicorn[standard]==0.22.0
+
+# Dependencies from my_rag_app:
+openai==0.27.8
+qdrant-client==1.3.2
+unstructured==0.5.2
+PyPDF2==3.0.1
+# Use the unified pandas version:
+pandas==2.2.3
+numpy>=1.23.5
+scikit-learn>=1.2.2
+sentence-transformers==2.2.2
+nltk==3.8.1
+huggingface_hub==0.13.3
+
+# Dependencies from predictive-backend:
+xgboost==2.1.4
+# Note: Use the same pandas version as above.
+scikit-learn==1.4.2
+joblib==1.4.2
+# Also, force the same numpy version if needed:
+numpy==1.26.3
+python-dotenv==1.0.1

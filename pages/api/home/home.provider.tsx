@@ -1,0 +1,136 @@
+// /frontend/pages/api/home/home.provider.tsx
+
+import React, { useReducer } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
+import HomeContext from './home.context';
+import { HomeInitialState, initialState } from './home.state';
+import { ActionType } from '@/hooks/useCreateReducer';
+
+import { Conversation } from '@/types/chat';
+import { OpenAIModels } from '@/types/openai';
+
+// Example minimal typed reducer
+function homeReducer(
+  state: HomeInitialState,
+  action: ActionType<HomeInitialState>
+): HomeInitialState {
+  switch (action.field) {
+    case 'apiKey':
+      return { ...state, apiKey: action.value };
+
+    case 'openModal':
+      // e.g. "profile", "templates", "help", "settings", or null
+      return { ...state, openModal: action.value };
+
+    case 'conversations':
+      return { ...state, conversations: action.value };
+
+    case 'selectedConversation':
+      return { ...state, selectedConversation: action.value };
+
+    case 'showChatbar':
+      return { ...state, showChatbar: action.value };
+
+    // ... add explicit cases for other fields if you like
+    // else fallback:
+    default:
+      // fallback: set state[action.field] = action.value
+      return { ...state, [action.field]: action.value };
+  }
+}
+
+/**
+ * HomeContextProvider sets up your global "home" state + actions.
+ */
+export default function HomeContextProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [state, dispatch] = useReducer(homeReducer, initialState);
+
+  // Example: create a new conversation
+  const handleNewConversation = () => {
+    console.log('[HomeProvider] Creating a new conversation...');
+    const newConv: Conversation = {
+      id: uuidv4(),
+      name: 'New Conversation',
+      messages: [],
+      model: OpenAIModels['gpt-3.5-turbo'], // or pick from your defaultModelId
+      prompt: '',
+      temperature: 1.0,
+      folderId: null,
+    };
+
+    // Add it to our conversation list
+    const updated = [...state.conversations, newConv];
+    dispatch({ field: 'conversations', value: updated });
+
+    // Select it
+    dispatch({ field: 'selectedConversation', value: newConv });
+    localStorage.setItem('conversationHistory', JSON.stringify(updated));
+
+    console.log('[HomeProvider] New conversation created:', newConv.id);
+  };
+
+  // Example stubs for folder functions
+  const handleCreateFolder = (name: string, type: string) => {
+    console.log('[HomeProvider] create folder not implemented yet', name, type);
+  };
+  const handleDeleteFolder = (folderId: string) => {
+    console.log('[HomeProvider] delete folder not implemented yet', folderId);
+  };
+  const handleUpdateFolder = (folderId: string, name: string) => {
+    console.log('[HomeProvider] update folder not implemented yet', folderId, name);
+  };
+
+  // Example: select a conversation
+  const handleSelectConversation = (conversation: Conversation) => {
+    console.log('[HomeProvider] Selecting conversation:', conversation.id);
+    dispatch({ field: 'selectedConversation', value: conversation });
+  };
+
+  // Example: update conversation fields
+  const handleUpdateConversation = (
+    conversation: Conversation,
+    data: { key: string; value: any }
+  ) => {
+    console.log('[HomeProvider] Updating conversation:', conversation.id, data);
+
+    // E.g. find the conversation in state, update it, store in local
+    const updatedList = state.conversations.map((c) => {
+      if (c.id === conversation.id) {
+        return { ...c, [data.key]: data.value };
+      }
+      return c;
+    });
+
+    dispatch({ field: 'conversations', value: updatedList });
+
+    // If updating the selected conversation => also match that
+    if (state.selectedConversation?.id === conversation.id) {
+      const updatedConv = updatedList.find((c) => c.id === conversation.id);
+      dispatch({ field: 'selectedConversation', value: updatedConv });
+    }
+
+    localStorage.setItem('conversationHistory', JSON.stringify(updatedList));
+  };
+
+  return (
+    <HomeContext.Provider
+      value={{
+        state,
+        dispatch,
+        handleNewConversation,
+        handleCreateFolder,
+        handleDeleteFolder,
+        handleUpdateFolder,
+        handleSelectConversation,
+        handleUpdateConversation,
+      }}
+    >
+      {children}
+    </HomeContext.Provider>
+  );
+}
