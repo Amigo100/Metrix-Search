@@ -1,20 +1,35 @@
-// /frontend/pages/api/home/home.provider.tsx
+// file: /pages/api/home/home.provider.tsx
 
 import React, { useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
-import { ActionType } from '@/hooks/useCreateReducer';
 
+// Example union type for your actions:
+export type ActionType<T> =
+  | { type: 'reset' }
+  | { field: keyof T; value: T[keyof T] };
+
+// Example "Conversation" type
 import { Conversation } from '@/types/chat';
 import { OpenAIModels } from '@/types/openai';
 
-// Example minimal typed reducer
+/**
+ * Your homeReducer handles two kinds of actions:
+ * 1) { type: 'reset' }
+ * 2) { field: string; value: any }
+ */
 function homeReducer(
   state: HomeInitialState,
   action: ActionType<HomeInitialState>
 ): HomeInitialState {
+  // 1) If it's a "reset" action, return initialState early
+  if ('type' in action && action.type === 'reset') {
+    return initialState;
+  }
+
+  // 2) Otherwise, it's the { field, value } shape:
   switch (action.field) {
     case 'apiKey':
       return { ...state, apiKey: action.value };
@@ -32,10 +47,9 @@ function homeReducer(
     case 'showChatbar':
       return { ...state, showChatbar: action.value };
 
-    // ... add explicit cases for other fields if you like
-    // else fallback:
+    // ... add explicit cases for other fields if desired
+    // fallback for unrecognized field:
     default:
-      // fallback: set state[action.field] = action.value
       return { ...state, [action.field]: action.value };
   }
 }
@@ -57,17 +71,17 @@ export default function HomeContextProvider({
       id: uuidv4(),
       name: 'New Conversation',
       messages: [],
-      model: OpenAIModels['gpt-3.5-turbo'], // or pick from your defaultModelId
+      model: OpenAIModels['gpt-3.5-turbo'],
       prompt: '',
       temperature: 1.0,
       folderId: null,
     };
 
-    // Add it to our conversation list
+    // add it to our conversation list
     const updated = [...state.conversations, newConv];
     dispatch({ field: 'conversations', value: updated });
 
-    // Select it
+    // also select it
     dispatch({ field: 'selectedConversation', value: newConv });
     localStorage.setItem('conversationHistory', JSON.stringify(updated));
 
@@ -108,7 +122,7 @@ export default function HomeContextProvider({
 
     dispatch({ field: 'conversations', value: updatedList });
 
-    // If updating the selected conversation => also match that
+    // If updating the selected conversation => also update that
     if (state.selectedConversation?.id === conversation.id) {
       const updatedConv = updatedList.find((c) => c.id === conversation.id);
       dispatch({ field: 'selectedConversation', value: updatedConv });
