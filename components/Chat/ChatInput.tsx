@@ -76,10 +76,11 @@ export const ChatInput = ({
     prompt.name.toLowerCase().includes(promptInputValue.toLowerCase()),
   );
 
-  // convenience
+  // Dispatch-based “setter” for activePromptIndex
   const setActivePromptIndex = (idx: number) => {
     homeDispatch({ field: 'activePromptIndex', value: idx });
   };
+
   const setVariables = (vars: any) => {
     homeDispatch({ field: 'promptVariables', value: vars });
   };
@@ -133,20 +134,14 @@ export const ChatInput = ({
   };
 
   const isMobile = () => {
-    const ua =
-      typeof navigator === 'undefined' ? '' : navigator.userAgent;
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(
-      ua,
-    );
+    const ua = typeof navigator === 'undefined' ? '' : navigator.userAgent;
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua);
   };
 
   const handleInitModal = () => {
     const selectedPrompt = filteredPrompts[activePromptIndex];
     if (selectedPrompt) {
-      const newContent = textInputContent?.replace(
-        /\/\w*$/,
-        selectedPrompt.content,
-      );
+      const newContent = textInputContent?.replace(/\/\w*$/, selectedPrompt.content);
       setTextInputContent(newContent || '');
       handlePromptSelect(selectedPrompt);
     }
@@ -154,22 +149,29 @@ export const ChatInput = ({
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    // If showing prompt suggestions...
     if (showPromptList) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setActivePromptIndex((prev: number) =>
-          prev < filteredPrompts.length - 1 ? prev + 1 : prev,
-        );
+        // Instead of setActivePromptIndex(prev => prev + 1)
+        // use the current activePromptIndex from context:
+        const newIndex =
+          activePromptIndex < filteredPrompts.length - 1
+            ? activePromptIndex + 1
+            : activePromptIndex;
+        setActivePromptIndex(newIndex);
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setActivePromptIndex((prev: number) =>
-          prev > 0 ? prev - 1 : prev,
-        );
+        const newIndex =
+          activePromptIndex > 0 ? activePromptIndex - 1 : activePromptIndex;
+        setActivePromptIndex(newIndex);
       } else if (e.key === 'Tab') {
         e.preventDefault();
-        setActivePromptIndex((prev: number) =>
-          prev < filteredPrompts.length - 1 ? prev + 1 : 0,
-        );
+        const newIndex =
+          activePromptIndex < filteredPrompts.length - 1
+            ? activePromptIndex + 1
+            : 0;
+        setActivePromptIndex(newIndex);
       } else if (e.key === 'Enter') {
         e.preventDefault();
         handleInitModal();
@@ -177,6 +179,7 @@ export const ChatInput = ({
         e.preventDefault();
         setShowPromptList(false);
       } else {
+        // If user typed something else, reset to 0
         setActivePromptIndex(0);
       }
     } else if (
@@ -185,9 +188,11 @@ export const ChatInput = ({
       !isMobile() &&
       !e.shiftKey
     ) {
+      // Regular "Enter" => Send
       e.preventDefault();
       handleSend();
     } else if (e.key === '/' && e.metaKey) {
+      // For plugin select
       e.preventDefault();
       setShowPluginSelect(!showPluginSelect);
     }
@@ -227,13 +232,11 @@ export const ChatInput = ({
   };
 
   const handleSubmit = (updatedVars: string[]) => {
-    const newContent = textInputContent?.replace(
-      /{{(.*?)}}/g,
-      (match, variable) => {
-        const idx = promptVariables.indexOf(variable);
-        return updatedVars[idx];
-      },
-    );
+    // Fill in the prompt placeholders with user-provided values
+    const newContent = textInputContent?.replace(/{{(.*?)}}/g, (match, variable) => {
+      const idx = promptVariables.indexOf(variable);
+      return updatedVars[idx];
+    });
     setTextInputContent(newContent || '');
     if (textareaRef?.current) {
       textareaRef.current.focus();
@@ -247,18 +250,17 @@ export const ChatInput = ({
     }
   }, [activePromptIndex]);
 
-  // auto-grow
+  // Auto-grow the textarea as user types
   useEffect(() => {
-    if (textareaRef?.current && textareaRef.current) {
+    if (textareaRef?.current) {
       textareaRef.current.style.height = 'inherit';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-      textareaRef.current.style.overflow = `${
-        textareaRef.current.scrollHeight > 400 ? 'auto' : 'hidden'
-      }`;
+      textareaRef.current.style.overflow =
+        textareaRef.current.scrollHeight > 400 ? 'auto' : 'hidden';
     }
   }, [textInputContent, textareaRef]);
 
-  // close prompt list if click outside
+  // Close prompt list if user clicks outside
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       if (
@@ -304,9 +306,11 @@ export const ChatInput = ({
           )}
 
         {/* Input area */}
-        <div className="relative flex-1 flex items-center h-12 border border-black/10
-                        rounded-md bg-white shadow-sm dark:border-gray-900/50
-                        dark:bg-[#40414F]">
+        <div
+          className="relative flex-1 flex items-center h-12 border border-black/10
+                     rounded-md bg-white shadow-sm dark:border-gray-900/50
+                     dark:bg-[#40414F]"
+        >
           {/* Plugin button */}
           <button
             className="absolute left-2 text-neutral-600 dark:text-neutral-100
