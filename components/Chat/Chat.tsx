@@ -68,30 +68,26 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   } = useContext(HomeContext);
 
   // MAIN local states:
-  const [transcript, setTranscript] = useState('');       // The raw user transcript
-  const [clinicalDoc, setClinicalDoc] = useState('');     // The markdown doc
-  const [analysis, setAnalysis] = useState('');           // The doc comparison output
+  const [transcript, setTranscript] = useState('');
+  const [clinicalDoc, setClinicalDoc] = useState('');
+  const [analysis, setAnalysis] = useState('');
 
   const [isEditingDoc, setIsEditingDoc] = useState(false);
   const [editDocText, setEditDocText] = useState('');
 
-  // Template & Model states
   const [activeTemplateName, setActiveTemplateName] = useState('ED Triage Note');
   const [activeModelName, setActiveModelName] = useState('GPT-4');
   const [showTemplatesDropdown, setShowTemplatesDropdown] = useState(false);
   const [showModelsDropdown, setShowModelsDropdown] = useState(false);
 
-  // For re-running the last output:
   const [lastOutputType, setLastOutputType] = useState<OutputType>(null);
-  const [lastDocPrompt, setLastDocPrompt] = useState('');        
+  const [lastDocPrompt, setLastDocPrompt] = useState('');
   const [lastAnalysisPrompt, setLastAnalysisPrompt] = useState('');
 
-  // Refs
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
 
-  // Throttled scroll
   const throttledScrollDown = throttle(() => {
     if (autoScrollEnabled && messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -102,13 +98,12 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
     throttledScrollDown();
   }, [clinicalDoc, analysis, throttledScrollDown, loading]);
 
-  // Intersection observer for auto scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         setAutoScrollEnabled(entry.isIntersecting);
       },
-      { root: null, threshold: 0.3 }
+      { threshold: 0.3 }
     );
     if (messagesEndRef.current) observer.observe(messagesEndRef.current);
     return () => {
@@ -116,11 +111,15 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
     };
   }, []);
 
-  const scrollToBottom = () => {
-    if (autoScrollEnabled && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  // -------------------------------------------------
+  // Use environment variable for API base URL
+  // -------------------------------------------------
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
+  // We might have two different endpoints: /rag, /predictive, etc.
+  // We'll show example for /rag:
+  const RAG_ENDPOINT = `${API_BASE_URL}/rag/ask_rag`;
 
   // -----------------------------------------------
   // Create doc from transcript (Markdown output)
@@ -129,21 +128,14 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
     const selectedTemplate = prompts.find((tpl) => tpl.name === activeTemplateName);
     const templateContent = selectedTemplate?.content || '';
 
-    // Prompt for doc creation, ensuring Markdown format with headings/bullet points
     const docPrompt = `
-You are a helpful clinical scribe AI. Return your output in Markdown format with headings in bold or '#' style, bullet points, etc.
+You are a helpful clinical scribe AI. Return output in Markdown format.
 
-Template (headings/format):
---------------------------
+Template:
 ${templateContent}
 
 User Transcript:
---------------------------
 ${text}
-
-Instructions:
-- Fill in or expand on the above template headings using the transcript details.
-- Ensure final answer is Markdown (headings in **bold** or using #).
 `.trim();
 
     try {
@@ -153,42 +145,32 @@ Instructions:
         mode: 'scribe',
         template_name: activeTemplateName,
       };
-      const res = await axios.post('http://localhost:8000/rag/ask_rag', payload);
+      // Instead of axios to localhost => do axios to RAG_ENDPOINT
+      const res = await axios.post(RAG_ENDPOINT, payload);
       const docMarkdown = res.data.response || '';
 
       setClinicalDoc(docMarkdown);
       setAnalysis('');
       setIsEditingDoc(false);
 
-      // Store prompt for possible regenerate
       setLastDocPrompt(docPrompt);
       setLastOutputType('doc');
 
-      // After doc creation, automatically run analysis to show transcription errors, inferred terms, etc.
       await handleAnalyzeDoc(docMarkdown, text);
     } catch (err) {
       console.error('[handleCreateDocFromTranscript] error =>', err);
     }
   };
 
-  // ------------------------------------------------------------
-  // Compare doc vs transcript => highlight errors, inferred terms, next steps
-  // ------------------------------------------------------------
+  // Compare doc vs transcript => highlight errors, etc.
   const handleAnalyzeDoc = async (doc: string, rawTranscript: string) => {
     const analysisPrompt = `
-You are a clinical summarizer focusing on:
-1) **Potential Transcription Errors**: output as a list
-2) **Inferred Terms** 
-3) **Recommendations** (relevant to the active template)
-
-Please return your result in **Markdown** format with clear headings.
+Analyze doc vs. transcript. Return Markdown output with any errors or recommended improvements.
 
 Transcript:
------------
 ${rawTranscript}
 
 Clinical Document:
-------------------
 ${doc}
 `.trim();
 
@@ -198,10 +180,8 @@ ${doc}
         history: [],
         mode: 'analysis',
       };
-      const res = await axios.post('http://localhost:8000/rag/ask_rag', payload);
-      const analysisOutput = res.data.response || '';
-
-      setAnalysis(analysisOutput);
+      const res = await axios.post(RAG_ENDPOINT, payload);
+      setAnalysis(res.data.response || '');
       setLastAnalysisPrompt(analysisPrompt);
       setLastOutputType('analysis');
     } catch (err) {
@@ -209,17 +189,11 @@ ${doc}
     }
   };
 
-  // ------------------------------------------------------------
-  // Called when we first get a transcript (from dictation or typed)
-  // ------------------------------------------------------------
   const handleTranscriptReceived = async (text: string) => {
     setTranscript(text);
     await handleCreateDocFromTranscript(text);
   };
 
-  // ------------------------------------------------------------
-  // Regenerate => re-call the last prompt (doc or analysis)
-  // ------------------------------------------------------------
   const handleRegenerate = async () => {
     if (lastOutputType === 'doc') {
       if (!lastDocPrompt) return;
@@ -230,11 +204,10 @@ ${doc}
           mode: 'scribe',
           template_name: activeTemplateName,
         };
-        const res = await axios.post('http://localhost:8000/rag/ask_rag', payload);
+        const res = await axios.post(RAG_ENDPOINT, payload);
         const docMarkdown = res.data.response || '';
         setClinicalDoc(docMarkdown);
         setAnalysis('');
-        // After doc re-generation, run analysis again automatically:
         await handleAnalyzeDoc(docMarkdown, transcript);
       } catch (err) {
         console.error('[handleRegenerate - doc] error =>', err);
@@ -247,7 +220,7 @@ ${doc}
           history: [],
           mode: 'analysis',
         };
-        const res = await axios.post('http://localhost:8000/rag/ask_rag', payload);
+        const res = await axios.post(RAG_ENDPOINT, payload);
         setAnalysis(res.data.response || '');
       } catch (err) {
         console.error('[handleRegenerate - analysis] error =>', err);
@@ -255,10 +228,6 @@ ${doc}
     }
   };
 
-  // Word count for doc
-  const docWordCount = clinicalDoc.trim() ? clinicalDoc.trim().split(/\s+/).length : 0;
-
-  // Copy doc
   const handleCopyDoc = async () => {
     try {
       await navigator.clipboard.writeText(clinicalDoc);
@@ -268,7 +237,6 @@ ${doc}
     }
   };
 
-  // Download doc as PDF
   const handleDownloadPDF = () => {
     const now = new Date();
     const timeStamp = [
@@ -293,7 +261,6 @@ ${doc}
     pdfMake.createPdf(pdfDefinition).download(`${timeStamp}_ClinicalDocument.pdf`);
   };
 
-  // Edit doc toggles
   const handleStartEdit = () => {
     setIsEditingDoc(true);
     setEditDocText(clinicalDoc);
@@ -303,38 +270,23 @@ ${doc}
     setClinicalDoc(editDocText);
   };
 
-  // Decide what to render as mainContent
+  const docWordCount = clinicalDoc.trim() ? clinicalDoc.trim().split(/\s+/).length : 0;
   const noTranscript = !transcript;
-  let mainContent: ReactNode;
 
+  let mainContent: ReactNode;
   if (modelError) {
     mainContent = <ErrorMessageDiv error={modelError} />;
   } else if (noTranscript) {
-    // Show initial dictation or consultation buttons
     mainContent = (
       <div className="flex flex-row items-center justify-evenly py-6 px-4 w-full h-full">
-        <div
-          className="w-[45%] flex flex-col items-center justify-center border rounded-lg p-36 shadow"
-          style={{
-            backgroundImage: "url('/VoiceMode.png')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
+        <div className="w-[45%] flex flex-col items-center justify-center border rounded-lg p-36 shadow">
           <ChatTextToSpeech
             onSend={(msg) => {
               handleTranscriptReceived(msg.content);
             }}
           />
         </div>
-        <div
-          className="w-[45%] flex flex-col items-center justify-center border rounded-lg p-36 shadow"
-          style={{
-            backgroundImage: "url('/StartOfficeVisit.png')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
+        <div className="w-[45%] flex flex-col items-center justify-center border rounded-lg p-36 shadow">
           <ChatStartOfficeVisit
             onSend={(msg) => {
               handleTranscriptReceived(msg.content);
@@ -344,45 +296,30 @@ ${doc}
       </div>
     );
   } else {
-    // We have a transcript => show it, doc on left, analysis on right
     mainContent = (
       <div className="px-4 py-2 w-full h-full">
-        {/* Transcript at top */}
-        <div className="text-center text-lg font-semibold mb-2">
-          Transcript
-        </div>
+        <div className="text-center text-lg font-semibold mb-2">Transcript</div>
         <div className="flex justify-center mb-6">
           <div className="max-w-2xl bg-gray-200 text-black p-4 rounded shadow whitespace-pre-wrap">
             {transcript}
           </div>
         </div>
 
-        {/* Two columns: doc (left) and analysis (right) */}
         <div className="flex flex-row gap-4 h-[65vh]">
-          {/* Clinical doc => now rendered via ReactMarkdown */}
           <div className="flex-1 border rounded-md p-4 overflow-auto">
             <div className="flex items-center justify-between mb-2">
               <h2 className="font-semibold text-md">Clinical Documentation</h2>
               <div className="flex items-center space-x-2">
                 <span className="text-xs text-gray-600">{docWordCount} words</span>
-                <button
-                  onClick={handleCopyDoc}
-                  title="Copy"
-                  className="p-1 rounded hover:bg-gray-200"
-                >
+                <button onClick={handleCopyDoc} className="p-1 rounded hover:bg-gray-200">
                   <IconCopy size={16} />
                 </button>
-                <button
-                  onClick={handleDownloadPDF}
-                  title="Download PDF"
-                  className="p-1 rounded hover:bg-gray-200"
-                >
+                <button onClick={handleDownloadPDF} className="p-1 rounded hover:bg-gray-200">
                   <IconDownload size={16} />
                 </button>
                 {isEditingDoc ? (
                   <button
                     onClick={handleSaveEdit}
-                    title="Save Edits"
                     className="p-1 rounded hover:bg-gray-200 text-green-600"
                   >
                     <IconCheck size={16} />
@@ -390,7 +327,6 @@ ${doc}
                 ) : (
                   <button
                     onClick={handleStartEdit}
-                    title="Edit Document"
                     className="p-1 rounded hover:bg-gray-200"
                   >
                     <IconEdit size={16} />
@@ -406,14 +342,12 @@ ${doc}
                 onChange={(e) => setEditDocText(e.target.value)}
               />
             ) : (
-              // Render Markdown as formatted HTML via ReactMarkdown
               <div className="prose prose-sm dark:prose-invert">
                 <ReactMarkdown>{clinicalDoc}</ReactMarkdown>
               </div>
             )}
           </div>
 
-          {/* Analysis => also rendered via ReactMarkdown */}
           <div className="flex-1 border rounded-md p-4 overflow-auto">
             <div className="flex items-center justify-between mb-2">
               <h2 className="font-semibold text-md">Analysis &amp; Recommendations</h2>
@@ -422,9 +356,7 @@ ${doc}
               {analysis ? (
                 <ReactMarkdown>{analysis}</ReactMarkdown>
               ) : (
-                <p className="italic text-gray-500">
-                  Generating comparison and recommendations...
-                </p>
+                <p className="italic text-gray-500">Generating comparison...</p>
               )}
             </div>
           </div>
@@ -433,12 +365,10 @@ ${doc}
     );
   }
 
-  // Render the chat UI
   return (
     <div className="flex flex-col w-full h-full bg-white dark:bg-[#343541] text-black dark:text-white">
-      {/* Top bar => template & model */}
       <div className="border-b border-gray-300 dark:border-gray-700 px-4 py-2 flex items-center gap-4">
-        {/* Template dropdown */}
+        {/* Template Dropdown, etc. */}
         <div className="relative">
           <button
             className="flex items-center gap-1 rounded-md bg-gray-200 px-3 py-2
@@ -467,7 +397,6 @@ ${doc}
           )}
         </div>
 
-        {/* Model dropdown */}
         <div className="relative">
           <button
             className="flex items-center gap-1 rounded-md bg-gray-200 px-3 py-2
@@ -483,8 +412,7 @@ ${doc}
               {models.map((m) => (
                 <button
                   key={m.id}
-                  className="block w-full text-left px-3 py-2 text-sm text-gray-700
-                             hover:bg-gray-100"
+                  className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   onClick={() => {
                     setActiveModelName(m.name);
                     setShowModelsDropdown(false);
@@ -498,7 +426,6 @@ ${doc}
         </div>
       </div>
 
-      {/* Scrollable main content */}
       <div
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto pb-40"
@@ -517,27 +444,28 @@ ${doc}
         <div ref={messagesEndRef} className="h-1" />
       </div>
 
-      {/* Bottom ChatInput => includes "Regenerate" button */}
       <div className="px-2 pb-2">
         <ChatInput
           stopConversationRef={stopConversationRef}
           textareaRef={null as any}
           onSend={(msg) => {
-            // user typed something => treat as new transcript
             setTranscript(msg.content);
             handleCreateDocFromTranscript(msg.content);
           }}
           onRegenerate={() => handleRegenerate()}
-          onScrollDownClick={scrollToBottom}
+          onScrollDownClick={() => {
+            if (autoScrollEnabled && messagesEndRef.current) {
+              messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+            }
+          }}
           showScrollDownButton={false}
         />
       </div>
 
-      {/* Modals */}
       {openModal === 'profile' && <ProfileModal />}
       {openModal === 'templates' && <TemplatesModal />}
       {openModal === 'help' && <HelpModal />}
-      {openModal === 'settings' && <SettingsModal />} {/* NO onClose prop here */}
+      {openModal === 'settings' && <SettingsModal />}
     </div>
   );
 });
