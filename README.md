@@ -1,18 +1,11 @@
-# Caduceus, Open Healthcare AI Scribe
+# Metrix, Clinical Assistant Platform
 
 
 Caduceus can transcribe entire office visits in real-time using voice dictation, automatically converting  spoken word into structured medical documentation. 
 
-See the current version [here](https://app.caduc.eus/).
+See the current version on Vercel
 
-The platform comes with pre-built templates for common healthcare workflows like progress notes, patient communications, and procedure pre-authorizations. You can see a live demo at app.caduc.eus to experience how it streamlines medical documentation.
-
-Based on [Chatbot UI](https://github.com/mckaywrigley/chatbot-ui). This repo has many updates to the Next.js and React code, so you can similarly use it as a starting point for your own project.
-
-
-## Updates
-
-I continue work on this project in my spare time, especially while I'm in Egypt and Honduras where the physicians I work with mainly are using it. If you'd like to contribute or have feature requests, please reach out.
+The platform comes with pre-built templates for common healthcare workflows like progress notes, patient communications, and procedure pre-authorizations. You can see a live demo to experience how it streamlines medical documentation.
 
 
 
@@ -20,9 +13,7 @@ I continue work on this project in my spare time, especially while I'm in Egypt 
 
 **Vercel**
 
-Host your own live version of Caduceus with Vercel.
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmckaywrigley%2Fchatbot-ui)
+Host your own live version of Metrix with Vercel.
 
 **Docker**
 
@@ -36,7 +27,6 @@ docker run -e OPENAI_API_KEY=xxxxxxxx -p 3000:3000 chatgpt-ui
 Pull from ghcr:
 
 ```
-docker run -e OPENAI_API_KEY=xxxxxxxx -p 3000:3000 ghcr.io/mckaywrigley/chatbot-ui:main
 ```
 
 ## Running Locally
@@ -98,8 +88,6 @@ If you do not provide an OpenAI API key with `OPENAI_API_KEY`, users will have t
 If you don't have an OpenAI API key, you can get one [here](https://platform.openai.com/account/api-keys).
 
 ## Contact
-
-If you have any questions, feel free to reach out to Mckay on [Twitter](https://twitter.com/mckaywrigley).
 
 [GCSE]: https://developers.google.com/custom-search/v1/overview
 # AI-Scribe-Platform
