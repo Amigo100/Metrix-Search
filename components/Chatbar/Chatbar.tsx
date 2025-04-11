@@ -47,7 +47,7 @@ export const Chatbar = () => {
   // Allows user to set API key from Chatbar
   const handleApiKeyChange = useCallback(
     (apiKey: string) => {
-      homeDispatch({ field: 'apiKey', value: apiKey });
+      homeDispatch({ type: 'change', field: 'apiKey', value: apiKey });
       localStorage.setItem('apiKey', apiKey);
     },
     [homeDispatch],
@@ -61,6 +61,7 @@ export const Chatbar = () => {
   const handleClearConversations = () => {
     if (defaultModelId) {
       homeDispatch({
+        type: 'change',
         field: 'selectedConversation',
         value: {
           id: uuidv4(),
@@ -73,29 +74,31 @@ export const Chatbar = () => {
         },
       });
     }
-    homeDispatch({ field: 'conversations', value: [] });
+
+    homeDispatch({ type: 'change', field: 'conversations', value: [] });
     localStorage.removeItem('conversationHistory');
     localStorage.removeItem('selectedConversation');
 
     const updatedFolders = folders.filter((f) => f.type !== 'chat');
-    homeDispatch({ field: 'folders', value: updatedFolders });
+    homeDispatch({ type: 'change', field: 'folders', value: updatedFolders });
     saveFolders(updatedFolders);
   };
 
   const handleDeleteConversation = (conversation: Conversation) => {
     const updatedConversations = conversations.filter((c) => c.id !== conversation.id);
 
-    homeDispatch({ field: 'conversations', value: updatedConversations });
-    chatDispatch({ field: 'searchTerm', value: '' });
+    homeDispatch({ type: 'change', field: 'conversations', value: updatedConversations });
+    chatDispatch({ type: 'change', field: 'searchTerm', value: '' });
     saveConversations(updatedConversations);
 
     if (updatedConversations.length > 0) {
       const lastConv = updatedConversations[updatedConversations.length - 1];
-      homeDispatch({ field: 'selectedConversation', value: lastConv });
+      homeDispatch({ type: 'change', field: 'selectedConversation', value: lastConv });
       saveConversation(lastConv);
     } else {
       if (defaultModelId) {
         homeDispatch({
+          type: 'change',
           field: 'selectedConversation',
           value: {
             id: uuidv4(),
@@ -114,7 +117,11 @@ export const Chatbar = () => {
 
   // Toggle open/close
   const handleToggleChatbar = () => {
-    homeDispatch({ field: 'showChatbar', value: !showChatbar });
+    homeDispatch({
+      type: 'change',
+      field: 'showChatbar',
+      value: !showChatbar,
+    });
     localStorage.setItem('showChatbar', JSON.stringify(!showChatbar));
   };
 
@@ -123,7 +130,7 @@ export const Chatbar = () => {
     if (e.dataTransfer) {
       const conversation = JSON.parse(e.dataTransfer.getData('conversation'));
       handleUpdateConversation(conversation, { key: 'folderId', value: 0 });
-      chatDispatch({ field: 'searchTerm', value: '' });
+      chatDispatch({ type: 'change', field: 'searchTerm', value: '' });
       e.currentTarget.style.background = 'none';
     }
   };
@@ -133,6 +140,7 @@ export const Chatbar = () => {
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase();
       chatDispatch({
+        type: 'change',
         field: 'filteredConversations',
         value: conversations.filter((c) => {
           const joinedMsgs = c.messages.map((m) => m.content).join(' ');
@@ -141,7 +149,7 @@ export const Chatbar = () => {
         }),
       });
     } else {
-      chatDispatch({ field: 'filteredConversations', value: conversations });
+      chatDispatch({ type: 'change', field: 'filteredConversations', value: conversations });
     }
   }, [searchTerm, conversations, chatDispatch]);
 
@@ -167,7 +175,9 @@ export const Chatbar = () => {
         folderComponent={<ChatFolders searchTerm={searchTerm} />}
         items={filteredConversations}
         searchTerm={searchTerm}
-        handleSearchTerm={(term: string) => chatDispatch({ field: 'searchTerm', value: term })}
+        handleSearchTerm={(term: string) =>
+          chatDispatch({ type: 'change', field: 'searchTerm', value: term })
+        }
         toggleOpen={handleToggleChatbar}
         handleCreateItem={handleNewConversation} // => Creates a new conversation
         handleCreateFolder={() => handleCreateFolder(t('New folder'), 'chat')}
