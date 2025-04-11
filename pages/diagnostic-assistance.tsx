@@ -1,7 +1,7 @@
 // /pages/diagnostic-assistance.tsx
 
 import React, { useState } from 'react';
-import { marked } from 'marked'; // run: npm install marked
+import { marked } from 'marked'; // Ensure Marked 5+ is installed
 
 // ---------- Types ----------
 interface Message {
@@ -28,8 +28,12 @@ function DiagnosticAssistancePage() {
   const [requestType, setRequestType] = useState<string>('');
   const [exampleQueries, setExampleQueries] = useState<string[]>([]);
   const [userInput, setUserInput] = useState<string>('');
+
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'system', content: "Hello! I'm your Metrix AI assistant. Ask questions below." },
+    {
+      role: 'system',
+      content: "Hello! I'm your Metrix AI assistant. Ask questions below.",
+    },
   ]);
   const [messageIsStreaming, setMessageIsStreaming] = useState<boolean>(false);
   const [ttsIsPlaying, setTtsIsPlaying] = useState<boolean>(false);
@@ -45,8 +49,10 @@ function DiagnosticAssistancePage() {
     if (!trimmed) return;
 
     // Add user message to conversation
-    // NOTE: add 'as const' to the role
-    const newHistory = [...messages, { role: 'user' as const, content: trimmed }];
+    const newHistory = [
+      ...messages,
+      { role: 'user' as const, content: trimmed },
+    ];
     setMessages(newHistory);
     setUserInput('');
 
@@ -56,7 +62,10 @@ function DiagnosticAssistancePage() {
 
   async function processMessage(updatedHistory: Message[], newMessage: string) {
     // Insert a "thinking..." placeholder
-    const thinkingMsg: Message = { role: 'assistant', content: '...thinking...' };
+    const thinkingMsg: Message = {
+      role: 'assistant',
+      content: '...thinking...',
+    };
     const historyWithThinking = [...updatedHistory, thinkingMsg];
     setMessages(historyWithThinking);
     setMessageIsStreaming(true);
@@ -83,8 +92,7 @@ function DiagnosticAssistancePage() {
       setMessages((prev) =>
         prev
           .filter((m) => m.content !== '...thinking...')
-          // also add 'as const' here if needed
-          .concat({ role: 'assistant' as const, content: finalAnswer })
+          .concat({ role: 'assistant', content: finalAnswer } as const),
       );
       setMessageIsStreaming(false);
       setStage(3);
@@ -94,9 +102,9 @@ function DiagnosticAssistancePage() {
         prev
           .filter((m) => m.content !== '...thinking...')
           .concat({
-            role: 'system' as const,
+            role: 'system',
             content: 'An error occurred. Please try again later.',
-          })
+          } as const),
       );
       setMessageIsStreaming(false);
       setStage(3);
@@ -137,7 +145,6 @@ function DiagnosticAssistancePage() {
   // Example query click
   // -----------------------------------------
   function handleClickExample(example: string) {
-    // Option: Directly send it
     setStage(3);
     handleSendUserMessage(example);
   }
@@ -147,7 +154,10 @@ function DiagnosticAssistancePage() {
   // -----------------------------------------
   function handleClearChat() {
     setMessages([
-      { role: 'system', content: "Hello! I'm your Metrix AI assistant. Ask questions below." },
+      {
+        role: 'system',
+        content: "Hello! I'm your Metrix AI assistant. Ask questions below.",
+      },
     ]);
     setUserInput('');
     setStage(1);
@@ -177,18 +187,26 @@ function DiagnosticAssistancePage() {
     // Otherwise parse as markdown for assistant/system messages
     let bubbleContent: JSX.Element | string;
     if (isAssistant || msg.role === 'system') {
-      const rendered = marked(msg.content || '');
-      bubbleContent = <div className="prose prose-sm" dangerouslySetInnerHTML={{ __html: rendered }} />;
+      // Use synchronous parse => { async: false }
+      const rendered = marked.parse(msg.content || '', { async: false });
+
+      bubbleContent = (
+        <div className="prose prose-sm" dangerouslySetInnerHTML={{ __html: rendered }} />
+      );
     } else {
       bubbleContent = <>{msg.content}</>;
     }
 
-    // For the last assistant message, show "Regenerate" & "Edit" buttons
     const isLastAssistant =
-      isAssistant && index === messages.length - 1 && msg.content !== '...thinking...';
+      isAssistant &&
+      index === messages.length - 1 &&
+      msg.content !== '...thinking...';
 
     return (
-      <div key={index} className={`mb-4 flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
+      <div
+        key={index}
+        className={`mb-4 flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
+      >
         <div className="flex items-center space-x-2">
           <div className="font-bold">{isUser ? 'You' : 'Metrix AI'}</div>
           {isAssistant && msg.content.trim() && (
@@ -205,7 +223,9 @@ function DiagnosticAssistancePage() {
         </div>
 
         <div
-          className={`rounded-2xl p-3 mt-1 text-sm ${isUser ? 'bg-blue-100' : 'bg-gray-100'} text-black max-w-[90%]`}
+          className={`rounded-2xl p-3 mt-1 text-sm ${
+            isUser ? 'bg-blue-100' : 'bg-gray-100'
+          } text-black max-w-[90%]`}
           style={{ whiteSpace: 'normal' }}
         >
           {bubbleContent}
@@ -392,7 +412,9 @@ function DiagnosticAssistancePage() {
           <div className="mt-4 flex space-x-3 justify-center">
             <button
               onClick={() => {
-                navigator.clipboard.writeText(JSON.stringify(messages, null, 2));
+                navigator.clipboard.writeText(
+                  JSON.stringify(messages, null, 2),
+                );
                 alert('Conversation copied successfully!');
               }}
               className="px-4 py-2 bg-gray-300 text-black rounded-full hover:bg-gray-400"
