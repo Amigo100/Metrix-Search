@@ -1,4 +1,4 @@
-// /components/Modals/HelpModal.tsx
+// file: /components/Modals/HelpModal.tsx
 
 import { useContext } from 'react';
 import { useTranslation } from 'next-i18next';
@@ -11,7 +11,8 @@ export const HelpModal = () => {
   if (state.openModal !== 'help') return null;
 
   const handleClose = () => {
-    dispatch({ field: 'openModal', value: null });
+    // IMPORTANT: add type: 'change'
+    dispatch({ type: 'change', field: 'openModal', value: null });
   };
 
   return (
@@ -41,18 +42,10 @@ export const HelpModal = () => {
             {t('Quick Start Guide')}
           </h3>
           <ul className="list-disc list-inside text-sm text-gray-700 dark:text-gray-200 mt-2 space-y-1">
-            <li>
-              {t('Open the Chat interface and click “Start New Session”...')}
-            </li>
-            <li>
-              {t('Use the Voice Mode button to dictate your notes...')}
-            </li>
-            <li>
-              {t('Select a template (e.g., “ED Triage Note”)...')}
-            </li>
-            <li>
-              {t('Adjust the model (GPT-4, Gemini, or internal ML)...')}
-            </li>
+            <li>{t('Open the Chat interface and click “Start New Session”...')}</li>
+            <li>{t('Use the Voice Mode button to dictate your notes...')}</li>
+            <li>{t('Select a template (e.g., “ED Triage Note”)...')}</li>
+            <li>{t('Adjust the model (GPT-4, Gemini, or internal ML)...')}</li>
           </ul>
         </div>
 
