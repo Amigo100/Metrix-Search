@@ -18,7 +18,7 @@ combined_app = FastAPI(
 # Adjust for your actual deployed Vercel domain
 allowed_origins = [
     "http://localhost:3000",
-    "https://myvercelapp.vercel.app"
+    "https://fast-api-platform-clean-ozlq.vercel.app",
 ]
 
 combined_app.add_middleware(
