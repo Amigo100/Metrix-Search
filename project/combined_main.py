@@ -1,4 +1,4 @@
-# file: combined_main.py
+# combined_main.py
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,9 +15,15 @@ combined_app = FastAPI(
     version="1.0.0",
 )
 
+# Adjust for your actual deployed Vercel domain
+allowed_origins = [
+    "http://localhost:3000",
+    "https://myvercelapp.vercel.app"
+]
+
 combined_app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=allowed_origins,  # or ["*"] for open access
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
