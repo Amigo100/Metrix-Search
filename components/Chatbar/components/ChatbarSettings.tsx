@@ -34,23 +34,49 @@ export const ChatbarSettings = () => {
       <SidebarButton
         text={t('Profile')}
         icon={<IconUser size={18} />}
-        onClick={() => homeDispatch({ field: 'openModal', value: 'profile' })}
+        onClick={() =>
+          homeDispatch({
+            type: 'change',
+            field: 'openModal',
+            value: 'profile',
+          })
+        }
       />
+
       <SidebarButton
         text={t('Templates')}
         icon={<IconTemplate size={18} />}
-        onClick={() => homeDispatch({ field: 'openModal', value: 'templates' })}
+        onClick={() =>
+          homeDispatch({
+            type: 'change',
+            field: 'openModal',
+            value: 'templates',
+          })
+        }
       />
-      {/* Removed Predictive Analytics button */}
+
       <SidebarButton
         text={t('Help')}
         icon={<IconHelpCircle size={18} />}
-        onClick={() => homeDispatch({ field: 'openModal', value: 'help' })}
+        onClick={() =>
+          homeDispatch({
+            type: 'change',
+            field: 'openModal',
+            value: 'help',
+          })
+        }
       />
+
       <SidebarButton
         text={t('Settings')}
         icon={<IconSettings size={18} />}
-        onClick={() => homeDispatch({ field: 'openModal', value: 'settings' })}
+        onClick={() =>
+          homeDispatch({
+            type: 'change',
+            field: 'openModal',
+            value: 'settings',
+          })
+        }
       />
 
       {!serverSideApiKeyIsSet && (
