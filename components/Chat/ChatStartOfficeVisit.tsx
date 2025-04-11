@@ -35,7 +35,8 @@ export const ChatStartOfficeVisit = ({ onSend }: Props) => {
           if (recordRTC.current?.startRecording) {
             recordRTC.current.startRecording();
           }
-          homeDispatch({ field: 'recording', value: true });
+          // IMPORTANT: add `type: 'change'`
+          homeDispatch({ type: 'change', field: 'recording', value: true });
           console.log('[ChatStartOfficeVisit] Recording started.');
         })
         .catch((error) => {
@@ -48,12 +49,14 @@ export const ChatStartOfficeVisit = ({ onSend }: Props) => {
 
   const handleStopRecording = () => {
     console.log('[ChatStartOfficeVisit] Stopping consultation recording...');
-    homeDispatch({ field: 'recording', value: false });
+    // Add `type: 'change'`
+    homeDispatch({ type: 'change', field: 'recording', value: false });
 
     if (recordRTC.current?.stopRecording) {
       recordRTC.current.stopRecording(async () => {
         console.log('[ChatStartOfficeVisit] RecordRTC stop callback fired.');
-        homeDispatch({ field: 'transcribingAudio', value: true });
+        // Add `type: 'change'`
+        homeDispatch({ type: 'change', field: 'transcribingAudio', value: true });
 
         if (recordRTC.current?.getBlob) {
           const blob = recordRTC.current.getBlob();
@@ -67,7 +70,9 @@ export const ChatStartOfficeVisit = ({ onSend }: Props) => {
               formData,
               { headers: { 'Content-Type': 'multipart/form-data' } }
             );
-            homeDispatch({ field: 'transcribingAudio', value: false });
+
+            // Add `type: 'change'`
+            homeDispatch({ type: 'change', field: 'transcribingAudio', value: false });
 
             const messageContent = `Automated transcription of office visit. Write a progress note for the visit. Include ICD10 and CPT codes. Here is the transcription: ${response.data.text}`;
 
@@ -81,7 +86,8 @@ export const ChatStartOfficeVisit = ({ onSend }: Props) => {
 
           } catch (error) {
             console.error('[ChatStartOfficeVisit] Error fetching transcription:', error);
-            homeDispatch({ field: 'transcribingAudio', value: false });
+            // Add `type: 'change'`
+            homeDispatch({ type: 'change', field: 'transcribingAudio', value: false });
           }
         }
       });
