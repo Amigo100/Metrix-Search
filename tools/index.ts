@@ -1,3 +1,5 @@
+// /tools/index.ts
+
 import { ScoreDefinition } from './types';
 
 // Import each category file
