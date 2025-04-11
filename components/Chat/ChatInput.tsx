@@ -1,5 +1,4 @@
 // file: /components/Chat/ChatInput.tsx
-
 import {
   IconArrowDown,
   IconBolt,
@@ -78,14 +77,15 @@ export const ChatInput = ({
 
   // Dispatch-based “setter” for activePromptIndex
   const setActivePromptIndex = (idx: number) => {
-    homeDispatch({ field: 'activePromptIndex', value: idx });
+    homeDispatch({ type: 'change', field: 'activePromptIndex', value: idx });
   };
 
   const setVariables = (vars: any) => {
-    homeDispatch({ field: 'promptVariables', value: vars });
+    homeDispatch({ type: 'change', field: 'promptVariables', value: vars });
   };
+
   const setTextInputContent = (content: string) => {
-    homeDispatch({ field: 'textInputContent', value: content });
+    homeDispatch({ type: 'change', field: 'textInputContent', value: content });
   };
 
   // On text area changes
@@ -135,7 +135,9 @@ export const ChatInput = ({
 
   const isMobile = () => {
     const ua = typeof navigator === 'undefined' ? '' : navigator.userAgent;
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(ua);
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i.test(
+      ua,
+    );
   };
 
   const handleInitModal = () => {
@@ -153,8 +155,6 @@ export const ChatInput = ({
     if (showPromptList) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        // Instead of setActivePromptIndex(prev => prev + 1)
-        // use the current activePromptIndex from context:
         const newIndex =
           activePromptIndex < filteredPrompts.length - 1
             ? activePromptIndex + 1
@@ -223,7 +223,7 @@ export const ChatInput = ({
     const vars = parseVariables(prompt.content);
     setVariables(vars);
     if (vars.length > 0) {
-      homeDispatch({ field: 'promptModalVisible', value: true });
+      homeDispatch({ type: 'change', field: 'promptModalVisible', value: true });
     } else {
       const replaced = textInputContent?.replace(/\/\w*$/, prompt.content);
       setTextInputContent(replaced || '');
@@ -381,7 +381,11 @@ export const ChatInput = ({
               variables={promptVariables}
               onSubmit={handleSubmit}
               onClose={() =>
-                homeDispatch({ field: 'promptModalVisible', value: false })
+                homeDispatch({
+                  type: 'change',
+                  field: 'promptModalVisible',
+                  value: false,
+                })
               }
             />
           )}
