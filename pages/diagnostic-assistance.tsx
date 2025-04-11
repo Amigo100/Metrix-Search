@@ -1,4 +1,5 @@
 // /pages/diagnostic-assistance.tsx
+
 import React, { useState } from 'react';
 import { marked } from 'marked'; // run: npm install marked
 
@@ -33,7 +34,7 @@ function DiagnosticAssistancePage() {
   const [messageIsStreaming, setMessageIsStreaming] = useState<boolean>(false);
   const [ttsIsPlaying, setTtsIsPlaying] = useState<boolean>(false);
 
-  // API endpoint (updated to match sub-app mounting under /rag)
+  // API endpoint
   const API_ENDPOINT = 'http://localhost:8000/rag/ask_rag';
 
   // -----------------------------------------
@@ -44,7 +45,8 @@ function DiagnosticAssistancePage() {
     if (!trimmed) return;
 
     // Add user message to conversation
-    const newHistory = [...messages, { role: 'user', content: trimmed }];
+    // NOTE: add 'as const' to the role
+    const newHistory = [...messages, { role: 'user' as const, content: trimmed }];
     setMessages(newHistory);
     setUserInput('');
 
@@ -81,7 +83,8 @@ function DiagnosticAssistancePage() {
       setMessages((prev) =>
         prev
           .filter((m) => m.content !== '...thinking...')
-          .concat({ role: 'assistant', content: finalAnswer })
+          // also add 'as const' here if needed
+          .concat({ role: 'assistant' as const, content: finalAnswer })
       );
       setMessageIsStreaming(false);
       setStage(3);
@@ -91,7 +94,7 @@ function DiagnosticAssistancePage() {
         prev
           .filter((m) => m.content !== '...thinking...')
           .concat({
-            role: 'system',
+            role: 'system' as const,
             content: 'An error occurred. Please try again later.',
           })
       );
@@ -181,7 +184,8 @@ function DiagnosticAssistancePage() {
     }
 
     // For the last assistant message, show "Regenerate" & "Edit" buttons
-    const isLastAssistant = isAssistant && index === messages.length - 1 && msg.content !== '...thinking...';
+    const isLastAssistant =
+      isAssistant && index === messages.length - 1 && msg.content !== '...thinking...';
 
     return (
       <div key={index} className={`mb-4 flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
@@ -198,22 +202,6 @@ function DiagnosticAssistancePage() {
               Copy
             </button>
           )}
-          {isAssistant && msg.content.trim() && !ttsIsPlaying && (
-            <button
-              onClick={() => handlePlayTTS(msg.content)}
-              className="px-2 py-1 bg-green-500 text-white text-xs rounded-full hover:bg-green-600"
-            >
-              Speak
-            </button>
-          )}
-          {isAssistant && msg.content.trim() && ttsIsPlaying && (
-            <button
-              onClick={handleStopTTS}
-              className="px-2 py-1 bg-red-500 text-white text-xs rounded-full hover:bg-red-600"
-            >
-              Stop
-            </button>
-          )}
         </div>
 
         <div
@@ -225,10 +213,16 @@ function DiagnosticAssistancePage() {
 
         {isLastAssistant && (
           <div className="mt-2 flex space-x-2 text-xs">
-            <button onClick={onRegenerate} className="px-3 py-1 bg-gray-300 text-black rounded-full hover:bg-gray-400">
+            <button
+              onClick={onRegenerate}
+              className="px-3 py-1 bg-gray-300 text-black rounded-full hover:bg-gray-400"
+            >
               Regenerate
             </button>
-            <button onClick={handleEditLastUserInput} className="px-3 py-1 bg-gray-300 text-black rounded-full hover:bg-gray-400">
+            <button
+              onClick={handleEditLastUserInput}
+              className="px-3 py-1 bg-gray-300 text-black rounded-full hover:bg-gray-400"
+            >
               Edit
             </button>
           </div>
@@ -267,12 +261,14 @@ function DiagnosticAssistancePage() {
     return (
       <header className="flex flex-col items-center justify-center text-center">
         <div className="flex items-center justify-center">
-          <img src="/MetrixAI.png" alt="Metrix AI Logo" className="w-40 h-40 object-cover mr-3" />
-          <div className="uppercase font-semibold tracking-wide text-lg text-black">
-          </div>
+          <img
+            src="/MetrixAI.png"
+            alt="Metrix AI Logo"
+            className="w-40 h-40 object-cover mr-3"
+          />
+          <div className="uppercase font-semibold tracking-wide text-lg text-black"></div>
         </div>
-        <div className="mt-1 text-base text-black font-normal">
-        </div>
+        <div className="mt-1 text-base text-black font-normal"></div>
       </header>
     );
   }
