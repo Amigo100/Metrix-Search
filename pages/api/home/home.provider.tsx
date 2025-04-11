@@ -1,66 +1,55 @@
 // file: /pages/api/home/home.provider.tsx
-
-import React, { useReducer } from 'react';
+import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
 
+// Import the exact same ActionType from your custom hook
+import { ActionType } from '@/hooks/useCreateReducer';
+
 import { Conversation } from '@/types/chat';
 import { OpenAIModels } from '@/types/openai';
 
 /**
- * We define a union:  { type: 'reset' } | { field: keyof T; value: T[keyof T] }
+ * Home reducer that uses the same union action shape:
+ *   - { type: 'reset' }
+ *   - { type: 'change'; field: keyof HomeInitialState; value: any }
  */
-type ActionType<T> =
-  | { type: 'reset' }
-  | { field: keyof T; value: T[keyof T] };
-
 function homeReducer(
   state: HomeInitialState,
   action: ActionType<HomeInitialState>,
 ): HomeInitialState {
-  // If 'field' in action => handle the field-based logic
-  if ('field' in action) {
-    switch (action.field) {
-      case 'apiKey':
-        return { ...state, apiKey: action.value };
+  switch (action.type) {
+    case 'reset':
+      return initialState;
 
-      case 'openModal':
-        return { ...state, openModal: action.value };
-
-      case 'conversations':
-        return { ...state, conversations: action.value };
-
-      case 'selectedConversation':
-        return { ...state, selectedConversation: action.value };
-
-      case 'showChatbar':
-        return { ...state, showChatbar: action.value };
-
-      // fallback if needed
-      default:
-        return {
-          ...state,
-          [action.field]: action.value,
-        };
+    case 'change': {
+      // Update the field in question
+      const { field, value } = action;
+      return { ...state, [field]: value };
     }
-  } else {
-    // Otherwise, it's { type: 'reset' }
-    return initialState;
+
+    default:
+      // If you prefer to allow more advanced logic,
+      // you can handle additional 'type' variants here
+      throw new Error(`Unknown action type: ${action.type}`);
   }
 }
 
-export default function HomeContextProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [state, dispatch] = useReducer(homeReducer, initialState);
+export default function HomeContextProvider({ children }: { children: React.ReactNode }) {
+  // Now we have a single source of truth for how the action is shaped
+  // We can do useReducer or your custom useCreateReducer if we want:
+  const [state, dispatch] = React.useReducer(homeReducer, initialState);
 
-  // Example: create a new conversation
+  // or if you prefer using your custom hook:
+  // const { state, dispatch } = useCreateReducer({ initialState });
+  // and skip the local homeReducer code entirely.
+
+  // example function
   const handleNewConversation = () => {
     console.log('[HomeProvider] Creating a new conversation...');
+
     const newConv: Conversation = {
       id: uuidv4(),
       name: 'New Conversation',
@@ -71,53 +60,12 @@ export default function HomeContextProvider({
       folderId: null,
     };
 
-    const updated = [...state.conversations, newConv];
-    dispatch({ field: 'conversations', value: updated });
-    dispatch({ field: 'selectedConversation', value: newConv });
-    localStorage.setItem('conversationHistory', JSON.stringify(updated));
+    // Update conversations
+    dispatch({ type: 'change', field: 'conversations', value: [...state.conversations, newConv] });
+    // Also set selectedConversation
+    dispatch({ type: 'change', field: 'selectedConversation', value: newConv });
 
-    console.log('[HomeProvider] New conversation created:', newConv.id);
-  };
-
-  // Example folder stubs
-  const handleCreateFolder = (name: string, type: string) => {
-    console.log('[HomeProvider] create folder not implemented yet', name, type);
-  };
-  const handleDeleteFolder = (folderId: string) => {
-    console.log('[HomeProvider] delete folder not implemented yet', folderId);
-  };
-  const handleUpdateFolder = (folderId: string, name: string) => {
-    console.log('[HomeProvider] update folder not implemented yet', folderId, name);
-  };
-
-  // Example: select a conversation
-  const handleSelectConversation = (conversation: Conversation) => {
-    console.log('[HomeProvider] Selecting conversation:', conversation.id);
-    dispatch({ field: 'selectedConversation', value: conversation });
-  };
-
-  // Example: update conversation fields
-  const handleUpdateConversation = (
-    conversation: Conversation,
-    data: { key: string; value: any },
-  ) => {
-    console.log('[HomeProvider] Updating conversation:', conversation.id, data);
-
-    const updatedList = state.conversations.map((c) => {
-      if (c.id === conversation.id) {
-        return { ...c, [data.key]: data.value };
-      }
-      return c;
-    });
-
-    dispatch({ field: 'conversations', value: updatedList });
-
-    if (state.selectedConversation?.id === conversation.id) {
-      const updatedConv = updatedList.find((c) => c.id === conversation.id);
-      dispatch({ field: 'selectedConversation', value: updatedConv });
-    }
-
-    localStorage.setItem('conversationHistory', JSON.stringify(updatedList));
+    localStorage.setItem('conversationHistory', JSON.stringify([...state.conversations, newConv]));
   };
 
   return (
@@ -126,11 +74,7 @@ export default function HomeContextProvider({
         state,
         dispatch,
         handleNewConversation,
-        handleCreateFolder,
-        handleDeleteFolder,
-        handleUpdateFolder,
-        handleSelectConversation,
-        handleUpdateConversation,
+        // ... any other functions
       }}
     >
       {children}
