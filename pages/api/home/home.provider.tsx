@@ -1,3 +1,5 @@
+// file: /pages/api/home/home.provider.tsx
+
 import React, { useReducer } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -8,9 +10,7 @@ import { Conversation } from '@/types/chat';
 import { OpenAIModels } from '@/types/openai';
 
 /**
- * Union type:
- *  - If { type: 'reset' }, then there's no field/value.
- *  - Else, { field: keyof T; value: T[keyof T] }.
+ * We define a union:  { type: 'reset' } | { field: keyof T; value: T[keyof T] }
  */
 type ActionType<T> =
   | { type: 'reset' }
@@ -18,33 +18,36 @@ type ActionType<T> =
 
 function homeReducer(
   state: HomeInitialState,
-  action: ActionType<HomeInitialState>
+  action: ActionType<HomeInitialState>,
 ): HomeInitialState {
-  // If it's the "reset" shape => return initialState.
-  if ('type' in action && action.type === 'reset') {
+  // If 'field' in action => handle the field-based logic
+  if ('field' in action) {
+    switch (action.field) {
+      case 'apiKey':
+        return { ...state, apiKey: action.value };
+
+      case 'openModal':
+        return { ...state, openModal: action.value };
+
+      case 'conversations':
+        return { ...state, conversations: action.value };
+
+      case 'selectedConversation':
+        return { ...state, selectedConversation: action.value };
+
+      case 'showChatbar':
+        return { ...state, showChatbar: action.value };
+
+      // fallback if needed
+      default:
+        return {
+          ...state,
+          [action.field]: action.value,
+        };
+    }
+  } else {
+    // Otherwise, it's { type: 'reset' }
     return initialState;
-  }
-
-  // Otherwise, it's the { field, value } shape.
-  switch (action.field) {
-    case 'apiKey':
-      return { ...state, apiKey: action.value };
-
-    case 'openModal':
-      return { ...state, openModal: action.value };
-
-    case 'conversations':
-      return { ...state, conversations: action.value };
-
-    case 'selectedConversation':
-      return { ...state, selectedConversation: action.value };
-
-    case 'showChatbar':
-      return { ...state, showChatbar: action.value };
-
-    // Add additional cases as needed, or fallback:
-    default:
-      return { ...state, [action.field]: action.value };
   }
 }
 
@@ -76,7 +79,7 @@ export default function HomeContextProvider({
     console.log('[HomeProvider] New conversation created:', newConv.id);
   };
 
-  // Folder stubs
+  // Example folder stubs
   const handleCreateFolder = (name: string, type: string) => {
     console.log('[HomeProvider] create folder not implemented yet', name, type);
   };
@@ -87,25 +90,28 @@ export default function HomeContextProvider({
     console.log('[HomeProvider] update folder not implemented yet', folderId, name);
   };
 
-  // Select conversation
+  // Example: select a conversation
   const handleSelectConversation = (conversation: Conversation) => {
     console.log('[HomeProvider] Selecting conversation:', conversation.id);
     dispatch({ field: 'selectedConversation', value: conversation });
   };
 
-  // Update a conversation’s properties
+  // Example: update conversation fields
   const handleUpdateConversation = (
     conversation: Conversation,
-    data: { key: string; value: any }
+    data: { key: string; value: any },
   ) => {
     console.log('[HomeProvider] Updating conversation:', conversation.id, data);
-    const updatedList = state.conversations.map((c) =>
-      c.id === conversation.id ? { ...c, [data.key]: data.value } : c
-    );
+
+    const updatedList = state.conversations.map((c) => {
+      if (c.id === conversation.id) {
+        return { ...c, [data.key]: data.value };
+      }
+      return c;
+    });
 
     dispatch({ field: 'conversations', value: updatedList });
 
-    // If selected conversation => also update that
     if (state.selectedConversation?.id === conversation.id) {
       const updatedConv = updatedList.find((c) => c.id === conversation.id);
       dispatch({ field: 'selectedConversation', value: updatedConv });
