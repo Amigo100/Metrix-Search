@@ -18,11 +18,12 @@ export const ProfileModal = () => {
   const [signOff, setSignOff] = useState('Dr James Deighton, MBBS');
 
   const handleClose = () => {
-    dispatch({ field: 'openModal', value: null });
+    // IMPORTANT: add type: 'change'
+    dispatch({ type: 'change', field: 'openModal', value: null });
   };
 
   const handleSaveProfile = () => {
-    dispatch({ field: 'userSignOff', value: signOff });
+    dispatch({ type: 'change', field: 'userSignOff', value: signOff });
     alert('Profile saved! (placeholder)');
     handleClose();
   };
