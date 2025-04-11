@@ -25,7 +25,9 @@ export const ChatTextToSpeech = ({ onSend }: Props) => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
+  // ---------------------------
   // Start Recording
+  // ---------------------------
   const handleStartRecording = () => {
     console.log('[ChatTextToSpeech] Starting recording...');
     if (typeof window !== 'undefined' && navigator.mediaDevices) {
@@ -37,7 +39,14 @@ export const ChatTextToSpeech = ({ onSend }: Props) => {
             mimeType: 'audio/webm',
           });
           recordRTC.current?.startRecording();
-          homeDispatch({ field: 'recording', value: true });
+
+          // IMPORTANT: add type: 'change'
+          homeDispatch({
+            type: 'change',
+            field: 'recording',
+            value: true,
+          });
+
           console.log('[ChatTextToSpeech] Recording started.');
         })
         .catch((error) => {
@@ -48,15 +57,26 @@ export const ChatTextToSpeech = ({ onSend }: Props) => {
     }
   };
 
-  // Stop Recording + send audio to the server
+  // ---------------------------
+  // Stop Recording + Send Audio
+  // ---------------------------
   const handleStopRecording = () => {
     console.log('[ChatTextToSpeech] Stopping recording...');
-    homeDispatch({ field: 'recording', value: false });
+    homeDispatch({
+      type: 'change',
+      field: 'recording',
+      value: false,
+    });
 
     if (recordRTC.current?.stopRecording) {
       recordRTC.current.stopRecording(async () => {
         console.log('[ChatTextToSpeech] RecordRTC stop callback fired.');
-        homeDispatch({ field: 'transcribingAudio', value: true });
+
+        homeDispatch({
+          type: 'change',
+          field: 'transcribingAudio',
+          value: true,
+        });
 
         if (recordRTC.current?.getBlob) {
           const blob = recordRTC.current.getBlob();
@@ -71,7 +91,12 @@ export const ChatTextToSpeech = ({ onSend }: Props) => {
               { headers: { 'Content-Type': 'multipart/form-data' } }
             );
 
-            homeDispatch({ field: 'transcribingAudio', value: false });
+            homeDispatch({
+              type: 'change',
+              field: 'transcribingAudio',
+              value: false,
+            });
+
             console.log('[ChatTextToSpeech] Transcription response:', response.data);
 
             // Turn transcription into a user message
@@ -86,13 +111,20 @@ export const ChatTextToSpeech = ({ onSend }: Props) => {
 
           } catch (error) {
             console.error('[ChatTextToSpeech] Error fetching transcription:', error);
-            homeDispatch({ field: 'transcribingAudio', value: false });
+            homeDispatch({
+              type: 'change',
+              field: 'transcribingAudio',
+              value: false,
+            });
           }
         }
       });
     }
   };
 
+  // ---------------------------
+  // Load RecordRTC lazily
+  // ---------------------------
   useEffect(() => {
     import('recordrtc').then((R) => {
       RecordRTC = R.default || R;
@@ -116,9 +148,9 @@ export const ChatTextToSpeech = ({ onSend }: Props) => {
       {transcribingAudio ? (
         <div className="flex items-center justify-center">
           <div className="flex space-x-2 animate-pulse">
-            <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-            <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-            <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-gray-500 rounded-full" />
+            <div className="w-3 h-3 bg-gray-500 rounded-full" />
+            <div className="w-3 h-3 bg-gray-500 rounded-full" />
           </div>
         </div>
       ) : (
