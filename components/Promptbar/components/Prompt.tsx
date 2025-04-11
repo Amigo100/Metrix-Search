@@ -1,3 +1,5 @@
+// file: /components/Promptbar/components/Prompt.tsx
+
 import {
   IconClipboardList,
   IconCheck,
@@ -13,7 +15,6 @@ import {
 } from 'react';
 
 import { Prompt } from '@/types/prompt';
-
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
 
 import PromptbarContext from '../PromptBar.context';
@@ -35,9 +36,10 @@ export const PromptComponent = ({ prompt }: Props) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
 
-  const handleUpdate = (prompt: Prompt) => {
-    handleUpdatePrompt(prompt);
-    promptDispatch({ field: 'searchTerm', value: '' });
+  const handleUpdate = (p: Prompt) => {
+    handleUpdatePrompt(p);
+    // IMPORTANT: add type: 'change'
+    promptDispatch({ type: 'change', field: 'searchTerm', value: '' });
   };
 
   const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
@@ -45,7 +47,8 @@ export const PromptComponent = ({ prompt }: Props) => {
 
     if (isDeleting) {
       handleDeletePrompt(prompt);
-      promptDispatch({ field: 'searchTerm', value: '' });
+      // type: 'change'
+      promptDispatch({ type: 'change', field: 'searchTerm', value: '' });
     }
 
     setIsDeleting(false);
@@ -61,9 +64,9 @@ export const PromptComponent = ({ prompt }: Props) => {
     setIsDeleting(true);
   };
 
-  const handleDragStart = (e: DragEvent<HTMLButtonElement>, prompt: Prompt) => {
+  const handleDragStart = (e: DragEvent<HTMLButtonElement>, p: Prompt) => {
     if (e.dataTransfer) {
-      e.dataTransfer.setData('prompt', JSON.stringify(prompt));
+      e.dataTransfer.setData('prompt', JSON.stringify(p));
     }
   };
 
@@ -78,7 +81,9 @@ export const PromptComponent = ({ prompt }: Props) => {
   return (
     <div className="relative flex items-center">
       <button
-        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 dark:hover:bg-[#343541]/90 hover:bg-gray-300 text-neutral-800 dark:text-white"
+        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm 
+                   transition-colors duration-200 dark:hover:bg-[#343541]/90 hover:bg-gray-300 
+                   text-neutral-800 dark:text-white"
         draggable="true"
         onClick={(e) => {
           e.stopPropagation();
@@ -93,7 +98,7 @@ export const PromptComponent = ({ prompt }: Props) => {
       >
         <IconClipboardList size={18} />
 
-        <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all pr-4 text-left text-[12.5px] leading-3 ">
+        <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all pr-4 text-left text-[12.5px] leading-3">
           {prompt.name}
         </div>
       </button>
@@ -128,3 +133,5 @@ export const PromptComponent = ({ prompt }: Props) => {
     </div>
   );
 };
+
+export default PromptComponent;
