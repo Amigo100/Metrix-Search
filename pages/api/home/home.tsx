@@ -1,3 +1,5 @@
+// file: /pages/api/home/home.tsx
+
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from 'react-query';
 
@@ -16,7 +18,10 @@ import {
   cleanConversationHistory,
   cleanSelectedConversation,
 } from '@/utils/app/clean';
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  DEFAULT_TEMPERATURE,
+} from '@/utils/app/const';
 import {
   saveConversation,
   saveConversations,
@@ -39,7 +44,6 @@ import Promptbar from '@/components/Promptbar';
 
 import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
-
 import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
@@ -79,6 +83,7 @@ const Home = ({
 
   const stopConversationRef = useRef<boolean>(false);
 
+  // Use react-query to fetch models
   const { data, error, refetch } = useQuery(
     ['GetModels', apiKey, serverSideApiKeyIsSet],
     ({ signal }) => {
@@ -87,32 +92,39 @@ const Home = ({
         {
           key: apiKey,
         },
-        signal,
+        signal
       );
     },
-    { enabled: true, refetchOnMount: false },
+    { enabled: true, refetchOnMount: false }
   );
 
+  // --- FIX 1: Add `type: 'change'` here
   useEffect(() => {
-    if (data) dispatch({ field: 'models', value: data });
+    if (data) {
+      dispatch({ type: 'change', field: 'models', value: data });
+    }
   }, [data, dispatch]);
 
+  // --- FIX 2: Add `type: 'change'` here
   useEffect(() => {
-    dispatch({ field: 'modelError', value: getModelsError(error) });
+    dispatch({
+      type: 'change',
+      field: 'modelError',
+      value: getModelsError(error),
+    });
   }, [dispatch, error, getModelsError]);
 
-  // FETCH MODELS ----------------------------------------------
-
+  // SELECT A CONVERSATION
   const handleSelectConversation = (conversation: Conversation) => {
     dispatch({
+      type: 'change',
       field: 'selectedConversation',
       value: conversation,
     });
     saveConversation(conversation);
   };
 
-  // FOLDER OPERATIONS  --------------------------------------------
-
+  // FOLDER OPERATIONS
   const handleCreateFolder = (name: string, type: FolderType) => {
     const newFolder: FolderInterface = {
       id: uuidv4(),
@@ -121,13 +133,13 @@ const Home = ({
     };
 
     const updatedFolders = [...folders, newFolder];
-    dispatch({ field: 'folders', value: updatedFolders });
+    dispatch({ type: 'change', field: 'folders', value: updatedFolders });
     saveFolders(updatedFolders);
   };
 
   const handleDeleteFolder = (folderId: string) => {
     const updatedFolders = folders.filter((f) => f.id !== folderId);
-    dispatch({ field: 'folders', value: updatedFolders });
+    dispatch({ type: 'change', field: 'folders', value: updatedFolders });
     saveFolders(updatedFolders);
 
     const updatedConversations: Conversation[] = conversations.map((c) => {
@@ -136,8 +148,11 @@ const Home = ({
       }
       return c;
     });
-
-    dispatch({ field: 'conversations', value: updatedConversations });
+    dispatch({
+      type: 'change',
+      field: 'conversations',
+      value: updatedConversations,
+    });
     saveConversations(updatedConversations);
 
     const updatedPrompts: Prompt[] = prompts.map((p) => {
@@ -146,8 +161,7 @@ const Home = ({
       }
       return p;
     });
-
-    dispatch({ field: 'prompts', value: updatedPrompts });
+    dispatch({ type: 'change', field: 'prompts', value: updatedPrompts });
     savePrompts(updatedPrompts);
   };
 
@@ -158,12 +172,11 @@ const Home = ({
       }
       return f;
     });
-    dispatch({ field: 'folders', value: updatedFolders });
+    dispatch({ type: 'change', field: 'folders', value: updatedFolders });
     saveFolders(updatedFolders);
   };
 
-  // CONVERSATION OPERATIONS  --------------------------------------------
-
+  // CONVERSATION OPERATIONS
   const handleNewConversation = () => {
     const lastConversation = conversations[conversations.length - 1];
     const newConversation: Conversation = {
@@ -182,109 +195,146 @@ const Home = ({
     };
 
     const updatedConversations = [...conversations, newConversation];
-    dispatch({ field: 'selectedConversation', value: newConversation });
-    dispatch({ field: 'conversations', value: updatedConversations });
+    dispatch({
+      type: 'change',
+      field: 'selectedConversation',
+      value: newConversation,
+    });
+    dispatch({
+      type: 'change',
+      field: 'conversations',
+      value: updatedConversations,
+    });
     saveConversation(newConversation);
     saveConversations(updatedConversations);
-    dispatch({ field: 'loading', value: false });
+    dispatch({ type: 'change', field: 'loading', value: false });
   };
 
   const handleUpdateConversation = (
     conversation: Conversation,
-    data: KeyValuePair,
+    data: KeyValuePair
   ) => {
     const updatedConversation = { ...conversation, [data.key]: data.value };
     const { single, all } = updateConversation(
       updatedConversation,
-      conversations,
+      conversations
     );
-    dispatch({ field: 'selectedConversation', value: single });
-    dispatch({ field: 'conversations', value: all });
+    dispatch({ type: 'change', field: 'selectedConversation', value: single });
+    dispatch({ type: 'change', field: 'conversations', value: all });
   };
 
-  // EFFECTS  --------------------------------------------
+  // OTHER EFFECTS
 
   useEffect(() => {
     if (window.innerWidth < 640) {
-      dispatch({ field: 'showChatbar', value: false });
+      dispatch({ type: 'change', field: 'showChatbar', value: false });
     }
   }, [selectedConversation]);
 
   useEffect(() => {
-    defaultModelId &&
-      dispatch({ field: 'defaultModelId', value: defaultModelId });
-    serverSideApiKeyIsSet &&
-      dispatch({ field: 'serverSideApiKeyIsSet', value: serverSideApiKeyIsSet });
-    serverSidePluginKeysSet &&
-      dispatch({ field: 'serverSidePluginKeysSet', value: serverSidePluginKeysSet });
+    if (defaultModelId) {
+      dispatch({ type: 'change', field: 'defaultModelId', value: defaultModelId });
+    }
+    if (serverSideApiKeyIsSet) {
+      dispatch({
+        type: 'change',
+        field: 'serverSideApiKeyIsSet',
+        value: serverSideApiKeyIsSet,
+      });
+    }
+    if (serverSidePluginKeysSet) {
+      dispatch({
+        type: 'change',
+        field: 'serverSidePluginKeysSet',
+        value: serverSidePluginKeysSet,
+      });
+    }
   }, [defaultModelId, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
 
-  // ON LOAD --------------------------------------------
+  // ON LOAD
   useEffect(() => {
     const settings = getSettings();
     if (settings.theme) {
-      dispatch({ field: 'lightMode', value: settings.theme });
+      dispatch({ type: 'change', field: 'lightMode', value: settings.theme });
     }
 
     // Automatically store the API key from the server into localStorage
     if (openaiApiKey) {
-      dispatch({ field: 'apiKey', value: openaiApiKey });
+      dispatch({ type: 'change', field: 'apiKey', value: openaiApiKey });
       localStorage.setItem('apiKey', openaiApiKey);
     } else {
       const storedKey = localStorage.getItem('apiKey');
       if (storedKey) {
-        dispatch({ field: 'apiKey', value: storedKey });
+        dispatch({ type: 'change', field: 'apiKey', value: storedKey });
       }
     }
 
     const pluginKeys = localStorage.getItem('pluginKeys');
     if (serverSidePluginKeysSet) {
-      dispatch({ field: 'pluginKeys', value: [] });
+      dispatch({ type: 'change', field: 'pluginKeys', value: [] });
       localStorage.removeItem('pluginKeys');
     } else if (pluginKeys) {
-      dispatch({ field: 'pluginKeys', value: pluginKeys });
+      dispatch({ type: 'change', field: 'pluginKeys', value: pluginKeys });
     }
 
     if (window.innerWidth < 640) {
-      dispatch({ field: 'showChatbar', value: false });
-      dispatch({ field: 'showSidePromptbar', value: false });
+      dispatch({ type: 'change', field: 'showChatbar', value: false });
+      dispatch({ type: 'change', field: 'showSidePromptbar', value: false });
     }
 
     const showChatbar = localStorage.getItem('showChatbar');
     if (showChatbar) {
-      dispatch({ field: 'showChatbar', value: showChatbar === 'true' });
+      dispatch({
+        type: 'change',
+        field: 'showChatbar',
+        value: showChatbar === 'true',
+      });
     }
 
     const showSidePromptbar = localStorage.getItem('showSidePromptbar');
     if (showSidePromptbar) {
-      dispatch({ field: 'showSidePromptbar', value: showSidePromptbar === 'false' });
+      // note: if "false", the bar is closed
+      dispatch({
+        type: 'change',
+        field: 'showSidePromptbar',
+        value: showSidePromptbar === 'false'
+      });
     }
 
     const folders = localStorage.getItem('folders');
     if (folders) {
-      dispatch({ field: 'folders', value: JSON.parse(folders) });
+      dispatch({ type: 'change', field: 'folders', value: JSON.parse(folders) });
     }
 
     const prompts = localStorage.getItem('prompts');
     if (prompts) {
-      dispatch({ field: 'prompts', value: JSON.parse(prompts) });
+      dispatch({ type: 'change', field: 'prompts', value: JSON.parse(prompts) });
     }
 
     const conversationHistory = localStorage.getItem('conversationHistory');
     if (conversationHistory) {
       const parsedConversationHistory: Conversation[] = JSON.parse(conversationHistory);
       const cleanedConversationHistory = cleanConversationHistory(parsedConversationHistory);
-      dispatch({ field: 'conversations', value: cleanedConversationHistory });
+      dispatch({
+        type: 'change',
+        field: 'conversations',
+        value: cleanedConversationHistory,
+      });
     }
 
     const selectedConversation = localStorage.getItem('selectedConversation');
     if (selectedConversation) {
       const parsedSelectedConversation: Conversation = JSON.parse(selectedConversation);
       const cleanedSelectedConversation = cleanSelectedConversation(parsedSelectedConversation);
-      dispatch({ field: 'selectedConversation', value: cleanedSelectedConversation });
+      dispatch({
+        type: 'change',
+        field: 'selectedConversation',
+        value: cleanedSelectedConversation,
+      });
     } else {
       const lastConversation = conversations[conversations.length - 1];
       dispatch({
+        type: 'change',
         field: 'selectedConversation',
         value: {
           id: uuidv4(),
@@ -297,7 +347,13 @@ const Home = ({
         },
       });
     }
-  }, [defaultModelId, dispatch, serverSideApiKeyIsSet, serverSidePluginKeysSet, openaiApiKey]);
+  }, [
+    defaultModelId,
+    dispatch,
+    serverSideApiKeyIsSet,
+    serverSidePluginKeysSet,
+    openaiApiKey,
+  ]);
 
   return (
     <HomeContext.Provider
@@ -314,9 +370,13 @@ const Home = ({
       <Head>
         <title>Metrix AI - The Intelligent Clinical Scribe Platform</title>
         <meta name="description" content="Smarter algorithms for smarter working" />
-        <meta name="viewport" content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no" />
+        <meta
+          name="viewport"
+          content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no"
+        />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <Script src="https://www.googletagmanager.com/gtag/js?id=G-S2RT6C3E5G" strategy="afterInteractive" />
       <Script id="google-analytics" strategy="afterInteractive">
         {`
@@ -328,7 +388,9 @@ const Home = ({
       </Script>
 
       {selectedConversation && (
-        <main className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}>
+        <main
+          className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
+        >
           <div className="fixed top-0 w-full sm:hidden">
             <Navbar
               selectedConversation={selectedConversation}
@@ -350,12 +412,15 @@ const Home = ({
     </HomeContext.Provider>
   );
 };
+
 export default Home;
 
 export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
   const defaultModelId =
     (process.env.DEFAULT_MODEL &&
-      Object.values(OpenAIModelID).includes(process.env.DEFAULT_MODEL as OpenAIModelID) &&
+      Object.values(OpenAIModelID).includes(
+        process.env.DEFAULT_MODEL as OpenAIModelID
+      ) &&
       process.env.DEFAULT_MODEL) ||
     fallbackModelID;
 
