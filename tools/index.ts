@@ -1,6 +1,6 @@
 // /tools/index.ts
 
-import { ScoreDefinition } from './types';
+import { ScoreDefinition } from './types'; // Use "./types" since types.ts is in the same folder
 
 // Import each category file
 import { cardioRiskTools } from './cardiorisk-tools';
@@ -10,7 +10,7 @@ import { neuroTools } from './neuro-tools';
 import { endocrinologyTools } from './endocrinology-tools';
 import { obgynTools } from './obgyn-tools';
 
-// Potential placeholders for additional categories
+// Placeholders for additional categories
 export const urologyTools: ScoreDefinition[] = [];
 export const hematologyTools: ScoreDefinition[] = [];
 export const infectiousDiseaseTools: ScoreDefinition[] = [];
@@ -21,7 +21,7 @@ export const nephrologyTools: ScoreDefinition[] = [];
 export const nutritionMetabolismTools: ScoreDefinition[] = [];
 export const miscellaneousTools: ScoreDefinition[] = [];
 
-// Merge them all into one big array
+// Merge all tools into one array
 export const ALL_TOOLS: ScoreDefinition[] = [
   ...cardioRiskTools,
   ...pulmonaryTools,
