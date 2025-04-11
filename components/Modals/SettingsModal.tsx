@@ -49,16 +49,24 @@ export const SettingsModal = () => {
   }, []);
 
   const handleClose = () => {
-    dispatch({ field: 'openModal', value: null });
+    // IMPORTANT: add { type: 'change' }
+    dispatch({ type: 'change', field: 'openModal', value: null });
   };
 
   const handleToggleDarkMode = () => {
-    dispatch({ field: 'lightMode', value: isDarkMode ? 'light' : 'dark' });
+    dispatch({
+      type: 'change',
+      field: 'lightMode',
+      value: isDarkMode ? 'light' : 'dark',
+    });
   };
 
   const handleApiProviderChange = (val: string) => {
     setSelectedApiProvider(val);
-    if (val === 'openai' && (selectedModel.startsWith('gemini') || selectedModel.startsWith('internal'))) {
+    if (
+      val === 'openai' &&
+      (selectedModel.startsWith('gemini') || selectedModel.startsWith('internal'))
+    ) {
       setSelectedModel('gpt-4');
     } else if (val === 'gemini' && !selectedModel.startsWith('gemini')) {
       setSelectedModel('gemini-2.0');
@@ -69,8 +77,8 @@ export const SettingsModal = () => {
 
   const handleSaveSettings = () => {
     // Save to global state
-    dispatch({ field: 'apiKey', value: tempApiKey });
-    dispatch({ field: 'defaultModelId', value: selectedModel });
+    dispatch({ type: 'change', field: 'apiKey', value: tempApiKey });
+    dispatch({ type: 'change', field: 'defaultModelId', value: selectedModel });
 
     // LocalStorage
     localStorage.setItem('apiKey', tempApiKey);
