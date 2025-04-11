@@ -1,7 +1,7 @@
 // /pages/diagnostic-assistance.tsx
 
 import React, { useState } from 'react';
-import { marked } from 'marked'; // Ensure Marked 5+ is installed
+import { marked } from 'marked';
 
 // ---------- Types ----------
 interface Message {
@@ -10,20 +10,14 @@ interface Message {
 }
 
 const DISCLAIMER_TEXT = `
-Our Metrix AI clinical platform enhances clinicians' decision-making processes. 
-It generates preliminary investigation plans, management guidance, drug regimen suggestions, 
-and answers to clinical reference questions. The features are not designed for and should not 
-be used for analyzing medical images, signals from in vitro devices, or any advanced signal 
+Our Metrix AI clinical platform enhances clinicians' decision-making processes.
+It generates preliminary investigation plans, management guidance, drug regimen suggestions,
+and answers to clinical reference questions. The features are not designed for and should not
+be used for analyzing medical images, signals from in vitro devices, or any advanced signal
 acquisition systems.
 `;
 
 function DiagnosticAssistancePage() {
-  /**
-   * Stages:
-   *   1 => Home screen
-   *   2 => Query screen (with examples)
-   *   3 => Chat/Conversation screen
-   */
   const [stage, setStage] = useState<number>(1);
   const [requestType, setRequestType] = useState<string>('');
   const [exampleQueries, setExampleQueries] = useState<string[]>([]);
@@ -36,10 +30,15 @@ function DiagnosticAssistancePage() {
     },
   ]);
   const [messageIsStreaming, setMessageIsStreaming] = useState<boolean>(false);
-  const [ttsIsPlaying, setTtsIsPlaying] = useState<boolean>(false);
 
-  // API endpoint
-  const API_ENDPOINT = 'http://localhost:8000/rag/ask_rag';
+  // -----------------------------------------
+  // Use environment variable for API base URL (fallback to localhost)
+  // -----------------------------------------
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
+  // Endpoints
+  const API_ENDPOINT = `${API_BASE_URL}/rag/ask_rag`; // e.g. https://fastapiplatformclean-8.onrender.com/rag/ask_rag
 
   // -----------------------------------------
   // Send user message
@@ -48,7 +47,6 @@ function DiagnosticAssistancePage() {
     const trimmed = text.trim();
     if (!trimmed) return;
 
-    // Add user message to conversation
     const newHistory = [
       ...messages,
       { role: 'user' as const, content: trimmed },
@@ -56,12 +54,10 @@ function DiagnosticAssistancePage() {
     setMessages(newHistory);
     setUserInput('');
 
-    // Now process it exactly once
     processMessage(newHistory, trimmed);
   }
 
   async function processMessage(updatedHistory: Message[], newMessage: string) {
-    // Insert a "thinking..." placeholder
     const thinkingMsg: Message = {
       role: 'assistant',
       content: '...thinking...',
@@ -77,7 +73,7 @@ function DiagnosticAssistancePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: newMessage,
-          history: historyWithThinking, // The entire conversation so far
+          history: historyWithThinking,
         }),
       });
       if (!resp.ok) {
@@ -86,9 +82,7 @@ function DiagnosticAssistancePage() {
       const data = await resp.json();
       console.log('👉 Server response =>', data);
 
-      // data.response should be a single string
       const finalAnswer = data.response || 'No response from server.';
-      // Replace "thinking..." with finalAnswer
       setMessages((prev) =>
         prev
           .filter((m) => m.content !== '...thinking...')
@@ -111,9 +105,6 @@ function DiagnosticAssistancePage() {
     }
   }
 
-  // -----------------------------------------
-  // Helper to handle ENTER key to send
-  // -----------------------------------------
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -121,9 +112,6 @@ function DiagnosticAssistancePage() {
     }
   }
 
-  // -----------------------------------------
-  // "Regenerate" retries the last user prompt
-  // -----------------------------------------
   function onRegenerate() {
     const lastUser = [...messages].reverse().find((m) => m.role === 'user');
     if (lastUser) {
@@ -131,9 +119,6 @@ function DiagnosticAssistancePage() {
     }
   }
 
-  // -----------------------------------------
-  // "Edit" loads the last user message into input
-  // -----------------------------------------
   function handleEditLastUserInput() {
     const lastUser = [...messages].reverse().find((m) => m.role === 'user');
     if (lastUser) {
@@ -141,17 +126,11 @@ function DiagnosticAssistancePage() {
     }
   }
 
-  // -----------------------------------------
-  // Example query click
-  // -----------------------------------------
   function handleClickExample(example: string) {
     setStage(3);
     handleSendUserMessage(example);
   }
 
-  // -----------------------------------------
-  // Clear entire chat
-  // -----------------------------------------
   function handleClearChat() {
     setMessages([
       {
@@ -163,14 +142,10 @@ function DiagnosticAssistancePage() {
     setStage(1);
   }
 
-  // -----------------------------------------
-  // Render a single message bubble
-  // -----------------------------------------
   function renderMessageBubble(msg: Message, index: number) {
     const isUser = msg.role === 'user';
     const isAssistant = msg.role === 'assistant';
 
-    // Show "thinking" animation
     if (isAssistant && msg.content === '...thinking...') {
       return (
         <div key={index} className="mb-4 flex items-start space-x-2">
@@ -184,14 +159,14 @@ function DiagnosticAssistancePage() {
       );
     }
 
-    // Otherwise parse as markdown for assistant/system messages
     let bubbleContent: JSX.Element | string;
     if (isAssistant || msg.role === 'system') {
-      // Use synchronous parse => { async: false }
       const rendered = marked.parse(msg.content || '', { async: false });
-
       bubbleContent = (
-        <div className="prose prose-sm" dangerouslySetInnerHTML={{ __html: rendered }} />
+        <div
+          className="prose prose-sm"
+          dangerouslySetInnerHTML={{ __html: rendered }}
+        />
       );
     } else {
       bubbleContent = <>{msg.content}</>;
@@ -251,7 +226,6 @@ function DiagnosticAssistancePage() {
     );
   }
 
-  // TTS helpers
   function handlePlayTTS(text: string) {
     if (!('speechSynthesis' in window)) {
       alert('Your browser does not support speech synthesis.');
@@ -262,21 +236,9 @@ function DiagnosticAssistancePage() {
     utterance.rate = 1;
     utterance.pitch = 1;
     utterance.volume = 1;
-    utterance.onstart = () => setTtsIsPlaying(true);
-    utterance.onend = () => setTtsIsPlaying(false);
-    utterance.onerror = () => setTtsIsPlaying(false);
     window.speechSynthesis.speak(utterance);
   }
-  function handleStopTTS() {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      setTtsIsPlaying(false);
-    }
-  }
 
-  // -----------------------------------------
-  // Rendering each stage
-  // -----------------------------------------
   function renderBrandHeader() {
     return (
       <header className="flex flex-col items-center justify-center text-center">
@@ -301,7 +263,6 @@ function DiagnosticAssistancePage() {
     );
   }
 
-  // Stage 1: Home screen
   function renderHomeScreen() {
     return (
       <div className="flex flex-col items-center pt-16 pb-24 px-4">
@@ -364,7 +325,6 @@ function DiagnosticAssistancePage() {
     );
   }
 
-  // Stage 2: Query screen with example queries
   function renderQueryScreen() {
     let heading = '';
     if (requestType === 'investigation') {
@@ -400,7 +360,6 @@ function DiagnosticAssistancePage() {
     );
   }
 
-  // Stage 3: Chat screen
   function renderChatScreen() {
     return (
       <div className="flex flex-col min-h-full pt-16 pb-24 px-4">
@@ -412,9 +371,7 @@ function DiagnosticAssistancePage() {
           <div className="mt-4 flex space-x-3 justify-center">
             <button
               onClick={() => {
-                navigator.clipboard.writeText(
-                  JSON.stringify(messages, null, 2),
-                );
+                navigator.clipboard.writeText(JSON.stringify(messages, null, 2));
                 alert('Conversation copied successfully!');
               }}
               className="px-4 py-2 bg-gray-300 text-black rounded-full hover:bg-gray-400"
@@ -433,17 +390,14 @@ function DiagnosticAssistancePage() {
     );
   }
 
-  // Main rendering
   return (
     <div className="flex flex-col h-screen bg-white">
-      {/* Main content */}
       <div className="flex-1 overflow-y-auto">
         {stage === 1 && renderHomeScreen()}
         {stage === 2 && renderQueryScreen()}
         {stage === 3 && renderChatScreen()}
       </div>
 
-      {/* Sticky bottom bar (single input) */}
       <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3">
         <div className="w-full max-w-4xl mx-auto flex items-center space-x-3">
           <input
@@ -464,33 +418,7 @@ function DiagnosticAssistancePage() {
                 : 'bg-blue-600 hover:bg-blue-700'
             }`}
           >
-            {messageIsStreaming ? (
-              <>
-                <svg
-                  className="animate-spin h-5 w-5 mr-2 inline-block text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8H4z"
-                  ></path>
-                </svg>
-                Sending...
-              </>
-            ) : (
-              'Send'
-            )}
+            {messageIsStreaming ? 'Sending...' : 'Send'}
           </button>
         </div>
       </div>
