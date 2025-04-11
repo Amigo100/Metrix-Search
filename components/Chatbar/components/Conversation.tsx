@@ -1,4 +1,5 @@
 // components/Chatbar/components/Conversation.tsx
+
 import {
   IconCheck,
   IconMessage,
@@ -29,11 +30,13 @@ export const ConversationComponent = ({ conversation }: Props) => {
     dispatch,
     handleUpdateConversation,
   } = useContext(HomeContext);
+
   const { handleDeleteConversation } = useContext(ChatbarContext);
 
-  // Define handleSelectConversation locally since it’s not provided by context.
+  // Define handleSelectConversation locally
   const handleSelectConversation = (conv: Conversation) => {
-    dispatch({ field: 'selectedConversation', value: conv });
+    // IMPORTANT: add `type: 'change'` here
+    dispatch({ type: 'change', field: 'selectedConversation', value: conv });
   };
 
   const [isDeleting, setIsDeleting] = useState(false);
