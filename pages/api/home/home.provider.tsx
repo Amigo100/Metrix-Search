@@ -4,18 +4,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
-
-// Import the exact same ActionType from your custom hook
-import { ActionType } from '@/hooks/useCreateReducer';
+import { ActionType } from '@/hooks/useCreateReducer'; // { type: 'reset' } | { type: 'change'; field: keyof HomeInitialState; value: any }
 
 import { Conversation } from '@/types/chat';
 import { OpenAIModels } from '@/types/openai';
 
-/**
- * Home reducer that uses the same union action shape:
- *   - { type: 'reset' }
- *   - { type: 'change'; field: keyof HomeInitialState; value: any }
- */
 function homeReducer(
   state: HomeInitialState,
   action: ActionType<HomeInitialState>,
@@ -25,28 +18,25 @@ function homeReducer(
       return initialState;
 
     case 'change': {
-      // Update the field in question
-      const { field, value } = action;
-      return { ...state, [field]: value };
+      return {
+        ...state,
+        [action.field]: action.value,
+      };
     }
-
-    default:
-      // If you prefer to allow more advanced logic,
-      // you can handle additional 'type' variants here
-      throw new Error(`Unknown action type: ${action.type}`);
   }
+  // no default case, because the union is fully handled
+
+  // Optional safety net (will never execute in practice):
+  return state;
 }
 
-export default function HomeContextProvider({ children }: { children: React.ReactNode }) {
-  // Now we have a single source of truth for how the action is shaped
-  // We can do useReducer or your custom useCreateReducer if we want:
+export default function HomeContextProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [state, dispatch] = React.useReducer(homeReducer, initialState);
 
-  // or if you prefer using your custom hook:
-  // const { state, dispatch } = useCreateReducer({ initialState });
-  // and skip the local homeReducer code entirely.
-
-  // example function
   const handleNewConversation = () => {
     console.log('[HomeProvider] Creating a new conversation...');
 
@@ -60,12 +50,21 @@ export default function HomeContextProvider({ children }: { children: React.Reac
       folderId: null,
     };
 
-    // Update conversations
-    dispatch({ type: 'change', field: 'conversations', value: [...state.conversations, newConv] });
-    // Also set selectedConversation
-    dispatch({ type: 'change', field: 'selectedConversation', value: newConv });
+    dispatch({
+      type: 'change',
+      field: 'conversations',
+      value: [...state.conversations, newConv],
+    });
+    dispatch({
+      type: 'change',
+      field: 'selectedConversation',
+      value: newConv,
+    });
 
-    localStorage.setItem('conversationHistory', JSON.stringify([...state.conversations, newConv]));
+    localStorage.setItem(
+      'conversationHistory',
+      JSON.stringify([...state.conversations, newConv]),
+    );
   };
 
   return (
@@ -74,7 +73,7 @@ export default function HomeContextProvider({ children }: { children: React.Reac
         state,
         dispatch,
         handleNewConversation,
-        // ... any other functions
+        // ... other methods
       }}
     >
       {children}
