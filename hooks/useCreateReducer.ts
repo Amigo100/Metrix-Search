@@ -1,60 +1,42 @@
+// file: /hooks/useCreateReducer.ts
+
 import { useMemo, useReducer } from 'react';
 
-/**
- * Extracts property names from the initial state for typesafe dispatch objects.
- * Right now, it doesn't really matter if T[K] is string or not—both map to K.
- * But if you have logic that specifically wants to treat some fields differently,
- * you can adjust the extends check (T[K] extends string ? K : never, etc.).
- */
-export type FieldNames<T> = {
-  [K in keyof T]: K;
-}[keyof T];
+// Let FieldNames<T> simply be `keyof T`:
+export type FieldNames<T> = keyof T;
 
 /**
- * Returns the Action type for the dispatch object:
- * - { type: 'reset' }
- * - { type?: 'change'; field: FieldNames<T>; value: any }
- *   (If type is not provided, we treat it as "change".)
+ * Now we define one strict union:
+ *   - { type: 'reset' }
+ *   - { type: 'change'; field: FieldNames<T>; value: any }
  */
 export type ActionType<T> =
   | { type: 'reset' }
-  | { type?: 'change'; field: FieldNames<T>; value: any };
+  | { type: 'change'; field: FieldNames<T>; value: any };
 
-/**
- * useCreateReducer gives you a typed dispatch and state.
- * Example usage:
- *   const { state, dispatch } = useCreateReducer({ initialState });
- *   dispatch({ field: 'someField', value: 'newValue' }); // default "change"
- *   dispatch({ type: 'reset' });
- */
 export const useCreateReducer = <T>({ initialState }: { initialState: T }) => {
+  // Our local Action is the same union:
   type Action =
     | { type: 'reset' }
-    | { type?: 'change'; field: FieldNames<T>; value: any };
+    | { type: 'change'; field: FieldNames<T>; value: any };
 
+  // The reducer now switches on `action.type`:
   const reducer = (state: T, action: Action) => {
-    // If there's no "type", assume it's a "change" => update the field
-    if (!action.type) {
-      return {
-        ...state,
-        [action.field]: action.value,
-      };
-    }
+    switch (action.type) {
+      case 'reset':
+        return initialState;
 
-    // If "reset", return initialState
-    if (action.type === 'reset') {
-      return initialState;
-    }
+      case 'change':
+        return { ...state, [action.field]: action.value };
 
-    // Otherwise, handle or throw an error for unknown types
-    throw new Error(`Unknown action type: ${action.type}`);
+      default:
+        // We never expect other action types:
+        throw new Error(`Unknown action type: ${action}`);
+    }
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Memoize the result so re-renders won't re-create objects
-  return useMemo(
-    () => ({ state, dispatch }),
-    [state, dispatch],
-  );
+  // Return a stable object
+  return useMemo(() => ({ state, dispatch }), [state, dispatch]);
 };
