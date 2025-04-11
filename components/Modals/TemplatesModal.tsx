@@ -30,13 +30,15 @@ export const TemplatesModal = () => {
 
   // Helper to update templates in global state and localStorage
   const updateTemplates = (newTemplates: Prompt[]) => {
-    dispatch({ field: 'prompts', value: newTemplates });
+    // IMPORTANT: add type: 'change'
+    dispatch({ type: 'change', field: 'prompts', value: newTemplates });
     localStorage.setItem('prompts', JSON.stringify(newTemplates));
     console.log('Templates updated in global state and localStorage.');
   };
 
   const handleClose = () => {
-    dispatch({ field: 'openModal', value: null });
+    // Also add type: 'change' here
+    dispatch({ type: 'change', field: 'openModal', value: null });
   };
 
   // Import templates from a JSON file
