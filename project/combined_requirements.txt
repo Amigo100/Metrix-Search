@@ -17,7 +17,7 @@ sentence-transformers==2.2.2
 nltk==3.8.1
 huggingface_hub==0.13.3
 langchain_core
-python multi-part
+python-multipart
 
 # Dependencies from predictive-backend:
 xgboost==2.1.4
