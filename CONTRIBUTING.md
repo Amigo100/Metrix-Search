@@ -1,8 +1,8 @@
 # Contributing Guidelines
 
-**Welcome to Caduceus!**
+**Welcome to Metrix!**
 
-We appreciate your interest in contributing to our project.
+We appreciate your interest in our project.
 
 Before you get started, please read our guidelines for contributing.
 
@@ -22,11 +22,6 @@ We welcome the following types of contributions:
 To get started, fork the project on GitHub and clone it locally on your machine. Then, create a new branch to work on your changes.
 
 ```
-git clone https://caduc.eus.git
-cd chatbot-ui
-git checkout -b my-branch-name
-
-```
 
 Before submitting your pull request, please make sure your changes pass our automated tests and adhere to our code style guidelines.
 
@@ -42,4 +37,4 @@ Before submitting your pull request, please make sure your changes pass our auto
 
 ## Contact
 
-If you have any questions or need help getting started, feel free to reach out to me on [Twitter](https://twitter.com/mckaywrigley).
+If you have any questions or need help getting started, feel free to reach out
