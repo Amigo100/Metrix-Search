@@ -7,9 +7,8 @@ import { IconMicrophone } from '@tabler/icons-react';
 import { Message, Role } from '@/types/chat';
 import { Plugin } from '@/types/plugin';
 
-// Uncomment and define if you actually have this type file.
-// import { MediaStreamRecorder } from '@/types/mediaStreamRecorder';
-
+// let RecordRTC: any;
+// Use a reference below so we can lazy-load it in useEffect.
 let RecordRTC: any;
 
 interface Props {
@@ -40,7 +39,13 @@ export const ChatInputMicButton = ({ onSend, messageIsStreaming }: Props) => {
             mimeType: 'audio/webm',
           });
           recordRTC.current?.startRecording();
-          homeDispatch({ field: 'recording', value: true });
+
+          // IMPORTANT: add { type: 'change', ... }
+          homeDispatch({
+            type: 'change',
+            field: 'recording',
+            value: true,
+          });
         })
         .catch((err) => console.error('Microphone access error:', err));
     }
@@ -50,11 +55,21 @@ export const ChatInputMicButton = ({ onSend, messageIsStreaming }: Props) => {
   // Stop Recording + Transcribe
   // ---------------------------
   const handleStopRecording = () => {
-    homeDispatch({ field: 'recording', value: false });
+    // IMPORTANT: add { type: 'change', ... }
+    homeDispatch({
+      type: 'change',
+      field: 'recording',
+      value: false,
+    });
 
     if (recordRTC.current?.stopRecording) {
       recordRTC.current.stopRecording(async () => {
-        homeDispatch({ field: 'transcribingAudio', value: true });
+        // Indicate transcribing
+        homeDispatch({
+          type: 'change',
+          field: 'transcribingAudio',
+          value: true,
+        });
 
         const blob = recordRTC.current?.getBlob();
         if (blob) {
@@ -77,7 +92,12 @@ export const ChatInputMicButton = ({ onSend, messageIsStreaming }: Props) => {
               },
             );
 
-            homeDispatch({ field: 'transcribingAudio', value: false });
+            // Done transcribing
+            homeDispatch({
+              type: 'change',
+              field: 'transcribingAudio',
+              value: false,
+            });
 
             const message = {
               role: 'user' as Role,
@@ -86,7 +106,13 @@ export const ChatInputMicButton = ({ onSend, messageIsStreaming }: Props) => {
             onSend(message, null);
           } catch (error) {
             console.error('Error fetching transcription:', error);
-            homeDispatch({ field: 'transcribingAudio', value: false });
+
+            // Also set transcribingAudio false if error
+            homeDispatch({
+              type: 'change',
+              field: 'transcribingAudio',
+              value: false,
+            });
           }
         }
       });
@@ -162,3 +188,5 @@ export const ChatInputMicButton = ({ onSend, messageIsStreaming }: Props) => {
     </button>
   );
 };
+
+export default ChatInputMicButton;
