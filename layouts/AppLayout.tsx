@@ -43,46 +43,47 @@ export default function AppLayout({
   };
 
   return (
-    <div className="w-full h-screen flex flex-col bg-white dark:bg-[#343541] text-black dark:text-white">
+    <div className="w-full h-screen flex flex-col bg-neutral-50 text-neutral-800 dark:bg-[#343541] dark:text-white font-sans">
       {/* Header */}
       <header
-        className="sticky top-0 z-30 bg-gray-900 text-white px-4 shadow flex items-center justify-between overflow-hidden"
+        className="sticky top-0 z-30 flex items-center justify-between bg-brand-dark text-white px-4 shadow"
         style={{ height: headerHeight, minHeight: headerHeight }}
       >
         {/* Branding */}
         <div className="flex items-center space-x-3 flex-none">
           <img
             src="/MetrixAI.png"
-            alt="Metrix AI Logo"
+            alt="ClinSync Logo"
             style={{
               width: `${logoSize}px`,
               height: `${logoSize}px`,
               objectFit: 'contain',
             }}
           />
-          <h2 className="text-xl font-semibold"></h2>
+          <h2 className="text-xl font-semibold">ClinSync</h2>
         </div>
 
         {/* Centered Navigation */}
-        <div className="flex-1 flex justify-center">
-          <nav className="flex items-center" style={{ gap: '2rem' }}>
-            <Link href="/dashboard" className="text-base hover:underline">
-              Dashboard
-            </Link>
-            <Link href="/clinical-scribe" className="text-base hover:underline">
-              Clinical Scribe
-            </Link>
-            <Link href="/predictive-analytics" className="text-base hover:underline">
-              Predictive Analytics
-            </Link>
-            <Link href="/clinical-scoring-tools" className="text-base hover:underline">
-              Clinical Scoring Tools
-            </Link>
-            <Link href="/diagnostic-assistance" className="text-base hover:underline">
-              Diagnostic Assistance
-            </Link>
-          </nav>
-        </div>
+        <nav className="flex-1 flex justify-center space-x-8">
+          <Link href="/dashboard" className="hover:underline">
+            Dashboard
+          </Link>
+          <Link href="/clinical-scribe" className="hover:underline">
+            Clinical Scribe
+          </Link>
+          <Link href="/predictive-analytics" className="hover:underline">
+            Predictive Analytics
+          </Link>
+          <Link href="/clinical-scoring-tools" className="hover:underline">
+            Clinical Scoring Tools
+          </Link>
+          <Link href="/diagnostic-assistance" className="hover:underline">
+            Diagnostic Assistance
+          </Link>
+          <Link href="/guidelines-search" className="hover:underline">
+            Guidelines Search
+          </Link>
+        </nav>
 
         {/* Example: Toggle Right Promptbar Button */}
         <div className="flex-none">
@@ -107,6 +108,13 @@ export default function AppLayout({
         {/* Right Tasks Sidebar */}
         <Tasks />
       </div>
+
+      {/* Footer */}
+      <footer className="bg-white dark:bg-gray-800 text-center py-2 shadow-inner">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          © {new Date().getFullYear()} ClinSync. All rights reserved.
+        </p>
+      </footer>
 
       {/* Modals */}
       {openModal === 'profile' && <ProfileModal />}
