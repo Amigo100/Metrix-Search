@@ -17,41 +17,29 @@ combined_app = FastAPI(
     version="1.0.0",
 )
 
-# 1. Start with a list of known valid origins
-allowed_origins = [
-    "http://localhost:3000",
-    # Potential stable domain(s) can go here, for example:
-    # "https://my-stable-production-domain.vercel.app",
-    # "https://my-custom-domain.com",
-]
+##############################################################################
+# 1. Use a regex to match ephemeral Vercel subdomains (e.g. myapp-xxxxx.vercel.app)
+#    plus localhost for dev. The pattern below matches:
+#     - http://localhost:3000
+#     - https://localhost:3000
+#     - https://<anything>.vercel.app
+#
+#    If you also need to allow ephemeral Render URLs, adjust the regex
+#    or add them separately.
+##############################################################################
+allow_origin_pattern = r"https?://(localhost:3000|.*\.vercel\.app)"
+logger.info(f"Using allow_origin_regex = {allow_origin_pattern}")
 
-# 2. Dynamically detect ephemeral Vercel URL if environment variable is present
-#    Vercel often provides 'VERCEL_URL' or 'VERCEL_BRANCH_URL' at runtime
-#    Example: fast-api-platform-clean-ozlq-nt55riy3q-amigo100s-projects.vercel.app
-vercel_url = os.getenv("VERCEL_URL")  # e.g. "fast-api-platform-clean-ozlq-nt55riy3q-amigo100s-projects.vercel.app"
-if vercel_url:
-    ephemeral_origin = f"https://{vercel_url}"
-    allowed_origins.append(ephemeral_origin)
-    logger.info(f"Detected ephemeral Vercel URL: {ephemeral_origin}")
-
-# 3. (Optional) You can also allow an entire wildcard for quick dev/staging
-# allowed_origins.append("https://*.vercel.app")
-
-# 4. Log environment variables if needed (cautious about secrets!)
-logger.info(f"OPENAI_API_KEY present? {'OPENAI_API_KEY' in os.environ}")
-logger.info(f"NEXT_PUBLIC_API_BASE_URL = {os.getenv('NEXT_PUBLIC_API_BASE_URL')}")
-logger.info(f"Allowed origins so far: {allowed_origins}")
-
-# 5. Configure CORS
+# 2. Configure CORS with the regex
 combined_app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,  # or ["*"] for completely open
+    allow_origin_regex=allow_origin_pattern,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 6. Mount sub-apps
+# 3. Mount the sub-apps
 combined_app.mount("/rag", rag_app)
 combined_app.mount("/predictive", predictive_app)
 
@@ -60,8 +48,5 @@ def root_check():
     logger.info("[/] Root check endpoint called.")
     return {
         "message": "Unified service for RAG + Predictive Analytics",
-        "rag_docs": "/rag/docs",
-        "predictive_docs": "/predictive/docs",
-        "allowed_origins": allowed_origins,
+        "cors_regex": allow_origin_pattern,
     }
-
