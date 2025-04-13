@@ -64,23 +64,41 @@ export default function AppLayout({
         </div>
 
         {/* Centered Navigation */}
-        <nav className="flex-1 flex justify-center space-x-8">
-          <Link href="/dashboard" className="hover:underline">
+        <nav className="flex-1 flex justify-center space-x-8 text-sm">
+          <Link
+            href="/dashboard"
+            className="hover:text-brand-light transition-colors"
+          >
             Dashboard
           </Link>
-          <Link href="/clinical-scribe" className="hover:underline">
+          <Link
+            href="/clinical-scribe"
+            className="hover:text-brand-light transition-colors"
+          >
             Clinical Scribe
           </Link>
-          <Link href="/predictive-analytics" className="hover:underline">
+          <Link
+            href="/predictive-analytics"
+            className="hover:text-brand-light transition-colors"
+          >
             Predictive Analytics
           </Link>
-          <Link href="/clinical-scoring-tools" className="hover:underline">
+          <Link
+            href="/clinical-scoring-tools"
+            className="hover:text-brand-light transition-colors"
+          >
             Clinical Scoring Tools
           </Link>
-          <Link href="/diagnostic-assistance" className="hover:underline">
+          <Link
+            href="/diagnostic-assistance"
+            className="hover:text-brand-light transition-colors"
+          >
             Diagnostic Assistance
           </Link>
-          <Link href="/guidelines-search" className="hover:underline">
+          <Link
+            href="/guidelines-search"
+            className="hover:text-brand-light transition-colors"
+          >
             Guidelines Search
           </Link>
         </nav>
