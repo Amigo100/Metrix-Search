@@ -1,3 +1,5 @@
+/* file: /styles/globals.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -28,8 +30,10 @@
   height: 6px;
 }
 
+/* Remove the very dark background on html if you want a lighter look by default. */
 html {
-  background: #202123;
+  /* background: #202123;  Remove or comment out if you prefer a neutral approach */
+  background: #f8fafc; /* matches neutral-50 in your theme */
 }
 
 @media (max-width: 720px) {
@@ -42,11 +46,11 @@ pre:has(div.codeblock) {
   padding: 0;
 }
 
+/* Recording button styles: kept as is, if needed */
 .record-button:hover .record-button-ring,
-.record-button.is-recording .record-button-ring
-{
+.record-button.is-recording .record-button-ring {
   animation: ring 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
-  box-sizing: border-box; /* To include the border width in the element's total width and height */
+  box-sizing: border-box;
 }
 
 @keyframes ring {
@@ -54,18 +58,16 @@ pre:has(div.codeblock) {
     transform: scale(1);
     opacity: 1;
   }
-
   100% {
     transform: scale(1.4);
     opacity: 0;
   }
 }
 
-
 .is-recording .recording-button-inner {
-  background: linear-gradient(-45deg,#525cff,#0cb4ff);
+  background: linear-gradient(-45deg, #525cff, #0cb4ff);
   background-size: 400% 400%;
-  animation: animate_recording_button 3s ease infinite
+  animation: animate_recording_button 3s ease infinite;
 }
 
 .is-recording img {
@@ -73,7 +75,7 @@ pre:has(div.codeblock) {
 }
 
 .chatbar-button-is-recording {
-  background: linear-gradient(-45deg,#525cff,#0cb4ff);
+  background: linear-gradient(-45deg, #525cff, #0cb4ff);
   background-size: 400% 400%;
   animation: animate_recording_button 3s ease infinite;
 }
@@ -83,15 +85,13 @@ pre:has(div.codeblock) {
 }
 
 @keyframes animate_recording_button {
-    0% {
-        background-position: 0 50%
-    }
-
-    50% {
-        background-position: 100% 50%
-    }
-
-    100% {
-        background-position: 0 50%
-    }
+  0% {
+    background-position: 0 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
 }
