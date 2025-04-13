@@ -1,5 +1,4 @@
-// file: /layouts/AppLayout.tsx
-
+// layouts/AppLayout.tsx
 import React, { useContext } from 'react';
 import Link from 'next/link';
 import HomeContext from '@/pages/api/home/home.context';
@@ -19,12 +18,12 @@ import {
 
 interface AppLayoutProps {
   children: React.ReactNode;
-  logoSize?: number; // pass a custom logo size if you want
+  logoSize?: number;
 }
 
 export default function AppLayout({
   children,
-  logoSize = 128, // default to 128px
+  logoSize = 128,
 }: AppLayoutProps) {
   const { state, dispatch } = useContext(HomeContext);
   const { openModal, showSidePromptbar } = state;
@@ -32,7 +31,6 @@ export default function AppLayout({
   // Keep header height at 80px (example).
   const headerHeight = '80px';
 
-  // A toggle function for the right prompt bar
   const handleTogglePromptbar = () => {
     dispatch({
       type: 'change',
@@ -65,45 +63,27 @@ export default function AppLayout({
 
         {/* Centered Navigation */}
         <nav className="flex-1 flex justify-center space-x-8 text-sm">
-          <Link
-            href="/dashboard"
-            className="hover:text-brand-light transition-colors"
-          >
+          <Link href="/dashboard" className="hover:text-brand-light transition-colors">
             Dashboard
           </Link>
-          <Link
-            href="/clinical-scribe"
-            className="hover:text-brand-light transition-colors"
-          >
+          <Link href="/clinical-scribe" className="hover:text-brand-light transition-colors">
             Clinical Scribe
           </Link>
-          <Link
-            href="/predictive-analytics"
-            className="hover:text-brand-light transition-colors"
-          >
+          <Link href="/predictive-analytics" className="hover:text-brand-light transition-colors">
             Predictive Analytics
           </Link>
-          <Link
-            href="/clinical-scoring-tools"
-            className="hover:text-brand-light transition-colors"
-          >
+          <Link href="/clinical-scoring-tools" className="hover:text-brand-light transition-colors">
             Clinical Scoring Tools
           </Link>
-          <Link
-            href="/diagnostic-assistance"
-            className="hover:text-brand-light transition-colors"
-          >
+          <Link href="/diagnostic-assistance" className="hover:text-brand-light transition-colors">
             Diagnostic Assistance
           </Link>
-          <Link
-            href="/guidelines-search"
-            className="hover:text-brand-light transition-colors"
-          >
+          <Link href="/guidelines-search" className="hover:text-brand-light transition-colors">
             Guidelines Search
           </Link>
         </nav>
 
-        {/* Example: Toggle Right Promptbar Button */}
+        {/* Toggle Right Promptbar Button */}
         <div className="flex-none">
           {showSidePromptbar ? (
             <CloseSidebarButton side="right" onClick={handleTogglePromptbar} />
