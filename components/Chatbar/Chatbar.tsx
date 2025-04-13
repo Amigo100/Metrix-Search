@@ -186,8 +186,8 @@ export const Chatbar = () => {
         handleCreateFolder={() => handleCreateFolder(t('New folder'), 'chat')}
         handleDrop={handleDrop}
         footerComponent={<ChatbarSettings />}
-        // Additional style overrides to match teal/dark theme
-        containerClasses="bg-gray-800 text-gray-100 border-r border-gray-700"
+        // Use className instead of containerClasses
+        className="bg-gray-800 text-gray-100 border-r border-gray-700"
       />
     </ChatbarContext.Provider>
   );
