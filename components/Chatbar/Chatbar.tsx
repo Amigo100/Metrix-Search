@@ -1,4 +1,4 @@
-// /components/Chatbar/Chatbar.tsx
+// components/Chatbar/Chatbar.tsx
 
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
@@ -149,11 +149,14 @@ export const Chatbar = () => {
         }),
       });
     } else {
-      chatDispatch({ type: 'change', field: 'filteredConversations', value: conversations });
+      chatDispatch({
+        type: 'change',
+        field: 'filteredConversations',
+        value: conversations,
+      });
     }
   }, [searchTerm, conversations, chatDispatch]);
 
-  // Provide all these chatbar features to children
   return (
     <ChatbarContext.Provider
       value={{
@@ -170,19 +173,21 @@ export const Chatbar = () => {
       <Sidebar<Conversation>
         side="left"
         isOpen={showChatbar}
+        toggleOpen={handleToggleChatbar}
         addItemButtonTitle={t('Start New Session') as string}
         itemComponent={<Conversations conversations={filteredConversations} />}
         folderComponent={<ChatFolders searchTerm={searchTerm} />}
+        footerComponent={<ChatbarSettings />}
         items={filteredConversations}
         searchTerm={searchTerm}
         handleSearchTerm={(term: string) =>
           chatDispatch({ type: 'change', field: 'searchTerm', value: term })
         }
-        toggleOpen={handleToggleChatbar}
-        handleCreateItem={handleNewConversation} // => Creates a new conversation
+        handleCreateItem={handleNewConversation}
         handleCreateFolder={() => handleCreateFolder(t('New folder'), 'chat')}
         handleDrop={handleDrop}
-        footerComponent={<ChatbarSettings />} // => Renders modals if user sets openModal in global
+        // Custom className for styling
+        className="bg-gray-800 text-gray-100 border-r border-gray-700"
       />
     </ChatbarContext.Provider>
   );
