@@ -19,6 +19,7 @@ combined_app = FastAPI(
 allowed_origins = [
     "http://localhost:3000",
     "https://fast-api-platform-clean-ozlq-nt55riy3q-amigo100s-projects.vercel.app",
+    "https://fast-api-platform-clean-ozlq.vercel.app",
 ]
 
 combined_app.add_middleware(
