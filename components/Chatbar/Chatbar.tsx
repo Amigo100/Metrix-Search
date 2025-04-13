@@ -1,4 +1,4 @@
-// file: /components/Chatbar/Chatbar.tsx
+// /components/Chatbar/Chatbar.tsx
 
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
@@ -149,14 +149,11 @@ export const Chatbar = () => {
         }),
       });
     } else {
-      chatDispatch({
-        type: 'change',
-        field: 'filteredConversations',
-        value: conversations,
-      });
+      chatDispatch({ type: 'change', field: 'filteredConversations', value: conversations });
     }
   }, [searchTerm, conversations, chatDispatch]);
 
+  // Provide all these chatbar features to children
   return (
     <ChatbarContext.Provider
       value={{
@@ -182,12 +179,10 @@ export const Chatbar = () => {
           chatDispatch({ type: 'change', field: 'searchTerm', value: term })
         }
         toggleOpen={handleToggleChatbar}
-        handleCreateItem={handleNewConversation}
+        handleCreateItem={handleNewConversation} // => Creates a new conversation
         handleCreateFolder={() => handleCreateFolder(t('New folder'), 'chat')}
         handleDrop={handleDrop}
-        footerComponent={<ChatbarSettings />}
-        // Use className instead of containerClasses
-        className="bg-gray-800 text-gray-100 border-r border-gray-700"
+        footerComponent={<ChatbarSettings />} // => Renders modals if user sets openModal in global
       />
     </ChatbarContext.Provider>
   );
