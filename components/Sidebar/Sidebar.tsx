@@ -14,6 +14,10 @@ interface Props<T> {
   isOpen: boolean;
   side: 'left' | 'right';
   toggleOpen: () => void;
+
+  /** Optionally, override the container's default classes. */
+  className?: string; // <-- ADDED
+
   // The following props are optional—if you supply children, those will be rendered instead.
   addItemButtonTitle?: string;
   items?: T[];
@@ -32,6 +36,7 @@ const Sidebar = <T,>({
   isOpen,
   side,
   toggleOpen,
+  className,
   addItemButtonTitle,
   items,
   itemComponent,
@@ -46,15 +51,13 @@ const Sidebar = <T,>({
 }: Props<T>) => {
   const { t } = useTranslation('promptbar');
 
-  // Allow drag-and-drop handlers for default mode
+  // Drag & drop helpers
   const allowDrop = (e: any) => {
     e.preventDefault();
   };
-
   const highlightDrop = (e: any) => {
     e.target.style.background = '#3f3f46'; // e.g. dark gray to indicate drop target
   };
-
   const removeHighlight = (e: any) => {
     e.target.style.background = 'none';
   };
@@ -62,10 +65,12 @@ const Sidebar = <T,>({
   return isOpen ? (
     <div>
       <div
+        // Merge default classes with optional className
         className={`
           fixed top-0 ${side}-0 z-40 flex h-full w-[260px] flex-col space-y-2
           bg-gray-900 text-white p-2 text-[14px] transition-all
           sm:relative sm:top-0
+          ${className ?? ''}
         `}
       >
         {children ? (
@@ -132,12 +137,11 @@ const Sidebar = <T,>({
               ) : (
                 <div className="mt-8 select-none text-center opacity-50">
                   <IconMistOff className="mx-auto mb-3" />
-                  <span className="text-[14px] leading-normal">
-                    {t('No data.')}
-                  </span>
+                  <span className="text-[14px] leading-normal">{t('No data.')}</span>
                 </div>
               )}
             </div>
+
             {footerComponent}
           </>
         )}
