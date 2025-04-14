@@ -43,10 +43,10 @@ export default function AppLayout({
   };
 
   return (
-    <div className="w-full h-screen flex flex-col bg-white dark:bg-[#343541] text-black dark:text-white">
+    <div className="w-full h-screen flex flex-col bg-white dark:bg-[#343541] text-black dark:text-black">
       {/* Header */}
       <header
-        className="sticky top-0 z-30 bg-gray-900 text-white px-4 shadow flex items-center justify-between overflow-hidden"
+        className="sticky top-0 z-30 bg-neutral-50 text-black px-4 shadow flex items-center justify-between overflow-hidden"
         style={{ height: headerHeight, minHeight: headerHeight }}
       >
         {/* Branding */}
