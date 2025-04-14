@@ -62,8 +62,9 @@ export default function AppLayout({
               objectFit: 'contain',
             }}
           />
-          <h2 className="text-xl font-semibold"></h2>
+          <h2 className="text-2xl font-semibold">Metrix</h2>
         </div>
+        
 
         {/* Centered Navigation */}
         <div
