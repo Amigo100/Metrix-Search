@@ -106,9 +106,9 @@ export const ChatStartOfficeVisit = ({ onSend }: Props) => {
       className={`
         flex items-center justify-center w-64 h-24 
         rounded-lg border border-neutral-200 
-        bg-gray-800 bg-opacity-100
+        bg-[#008080] bg-opacity-100
         cursor-pointer 
-        hover:bg-gray-800 hover:bg-opacity-70
+        hover:bg-[#008080] hover:bg-opacity-70
         record-button 
         ${recording ? 'is-recording' : ''}
       `}
