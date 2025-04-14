@@ -84,7 +84,7 @@ const Sidebar = <T,>({
                 <button
                   className={`
                     flex w-[190px] flex-shrink-0 cursor-pointer items-center gap-3
-                    rounded-md border border-white/20 p-3 text-black
+                    rounded-md border border-gray-200 p-3 text-black
                     transition-colors duration-200 hover:bg-neutral-50
                   `}
                   onClick={() => {
@@ -100,7 +100,7 @@ const Sidebar = <T,>({
                 <button
                   className={`
                     ml-2 flex flex-shrink-0 cursor-pointer items-center gap-3
-                    rounded-md border border-white/20 p-3 text-sm text-black
+                    rounded-md border border-gray-200 p-3 text-sm text-black
                     transition-colors duration-200 hover:bg-neutral-50
                   `}
                   onClick={handleCreateFolder}
@@ -120,7 +120,7 @@ const Sidebar = <T,>({
 
             <div className="flex-grow overflow-auto">
               {items && items.length > 0 && folderComponent && (
-                <div className="flex border-b border-white/20 pb-2">
+                <div className="flex border-b border-gray-200 pb-2">
                   {folderComponent}
                 </div>
               )}
