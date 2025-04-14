@@ -282,7 +282,7 @@ import React, {
       <div className={`flex items-center space-x-2 py-1 ${taskStyle}`}>
         <Checkbox
           id={checkboxId}
-          className="border-gray-500 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+          className="border-gray-500 data-[state=checked]:bg-[#008080] data-[state=checked]:border-[#008080]"
         />
         <label htmlFor={checkboxId} className="flex-1 text-sm cursor-pointer">
           {task.text}
@@ -697,7 +697,7 @@ import React, {
                 variant="outline"
                 size="sm"
                 onClick={() => setIsModalOpen(true)}
-                className="bg-blue-600 hover: bg-[#008080] border-[#008080] text-white"
+                className="bg-[#008080] hover: bg-[#008080] border-[#008080] text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Patient
