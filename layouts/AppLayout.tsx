@@ -81,16 +81,16 @@ export default function AppLayout({
               Dashboard
             </Link>
             <Link href="/clinical-scribe" className="text-base hover:underline">
-              Clinical Scribe
+              AI Scribe
             </Link>
             <Link href="/predictive-analytics" className="text-base hover:underline">
-              Predictive Analytics
+              Predictive Insights
             </Link>
             <Link href="/clinical-scoring-tools" className="text-base hover:underline">
-              Clinical Scoring Tools
+              Risk & Scoring
             </Link>
             <Link href="/diagnostic-assistance" className="text-base hover:underline">
-              Diagnostic Assistance
+              AI Medical Assistant
             </Link>
           </nav>
         </div>
