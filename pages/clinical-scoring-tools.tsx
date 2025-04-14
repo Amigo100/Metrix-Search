@@ -23,15 +23,23 @@ const categorizedTools: { [key: string]: ScoreDefinition[] } = {
 };
 
 // The available calcType options
-const calcTypeOptions = ["All", "Diagnostic", "Prognostic", "Rule Out", "Treatment", "Drug Conversion"];
+const calcTypeOptions = [
+  'All',
+  'Diagnostic',
+  'Prognostic',
+  'Rule Out',
+  'Treatment',
+  'Drug Conversion',
+];
 
 export default function ClinicalScoringToolsPage() {
   const [inputValue, setInputValue] = useState('');
-  const [selectedCalcType, setSelectedCalcType] = useState("All");
+  const [selectedCalcType, setSelectedCalcType] = useState('All');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedTool, setSelectedTool] = useState<ScoreDefinition | null>(null);
   const [formValues, setFormValues] = useState<Record<string, any>>({});
-  const [scoreResult, setScoreResult] = useState<{ score: number; interpretation: string } | null>(null);
+  const [scoreResult, setScoreResult] =
+    useState<{ score: number; interpretation: string } | null>(null);
   const [showNextSteps, setShowNextSteps] = useState(false);
   const [showEvidence, setShowEvidence] = useState(false);
 
@@ -42,10 +50,13 @@ export default function ClinicalScoringToolsPage() {
     const result: { [key: string]: ScoreDefinition[] } = {};
     Object.keys(categorizedTools).forEach((category) => {
       const filtered = categorizedTools[category].filter((tool) => {
-        const matchesSearch = tool.name.toLowerCase().includes(inputValue.toLowerCase());
+        const matchesSearch = tool.name
+          .toLowerCase()
+          .includes(inputValue.toLowerCase());
         const matchesType =
-          selectedCalcType === "All" ||
-          (tool.calcType && tool.calcType.toLowerCase() === selectedCalcType.toLowerCase());
+          selectedCalcType === 'All' ||
+          (tool.calcType &&
+            tool.calcType.toLowerCase() === selectedCalcType.toLowerCase());
         return matchesSearch && matchesType;
       });
       if (filtered.length > 0) {
@@ -89,15 +100,27 @@ export default function ClinicalScoringToolsPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-white p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 center">Clinical Scoring Tools</h1>
-        <p className="text-gray-600 mb-6 max-w-3xl">
-          Search or select from many clinical calculators grouped by category. You can also filter by calculator type to find the relevant tool.
+    {/* 
+      Parent container ensures full width (w-full) 
+      and centers the content (items-center). 
+    */}
+    <div className="w-full min-h-screen bg-white p-6 flex flex-col items-center">
+      {/* 
+        Inner container: w-full so it stretches across, 
+        but you can optionally set a max-w if you want 
+        some margins on very large screens.
+      */}
+      <div className="w-full">
+        <h1 className="text-3xl font-bold text-gray-800 text-center">
+          Clinical Scoring Tools
+        </h1>
+        <p className="text-gray-600 mb-6 text-center">
+          Search or select from many clinical calculators grouped by category. You can
+          also filter by calculator type to find the relevant tool.
         </p>
 
         {/* Type Filter Buttons */}
-        <div className="flex gap-2 mb-4 flex-wrap">
+        <div className="flex gap-2 mb-4 flex-wrap justify-center">
           {calcTypeOptions.map((option) => (
             <button
               key={option}
@@ -114,8 +137,8 @@ export default function ClinicalScoringToolsPage() {
         </div>
 
         {/* Combined Search & Dropdown by Category */}
-        <div className="relative mb-8 w-full sm:w-2/3 lg:w-1/2" ref={dropdownRef}>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="relative mb-8 mx-auto w-full max-w-md" ref={dropdownRef}>
+          <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
             Search or Select a Tool
           </label>
           <div
@@ -167,9 +190,13 @@ export default function ClinicalScoringToolsPage() {
 
         {/* Display the selected tool */}
         {selectedTool && (
-          <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-4xl">
-            <h2 className="text-xl font-semibold text-blue-700 mb-2">{selectedTool.name}</h2>
-            <p className="text-sm text-gray-600 mb-5">{selectedTool.description}</p>
+          <div className="bg-white shadow-md rounded-lg p-6 mx-auto w-full max-w-4xl">
+            <h2 className="text-xl font-semibold text-blue-700 mb-2 text-center">
+              {selectedTool.name}
+            </h2>
+            <p className="text-sm text-gray-600 mb-5 text-center">
+              {selectedTool.description}
+            </p>
 
             {/* Render input fields */}
             <div className="space-y-4">
@@ -192,7 +219,10 @@ export default function ClinicalScoringToolsPage() {
                 }
                 if (field.type === 'number') {
                   return (
-                    <div key={field.key} className="flex flex-col sm:flex-row sm:items-center">
+                    <div
+                      key={field.key}
+                      className="flex flex-col sm:flex-row sm:items-center"
+                    >
                       <label htmlFor={field.key} className="sm:w-48 font-medium text-gray-800">
                         {field.label}
                       </label>
@@ -208,7 +238,10 @@ export default function ClinicalScoringToolsPage() {
                 }
                 if (field.type === 'select') {
                   return (
-                    <div key={field.key} className="flex flex-col sm:flex-row sm:items-center">
+                    <div
+                      key={field.key}
+                      className="flex flex-col sm:flex-row sm:items-center"
+                    >
                       <label htmlFor={field.key} className="sm:w-48 font-medium text-gray-800">
                         {field.label}
                       </label>
@@ -252,7 +285,7 @@ export default function ClinicalScoringToolsPage() {
             )}
 
             {(selectedTool.nextSteps || selectedTool.evidence) && (
-              <div className="mt-6 flex gap-3">
+              <div className="mt-6 flex gap-3 justify-center">
                 {selectedTool.nextSteps && (
                   <button
                     onClick={() => setShowNextSteps(!showNextSteps)}
@@ -292,7 +325,9 @@ export default function ClinicalScoringToolsPage() {
 
             {showEvidence && selectedTool.evidence && (
               <div className="mt-4 p-4 border rounded bg-gray-50">
-                <h4 className="text-md font-semibold text-purple-700 mb-2">Evidence & References</h4>
+                <h4 className="text-md font-semibold text-purple-700 mb-2">
+                  Evidence & References
+                </h4>
                 {selectedTool.evidence.commentary && (
                   <p className="text-gray-700 mb-3 whitespace-pre-line">
                     {selectedTool.evidence.commentary}
@@ -308,9 +343,10 @@ export default function ClinicalScoringToolsPage() {
           </div>
         )}
 
-        <div className="mt-10 text-xs text-gray-500 max-w-3xl leading-relaxed">
+        <div className="mt-10 text-xs text-gray-500 leading-relaxed text-center">
           <p className="mb-2">
-            <strong>Disclaimer:</strong> These calculators are provided for reference only; always use clinical judgment.
+            <strong>Disclaimer:</strong> These calculators are provided for reference
+            only; always use clinical judgment.
           </p>
         </div>
       </div>
