@@ -290,7 +290,7 @@ import React, {
         {task.timerEnd && (
           <span
             className={`text-xs font-mono ${
-              isTimerExpired ? 'text-red-400 font-semibold' : 'text-black'
+              isTimerExpired ? 'text-red-400 font-semibold' : 'text-white'
             }`}
           >
             <Clock className="inline h-3 w-3 mr-1" />
@@ -459,7 +459,7 @@ import React, {
   
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="bg-neutral-50 text-black sm:max-w-[550px]">
+        <DialogContent className="bg-neutral-50 text-white sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>Add New Patient</DialogTitle>
             <DialogDescription className="text-black">
@@ -518,7 +518,7 @@ import React, {
                       onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         handleTaskChange(task.id, 'text', e.target.value)
                       }
-                      className="flex-grow bg-neutral-50 border-gray-600 text-black placeholder-black"
+                      className="flex-grow bg-neutral-50 border-gray-600 text-white placeholder-white"
                     />
                     <Input
                       type="number"
@@ -529,13 +529,13 @@ import React, {
                       onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         handleTaskChange(task.id, 'timerMinutes', e.target.value)
                       }
-                      className="w-28 bg-neutral-50 border-gray-600 text-black placeholder-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-28 bg-neutral-50 border-gray-600 text-white placeholder-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="text-red-500 hover:bg-red-900/50 h-8 w-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="text-white hover:bg-red-900/50 h-8 w-8 disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={() => handleRemoveTask(task.id)}
                       disabled={tasks.length <= 1}
                       aria-label="Remove task"
@@ -549,7 +549,7 @@ import React, {
                   variant="outline"
                   size="sm"
                   onClick={handleAddTask}
-                  className="mt-2 border-gray-600 text-black hover:bg-neutral-50"
+                  className="mt-2 border-gray-600 text-white hover:bg-neutral-50"
                 >
                   <Plus className="h-4 w-4 mr-2" /> Add Task Line
                 </Button>
@@ -560,7 +560,7 @@ import React, {
                 type="button"
                 variant="secondary"
                 onClick={onClose}
-                className="text-black bg-neutral-50 hover:bg-neutral-50"
+                className="text-white bg-neutral-50 hover:bg-neutral-50"
               >
                 Cancel
               </Button>
