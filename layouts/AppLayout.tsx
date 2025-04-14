@@ -71,7 +71,7 @@ export default function AppLayout({
           className="flex-1 flex justify-center"
           style={{
             // Shift nav based on whether the sidebars are open
-            marginLeft: showChatbar ? '230px' : '0px',
+            marginLeft: showChatbar ? '210px' : '0px',
             marginRight: showSidePromptbar ? '250px' : '0px',
             transition: 'margin 0.3s ease',
           }}
