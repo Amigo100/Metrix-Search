@@ -275,7 +275,7 @@ import React, {
       };
     }, [task.timerEnd, task.id, patientId, updateTaskTimerState, isTimerExpired, task.isTimerExpired]);
   
-    const taskStyle = isTimerExpired ? 'animate-flash text-red-400' : 'text-gray-300';
+    const taskStyle = isTimerExpired ? 'animate-flash text-red-400' : 'text-black';
     const checkboxId = `task-${task.id}`;
   
     return (
@@ -290,7 +290,7 @@ import React, {
         {task.timerEnd && (
           <span
             className={`text-xs font-mono ${
-              isTimerExpired ? 'text-red-400 font-semibold' : 'text-gray-400'
+              isTimerExpired ? 'text-red-400 font-semibold' : 'text-black'
             }`}
           >
             <Clock className="inline h-3 w-3 mr-1" />
@@ -339,11 +339,11 @@ import React, {
     return (
       <Card className={`mb-4 border-2 ${borderColor} ${bgColor} transition-colors duration-500`}>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-base font-medium text-gray-100">{patient.name}</CardTitle>
+          <CardTitle className="text-base font-medium text-white">{patient.name}</CardTitle>
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 text-gray-400 hover:text-red-500"
+            className="h-6 w-6 text-white hover:text-red-500"
             onClick={() => removePatient(patient.id)}
           >
             <X className="h-4 w-4" />
@@ -351,18 +351,18 @@ import React, {
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="text-xs text-gray-400 mb-2">
+          <div className="text-xs text-white mb-2">
             <Clock className="inline h-3 w-3 mr-1" />
             Length of Stay:{' '}
-            <span className="font-semibold text-gray-200">{lengthOfStayFormatted}</span>
-            <span className="ml-2 text-gray-500">
+            <span className="font-semibold text-white">{lengthOfStayFormatted}</span>
+            <span className="ml-2 text-white">
               (Arrival: {format(patient.arrivalTime, 'HH:mm')})
             </span>
           </div>
           <div className="mt-2 border-t border-gray-700 pt-2">
-            <h4 className="text-sm font-medium text-gray-300 mb-1">Tasks:</h4>
+            <h4 className="text-sm font-medium text-white mb-1">Tasks:</h4>
             {patient.tasks.length === 0 ? (
-              <p className="text-xs text-gray-500 italic">No tasks added.</p>
+              <p className="text-xs text-white italic">No tasks added.</p>
             ) : (
               patient.tasks.map((task) => (
                 <TaskItem
@@ -459,17 +459,17 @@ import React, {
   
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="bg-gray-800 text-gray-200 sm:max-w-[550px]">
+        <DialogContent className="bg-neutral-50 text-black sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>Add New Patient</DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogDescription className="text-black">
               Enter patient details, arrival time, and tasks.
             </DialogDescription>
             <DialogClose asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-100"
+                className="absolute top-4 right-4 text-black hover:text-black"
                 onClick={onClose}
               >
                 <X className="h-4 w-4" />
@@ -480,7 +480,7 @@ import React, {
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="patient-name" className="text-right text-gray-300">
+                <Label htmlFor="patient-name" className="text-right text-black">
                   Name/Title
                 </Label>
                 <Input
@@ -489,13 +489,13 @@ import React, {
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setPatientName(e.target.value)
                   }
-                  className="col-span-3 bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-500"
+                  className="col-span-3 bg-neutral-50 border-gray-600 text-black placeholder-black"
                   placeholder="e.g., Bed 5 / Mr. Smith"
                   required
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="arrival-time" className="text-right text-gray-300">
+                <Label htmlFor="arrival-time" className="text-right text-black">
                   Arrival Time
                 </Label>
                 <Input
@@ -503,12 +503,12 @@ import React, {
                   type="time"
                   value={arrivalTime}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setArrivalTime(e.target.value)}
-                  className="col-span-3 bg-gray-700 border-gray-600 text-gray-100"
+                  className="col-span-3 bg-neutral-50 border-gray-600 text-black"
                   required
                 />
               </div>
               <div className="col-span-4 mt-2">
-                <Label className="text-gray-300 mb-2 block font-medium">Tasks</Label>
+                <Label className="text-white mb-2 block font-medium">Tasks</Label>
                 {tasks.map((task, index) => (
                   <div key={task.id} className="flex items-center gap-2 mb-2">
                     <Input
@@ -518,7 +518,7 @@ import React, {
                       onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         handleTaskChange(task.id, 'text', e.target.value)
                       }
-                      className="flex-grow bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-500"
+                      className="flex-grow bg-neutral-50 border-gray-600 text-black placeholder-black"
                     />
                     <Input
                       type="number"
@@ -529,7 +529,7 @@ import React, {
                       onChange={(e: ChangeEvent<HTMLInputElement>) =>
                         handleTaskChange(task.id, 'timerMinutes', e.target.value)
                       }
-                      className="w-28 bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-28 bg-neutral-50 border-gray-600 text-black placeholder-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <Button
                       type="button"
@@ -549,7 +549,7 @@ import React, {
                   variant="outline"
                   size="sm"
                   onClick={handleAddTask}
-                  className="mt-2 border-gray-600 text-gray-300 hover:bg-gray-700"
+                  className="mt-2 border-gray-600 text-black hover:bg-neutral-50"
                 >
                   <Plus className="h-4 w-4 mr-2" /> Add Task Line
                 </Button>
@@ -560,11 +560,11 @@ import React, {
                 type="button"
                 variant="secondary"
                 onClick={onClose}
-                className="text-gray-300 bg-gray-600 hover:bg-gray-500"
+                className="text-black bg-neutral-50 hover:bg-neutral-50"
               >
                 Cancel
               </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button type="submit" className="bg-[#008080] hover:bg-[#008080] text-white">
                 Add Patient
               </Button>
             </DialogFooter>
@@ -685,19 +685,19 @@ import React, {
   
     return (
       <div
-        className={`flex flex-col h-full overflow-y-auto transition-all duration-300 bg-gray-800 border-l border-gray-700 ${sidebarWidth}`}
+        className={`flex flex-col h-full overflow-y-auto transition-all duration-300 bg-neutral-50 border-l border-gray-700 ${sidebarWidth}`}
       >
         {/* Only render content if open */}
         {showSidePromptbar && (
           <>
             {/* Sidebar Header */}
             <div className="flex justify-between items-center p-4 border-b border-gray-700 flex-shrink-0">
-              <h2 className="text-lg font-semibold text-gray-100">Patient Tracker</h2>
+              <h2 className="text-lg font-semibold text-black">Patient Tracker</h2>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsModalOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 border-blue-500 text-white"
+                className="bg-blue-600 hover: bg-[#008080] border-[#008080] text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Patient
