@@ -102,10 +102,10 @@ export const ConversationComponent = ({ conversation }: Props) => {
   return (
     <div className="relative flex items-center">
       {isRenaming && isSelected ? (
-        <div className="flex w-full items-center gap-3 rounded-lg bg-gray-700 p-3">
+        <div className="flex w-full items-center gap-3 rounded-lg bg-neutral-50 p-3">
           <IconMessage size={18} />
           <input
-            className="mr-12 flex-1 overflow-hidden overflow-ellipsis bg-transparent text-left text-[12.5px] leading-3 text-white outline-none"
+            className="mr-12 flex-1 overflow-hidden overflow-ellipsis bg-transparent text-left text-[12.5px] leading-3 text-black outline-none"
             type="text"
             value={renameValue}
             onChange={(e) => setRenameValue(e.target.value)}
@@ -117,8 +117,8 @@ export const ConversationComponent = ({ conversation }: Props) => {
         <button
           className={`
             flex w-full items-center gap-3 rounded-lg p-3 text-sm
-            text-white transition-colors duration-200
-            ${isSelected ? 'bg-gray-700' : 'hover:bg-gray-700'}
+            text-black transition-colors duration-200
+            ${isSelected ? 'bg-neutral-50' : 'hover:bg-gray-100'}
             ${messageIsStreaming ? 'disabled:cursor-not-allowed' : ''}
           `}
           onClick={() => handleSelectConversation(conversation)}
@@ -139,7 +139,7 @@ export const ConversationComponent = ({ conversation }: Props) => {
       )}
 
       {(isDeleting || isRenaming) && isSelected && (
-        <div className="absolute right-1 z-10 flex text-white">
+        <div className="absolute right-1 z-10 flex text-black">
           <SidebarActionButton handleClick={handleConfirm}>
             <IconCheck size={18} />
           </SidebarActionButton>
@@ -150,7 +150,7 @@ export const ConversationComponent = ({ conversation }: Props) => {
       )}
 
       {isSelected && !isDeleting && !isRenaming && (
-        <div className="absolute right-1 z-10 flex text-white">
+        <div className="absolute right-1 z-10 flex text-black">
           <SidebarActionButton handleClick={handleOpenRenameModal}>
             <IconPencil size={18} />
           </SidebarActionButton>
