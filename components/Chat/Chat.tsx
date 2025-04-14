@@ -439,7 +439,7 @@ ${doc}
         {/* Template dropdown */}
         <div className="relative">
           <button
-            className="flex items-center gap-1 rounded-md bg-[#008080] px-3 py-2
+            className="flex items-center gap-1 rounded-md bg-gray-200 px-3 py-2
                        text-sm font-semibold text-gray-700 hover:bg-gray-300"
             onClick={() => setShowTemplatesDropdown(!showTemplatesDropdown)}
           >
@@ -447,7 +447,7 @@ ${doc}
             <IconChevronDown size={16} />
           </button>
           {showTemplatesDropdown && (
-            <div className="absolute left-0 mt-2 w-[220px] rounded-md border border-gray-200
+            <div className="absolute left-0 mt-2 w-[220px] rounded-md border border-gray-300
                             bg-white p-2 shadow-lg z-50">
               {prompts.map((prompt: Prompt) => (
                 <button
@@ -468,7 +468,7 @@ ${doc}
         {/* Model dropdown */}
         <div className="relative">
           <button
-            className="flex items-center gap-1 rounded-md bg-[#008080] px-3 py-2
+            className="flex items-center gap-1 rounded-md bg-gray-300 px-3 py-2
                        text-sm font-semibold text-gray-700 hover:bg-gray-300"
             onClick={() => setShowModelsDropdown(!showModelsDropdown)}
           >
