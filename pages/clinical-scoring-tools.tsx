@@ -100,16 +100,7 @@ export default function ClinicalScoringToolsPage() {
   };
 
   return (
-    {/* 
-      Parent container ensures full width (w-full) 
-      and centers the content (items-center). 
-    */}
     <div className="w-full min-h-screen bg-white p-6 flex flex-col items-center">
-      {/* 
-        Inner container: w-full so it stretches across, 
-        but you can optionally set a max-w if you want 
-        some margins on very large screens.
-      */}
       <div className="w-full">
         <h1 className="text-3xl font-bold text-gray-800 text-center">
           Clinical Scoring Tools
@@ -223,7 +214,10 @@ export default function ClinicalScoringToolsPage() {
                       key={field.key}
                       className="flex flex-col sm:flex-row sm:items-center"
                     >
-                      <label htmlFor={field.key} className="sm:w-48 font-medium text-gray-800">
+                      <label
+                        htmlFor={field.key}
+                        className="sm:w-48 font-medium text-gray-800"
+                      >
                         {field.label}
                       </label>
                       <input
@@ -242,7 +236,10 @@ export default function ClinicalScoringToolsPage() {
                       key={field.key}
                       className="flex flex-col sm:flex-row sm:items-center"
                     >
-                      <label htmlFor={field.key} className="sm:w-48 font-medium text-gray-800">
+                      <label
+                        htmlFor={field.key}
+                        className="sm:w-48 font-medium text-gray-800"
+                      >
                         {field.label}
                       </label>
                       <select
