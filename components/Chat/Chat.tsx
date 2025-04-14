@@ -310,36 +310,50 @@ ${doc}
   if (modelError) {
     mainContent = <ErrorMessageDiv error={modelError} />;
   } else if (noTranscript) {
-    // Show initial dictation or consultation buttons
+    // Show initial dictation or consultation buttons, plus heading & explainer
     mainContent = (
-      <div className="flex flex-row items-center justify-evenly py-6 px-4 w-full h-full">
-        <div
-          className="w-[45%] flex flex-col items-center justify-center border rounded-lg p-36 shadow"
-          style={{
-            backgroundImage: "url('/VoiceMode.png')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          <ChatTextToSpeech
-            onSend={(msg) => {
-              handleTranscriptReceived(msg.content);
-            }}
-          />
+      <div className="px-4 py-6 w-full h-full flex flex-col">
+        {/* New heading & explainer text */}
+        <div className="mb-4">
+          <h1 className="text-xl font-bold text-center">Metrix AI Clinical Scribe</h1>
+          <p className="text-center text-gray-600 mt-2">
+            Use the clinical scribe to record speech or consultations. 
+            Select a template from the options above and produce a 
+            professional clinical document with associated recommendations. 
+            You can then download or copy it into the patient's EHR.
+          </p>
         </div>
-        <div
-          className="w-[45%] flex flex-col items-center justify-center border rounded-lg p-36 shadow"
-          style={{
-            backgroundImage: "url('/StartOfficeVisit.png')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          <ChatStartOfficeVisit
-            onSend={(msg) => {
-              handleTranscriptReceived(msg.content);
+
+        {/* The two main buttons */}
+        <div className="flex flex-row items-center justify-evenly flex-1">
+          <div
+            className="w-[45%] flex flex-col items-center justify-center border rounded-lg p-36 shadow"
+            style={{
+              backgroundImage: "url('/VoiceMode.png')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
             }}
-          />
+          >
+            <ChatTextToSpeech
+              onSend={(msg) => {
+                handleTranscriptReceived(msg.content);
+              }}
+            />
+          </div>
+          <div
+            className="w-[45%] flex flex-col items-center justify-center border rounded-lg p-36 shadow"
+            style={{
+              backgroundImage: "url('/StartOfficeVisit.png')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
+            <ChatStartOfficeVisit
+              onSend={(msg) => {
+                handleTranscriptReceived(msg.content);
+              }}
+            />
+          </div>
         </div>
       </div>
     );
