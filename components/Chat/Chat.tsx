@@ -529,20 +529,25 @@ ${doc}
         <div ref={messagesEndRef} className="h-1" />
       </div>
 
-      {/* Bottom ChatInput => includes "Regenerate" button */}
-      <div className="px-2 pb-2">
-        <ChatInput
-          stopConversationRef={stopConversationRef}
-          textareaRef={null as any}
-          onSend={(msg) => {
-            // user typed something => treat as new transcript
-            setTranscript(msg.content);
-            handleCreateDocFromTranscript(msg.content);
-          }}
-          onRegenerate={() => handleRegenerate()}
-          onScrollDownClick={scrollToBottom}
-          showScrollDownButton={false}
-        />
+      {/* 
+        BOTTOM BAR — updated to match the style from diagnostic-assistance.tsx.
+        We keep the ChatInput functionality but apply the same 'sticky' & border layout.
+      */}
+      <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3">
+        <div className="w-full max-w-4xl mx-auto flex items-center space-x-3">
+          <ChatInput
+            stopConversationRef={stopConversationRef}
+            textareaRef={null as any}
+            onSend={(msg) => {
+              // user typed something => treat as new transcript
+              setTranscript(msg.content);
+              handleCreateDocFromTranscript(msg.content);
+            }}
+            onRegenerate={() => handleRegenerate()}
+            onScrollDownClick={scrollToBottom}
+            showScrollDownButton={false}
+          />
+        </div>
       </div>
 
       {/* Modals */}
