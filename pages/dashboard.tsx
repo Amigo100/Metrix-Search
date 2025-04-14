@@ -28,12 +28,6 @@ const features = [
     href: '/diagnostic-assistance',
     bgImage: '/images/diagnostic-assistance.png',
   },
-  {
-    title: 'Guidelines Search',
-    description: 'Semantic search through local policies/guidelines.',
-    href: '/guidelines-search',
-    bgImage: '/images/guidelines-search.png',
-  },
 ];
 
 export default function DashboardPage() {
@@ -69,7 +63,7 @@ export default function DashboardPage() {
           <Link
             key={feature.title}
             href={feature.href}
-            className="relative flex items-end overflow-hidden 
+            className="relative flex items-end h-64 overflow-hidden 
                        group cursor-pointer focus:outline-none 
                        hover:shadow-xl transition rounded-lg"
           >
