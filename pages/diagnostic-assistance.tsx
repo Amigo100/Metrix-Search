@@ -199,7 +199,7 @@ function DiagnosticAssistancePage() {
 
         <div
           className={`rounded-2xl p-3 mt-1 text-sm ${
-            isUser ? 'bg-blue-100' : 'bg-gray-100'
+            isUser ? 'bg-[#008080]' : 'bg-[#008080]'
           } text-black max-w-[90%]`}
           style={{ whiteSpace: 'normal' }}
         >
@@ -414,8 +414,8 @@ function DiagnosticAssistancePage() {
             disabled={messageIsStreaming}
             className={`px-4 py-2 rounded-full text-white font-medium transition-colors ${
               messageIsStreaming
-                ? 'bg-blue-300 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700'
+                ? 'bg-[#008080] cursor-not-allowed'
+                : 'bg-[#008080] hover:bg-[#008080]'
             }`}
           >
             {messageIsStreaming ? 'Sending...' : 'Send'}
