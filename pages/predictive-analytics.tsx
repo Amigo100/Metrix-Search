@@ -83,7 +83,7 @@ const Button: React.FC<ButtonProps> = ({
   const sizeClasses = size === 'sm' ? 'h-9 px-3' : 'h-10 px-4 py-2';
   const variants = {
     default:
-      'bg-blue-700 text-white hover:bg-blue-800/90 shadow-sm hover:shadow-md ring-offset-slate-50',
+      'bg-[#008080] text-white hover:bg-blue-800/90 shadow-sm hover:shadow-md ring-offset-slate-50',
     outline:
       'border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 ring-offset-slate-50',
   };
