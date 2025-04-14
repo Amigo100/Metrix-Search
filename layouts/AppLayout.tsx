@@ -24,15 +24,15 @@ interface AppLayoutProps {
 
 export default function AppLayout({
   children,
-  logoSize = 128, // default to 128px
+  logoSize = 128, // default 128px
 }: AppLayoutProps) {
   const { state, dispatch } = useContext(HomeContext);
-  const { openModal, showSidePromptbar } = state;
+  const { openModal, showSidePromptbar, showChatbar } = state;
 
-  // Keep header height at 80px (example)
+  // Keep header height at 80px, for example
   const headerHeight = '80px';
 
-  // A toggle function for the right prompt bar
+  // Toggle function for the right prompt bar
   const handleTogglePromptbar = () => {
     dispatch({
       type: 'change',
@@ -46,7 +46,9 @@ export default function AppLayout({
     <div className="w-full h-screen flex flex-col bg-white dark:bg-[#343541] text-black dark:text-black">
       {/* Header */}
       <header
-        className="sticky top-0 z-30 bg-neutral-50 text-black px-4 shadow flex items-center justify-between overflow-hidden"
+        className="sticky top-0 z-30 bg-neutral-50 text-black px-4 
+                   shadow-md border-b border-gray-200 
+                   flex items-center justify-between overflow-hidden"
         style={{ height: headerHeight, minHeight: headerHeight }}
       >
         {/* Branding */}
@@ -67,8 +69,10 @@ export default function AppLayout({
         <div
           className="flex-1 flex justify-center"
           style={{
+            // Shift nav based on whether the sidebars are open
+            marginLeft: showChatbar ? '250px' : '0px',
             marginRight: showSidePromptbar ? '250px' : '0px',
-            transition: 'margin-right 0.3s ease',
+            transition: 'margin 0.3s ease',
           }}
         >
           <nav className="flex items-center" style={{ gap: '2rem' }}>
