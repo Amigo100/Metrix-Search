@@ -29,7 +29,7 @@ export default function AppLayout({
   const { state, dispatch } = useContext(HomeContext);
   const { openModal, showSidePromptbar } = state;
 
-  // Keep header height at 80px (example).
+  // Keep header height at 80px (example)
   const headerHeight = '80px';
 
   // A toggle function for the right prompt bar
@@ -55,8 +55,8 @@ export default function AppLayout({
             src="/MetrixAI.png"
             alt="Metrix AI Logo"
             style={{
-              width: `${logoSize}px`,
-              height: `${logoSize}px`,
+              width: `${logoSize * 0.7}px`,  // Reduced by 30%
+              height: `${logoSize * 0.7}px`, // Reduced by 30%
               objectFit: 'contain',
             }}
           />
@@ -64,7 +64,13 @@ export default function AppLayout({
         </div>
 
         {/* Centered Navigation */}
-        <div className="flex-1 flex justify-center">
+        <div
+          className="flex-1 flex justify-center"
+          style={{
+            marginRight: showSidePromptbar ? '250px' : '0px',
+            transition: 'margin-right 0.3s ease',
+          }}
+        >
           <nav className="flex items-center" style={{ gap: '2rem' }}>
             <Link href="/dashboard" className="text-base hover:underline">
               Dashboard
@@ -84,7 +90,7 @@ export default function AppLayout({
           </nav>
         </div>
 
-        {/* Example: Toggle Right Promptbar Button */}
+        {/* Toggle Right Promptbar Button */}
         <div className="flex-none">
           {showSidePromptbar ? (
             <CloseSidebarButton side="right" onClick={handleTogglePromptbar} />
