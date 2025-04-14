@@ -42,7 +42,7 @@ export default function DashboardPage() {
       {/* 1. Welcome Message */}
       <div className="bg-white rounded-lg shadow p-4">
         <h1 className="text-2xl font-bold text-brand-dark">
-          Welcome to ClinSync!
+          Welcome to Metrix!
         </h1>
         <p className="mt-2 text-gray-600">
           Your one-stop platform for streamlined clinical documentation,
