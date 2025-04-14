@@ -439,7 +439,7 @@ ${doc}
         {/* Template dropdown */}
         <div className="relative">
           <button
-            className="flex items-center gap-1 rounded-md bg-gray-200 px-3 py-2
+            className="flex items-center gap-1 rounded-md bg-[#008080] px-3 py-2
                        text-sm font-semibold text-gray-700 hover:bg-gray-300"
             onClick={() => setShowTemplatesDropdown(!showTemplatesDropdown)}
           >
@@ -468,7 +468,7 @@ ${doc}
         {/* Model dropdown */}
         <div className="relative">
           <button
-            className="flex items-center gap-1 rounded-md bg-gray-200 px-3 py-2
+            className="flex items-center gap-1 rounded-md bg-[#008080] px-3 py-2
                        text-sm font-semibold text-gray-700 hover:bg-gray-300"
             onClick={() => setShowModelsDropdown(!showModelsDropdown)}
           >
