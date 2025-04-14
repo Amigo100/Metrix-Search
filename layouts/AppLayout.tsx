@@ -24,7 +24,7 @@ interface AppLayoutProps {
 
 export default function AppLayout({
   children,
-  logoSize = 128, // default 128px
+  logoSize = 100, // default 128px
 }: AppLayoutProps) {
   const { state, dispatch } = useContext(HomeContext);
   const { openModal, showSidePromptbar, showChatbar } = state;
@@ -57,8 +57,8 @@ export default function AppLayout({
             src="/MetrixAI.png"
             alt="Metrix AI Logo"
             style={{
-              width: `${logoSize * 0.7}px`,  // Reduced by 30%
-              height: `${logoSize * 0.7}px`, // Reduced by 30%
+              width: `${logoSize * 0.5}px`,  // Reduced by 30%
+              height: `${logoSize * 0.5}px`, // Reduced by 30%
               objectFit: 'contain',
             }}
           />
@@ -71,7 +71,7 @@ export default function AppLayout({
           className="flex-1 flex justify-center"
           style={{
             // Shift nav based on whether the sidebars are open
-            marginLeft: showChatbar ? '250px' : '0px',
+            marginLeft: showChatbar ? '230px' : '0px',
             marginRight: showSidePromptbar ? '250px' : '0px',
             transition: 'margin 0.3s ease',
           }}
