@@ -85,7 +85,7 @@ const Sidebar = <T,>({
                   className={`
                     flex w-[190px] flex-shrink-0 cursor-pointer items-center gap-3
                     rounded-md border border-gray-200 p-3 text-black
-                    transition-colors duration-200 hover:bg-neutral-50
+                    transition-colors duration-200 hover:bg-gray-100
                   `}
                   onClick={() => {
                     handleCreateItem();
@@ -101,7 +101,7 @@ const Sidebar = <T,>({
                   className={`
                     ml-2 flex flex-shrink-0 cursor-pointer items-center gap-3
                     rounded-md border border-gray-200 p-3 text-sm text-black
-                    transition-colors duration-200 hover:bg-neutral-50
+                    transition-colors duration-200 hover:bg-gray-100
                   `}
                   onClick={handleCreateFolder}
                 >
