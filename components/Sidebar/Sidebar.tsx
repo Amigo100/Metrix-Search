@@ -68,7 +68,7 @@ const Sidebar = <T,>({
         // Merge default classes with optional className
         className={`
           fixed top-0 ${side}-0 z-40 flex h-full w-[260px] flex-col space-y-2
-          bg-gray-900 text-white p-2 text-[14px] transition-all
+          bg-neutral-50 text-black p-2 text-[14px] transition-all
           sm:relative sm:top-0
           ${className ?? ''}
         `}
@@ -84,8 +84,8 @@ const Sidebar = <T,>({
                 <button
                   className={`
                     flex w-[190px] flex-shrink-0 cursor-pointer items-center gap-3
-                    rounded-md border border-white/20 p-3 text-white
-                    transition-colors duration-200 hover:bg-gray-700
+                    rounded-md border border-white/20 p-3 text-black
+                    transition-colors duration-200 hover:bg-neutral-50
                   `}
                   onClick={() => {
                     handleCreateItem();
@@ -100,8 +100,8 @@ const Sidebar = <T,>({
                 <button
                   className={`
                     ml-2 flex flex-shrink-0 cursor-pointer items-center gap-3
-                    rounded-md border border-white/20 p-3 text-sm text-white
-                    transition-colors duration-200 hover:bg-gray-700
+                    rounded-md border border-white/20 p-3 text-sm text-black
+                    transition-colors duration-200 hover:bg-neutral-50
                   `}
                   onClick={handleCreateFolder}
                 >
