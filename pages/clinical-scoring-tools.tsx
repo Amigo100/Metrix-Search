@@ -89,9 +89,9 @@ export default function ClinicalScoringToolsPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 p-6">
+    <div className="w-full min-h-screen bg-white p-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">Clinical Scoring Tools</h1>
+        <h1 className="text-3xl font-bold text-gray-800 center">Clinical Scoring Tools</h1>
         <p className="text-gray-600 mb-6 max-w-3xl">
           Search or select from many clinical calculators grouped by category. You can also filter by calculator type to find the relevant tool.
         </p>
