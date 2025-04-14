@@ -13,8 +13,8 @@ export const SidebarButton: FC<Props> = ({ text, icon, onClick, featured }) => {
       className={`
         flex w-full items-center gap-3 rounded-md py-3 px-3 text-[14px]
         leading-3 transition-colors duration-200
-        text-white
-        hover:bg-gray-700
+        text-black
+        hover:bg-neutral-50
         ${featured ? 'font-semibold' : ''}
       `}
       onClick={onClick}
