@@ -24,10 +24,10 @@ const Search: FC<Props> = ({ placeholder, searchTerm, onSearch }) => {
       <input
         className="
           w-full rounded-md border border-white/20 
-          bg-gray-900 
+          bg-neutral-50 
           py-2 px-4 pr-10
-          text-sm text-white
-          placeholder-gray-400 
+          text-sm text-black
+          placeholder-black 
           focus:outline-none
         "
         type="text"
@@ -37,7 +37,7 @@ const Search: FC<Props> = ({ placeholder, searchTerm, onSearch }) => {
       />
       {searchTerm && (
         <IconX
-          className="absolute right-3 cursor-pointer text-white hover:text-gray-300"
+          className="absolute right-3 cursor-pointer text-black hover:text-black"
           size={18}
           onClick={clearSearch}
         />
