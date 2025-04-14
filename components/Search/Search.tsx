@@ -24,7 +24,7 @@ const Search: FC<Props> = ({ placeholder, searchTerm, onSearch }) => {
       <input
         className="
           w-full rounded-md border border-white/20 
-          bg-neutral-50 
+          bg-white 
           py-2 px-4 pr-10
           text-sm text-black
           placeholder-black 
