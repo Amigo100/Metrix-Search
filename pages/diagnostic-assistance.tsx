@@ -254,15 +254,18 @@ function DiagnosticAssistancePage() {
     window.speechSynthesis.speak(utterance);
   }
 
-  // Brand header (for Stage 1 & 2)
+  // This brand header is used for Stage 1 & 2
   function renderBrandHeader() {
+    // 30% smaller means from w-40/h-40 to w-28/h-28
+    const logoSize = stage === 1 ? 'w-28 h-28' : 'w-40 h-40';
+
     return (
       <header className="flex flex-col items-center justify-center text-center">
         <div className="flex items-center justify-center">
           <img
             src="/MetrixAI.png"
             alt="Metrix AI Logo"
-            className="w-70 h-70 object-cover mr-3"
+            className={`${logoSize} object-cover mr-3`}
           />
           <div className="uppercase font-semibold tracking-wide text-lg text-black" />
         </div>
@@ -425,7 +428,7 @@ function DiagnosticAssistancePage() {
       {/* 
         Bottom bar: includes 
         1) text input + send (left side)
-        2) Copy & Clear chat (right side) => ONLY if stage === 3
+        2) Copy & Clear chat (right side) => only for stage 3
       */}
       <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3">
         <div className="w-full max-w-5xl mx-auto flex items-center justify-between">
