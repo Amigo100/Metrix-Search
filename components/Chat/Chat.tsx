@@ -68,9 +68,9 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   } = useContext(HomeContext);
 
   // MAIN local states:
-  const [transcript, setTranscript] = useState('');       // The raw user transcript
-  const [clinicalDoc, setClinicalDoc] = useState('');     // The markdown doc
-  const [analysis, setAnalysis] = useState('');           // The doc comparison output
+  const [transcript, setTranscript] = useState(''); // The raw user transcript
+  const [clinicalDoc, setClinicalDoc] = useState(''); // The markdown doc
+  const [analysis, setAnalysis] = useState(''); // The doc comparison output
 
   const [isEditingDoc, setIsEditingDoc] = useState(false);
   const [editDocText, setEditDocText] = useState('');
@@ -530,25 +530,21 @@ ${doc}
       </div>
 
       {/* 
-        BOTTOM BAR — updated to match the style from diagnostic-assistance.tsx.
-        We keep the ChatInput functionality but apply the same 'sticky' & border layout.
+        INSTEAD OF WRAPPING ChatInput IN ANOTHER STICKY CONTAINER,
+        WE RELY ON ChatInput's OWN STYLING FOR THE BOTTOM BAR
       */}
-      <div className="sticky bottom-0 bg-white border-t border-gray-400 px-4 py-3">
-        <div className="w-full max-w-4xl mx-auto flex items-center space-x-3">
-          <ChatInput
-            stopConversationRef={stopConversationRef}
-            textareaRef={null as any}
-            onSend={(msg) => {
-              // user typed something => treat as new transcript
-              setTranscript(msg.content);
-              handleCreateDocFromTranscript(msg.content);
-            }}
-            onRegenerate={() => handleRegenerate()}
-            onScrollDownClick={scrollToBottom}
-            showScrollDownButton={false}
-          />
-        </div>
-      </div>
+      <ChatInput
+        stopConversationRef={stopConversationRef}
+        textareaRef={null as any}
+        onSend={(msg) => {
+          // user typed something => treat it as a new transcript
+          setTranscript(msg.content);
+          handleCreateDocFromTranscript(msg.content);
+        }}
+        onRegenerate={() => handleRegenerate()}
+        onScrollDownClick={scrollToBottom}
+        showScrollDownButton={false}
+      />
 
       {/* Modals */}
       {openModal === 'profile' && <ProfileModal />}
