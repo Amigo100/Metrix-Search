@@ -37,11 +37,6 @@ export default function DashboardPage() {
       <div className="bg-white rounded-lg shadow p-4">
         <h1 className="text-2xl font-bold text-brand-dark">
           Welcome to Metrix!
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Your one-stop platform for streamlined clinical documentation,
-          scoring tools, diagnostic assistance, and more.
-        </p>
       </div>
 
       {/* 2. Recent Activity Log */}
