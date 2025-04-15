@@ -68,7 +68,7 @@ const Sidebar = <T,>({
         // Merge default classes with optional className
         className={`
           fixed top-0 ${side}-0 z-40 flex h-full w-[260px] flex-col space-y-2
-          bg-neutral-50 border border-gray-200 text-black p-2 text-[14px] transition-all
+          bg-neutral-50 shadow-md border border-gray-200 text-black p-2 text-[14px] transition-all
           sm:relative sm:top-0
           ${className ?? ''}
         `}
