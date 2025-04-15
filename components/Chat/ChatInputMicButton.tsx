@@ -184,7 +184,7 @@ export const ChatInputMicButton = ({ onSend, messageIsStreaming }: Props) => {
       onClick={recording ? handleStopRecording : handleStartRecording}
       disabled={messageIsStreaming}
     >
-      <IconMicrophone size={24} />
+      <IconMicrophone size={36} />
     </button>
   );
 };
