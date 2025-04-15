@@ -482,7 +482,7 @@ ${doc}
         {/* Model dropdown */}
         <div className="relative">
           <button
-            className="flex items-center gap-1 rounded-md bg-neutral-50 px-3 py-2
+            className="flex items-center gap-1 rounded-md border border-gray-400 bg-neutral-50 px-3 py-2
                        text-sm font-semibold text-gray-700 hover:bg-gray-100"
             onClick={() => setShowModelsDropdown(!showModelsDropdown)}
           >
