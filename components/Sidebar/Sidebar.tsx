@@ -120,7 +120,7 @@ const Sidebar = <T,>({
 
             <div className="flex-grow overflow-auto">
               {items && items.length > 0 && folderComponent && (
-                <div className="flex border-b border-gray-200 pb-2">
+                <div className="flex border-b border-gray-400 pb-2">
                   {folderComponent}
                 </div>
               )}
