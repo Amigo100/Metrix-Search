@@ -26,7 +26,7 @@ function DiagnosticAssistancePage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'system',
-      content: "Hello! I'm your Metrix AI assistant. Ask questions below.",
+      content: "Hello! I'm your Metrix AI Assistant. Ask questions below.",
     },
   ]);
   const [messageIsStreaming, setMessageIsStreaming] = useState<boolean>(false);
@@ -199,7 +199,7 @@ function DiagnosticAssistancePage() {
 
         <div
           className={`rounded-2xl p-3 mt-1 text-sm ${
-            isUser ? 'bg-[#008080]' : 'bg-[#008080]'
+            isUser ? 'bg-white' : 'bg-white'
           } text-black max-w-[90%]`}
           style={{ whiteSpace: 'normal' }}
         >
