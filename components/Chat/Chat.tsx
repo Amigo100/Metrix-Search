@@ -327,7 +327,7 @@ ${doc}
         {/* The two main buttons */}
         <div className="flex flex-row items-center justify-evenly flex-1">
           <div
-            className="w-[45%] flex flex-col items-center justify-center border rounded-lg p-36 shadow"
+            className="w-[45%] flex flex-col items-center justify-center border-gray-400 rounded-lg p-36 shadow"
             style={{
               backgroundImage: "url('/VoiceMode.png')",
               backgroundSize: 'cover',
@@ -341,7 +341,7 @@ ${doc}
             />
           </div>
           <div
-            className="w-[45%] flex flex-col items-center justify-center border rounded-lg p-36 shadow"
+            className="w-[45%] flex flex-col items-center justify-center border-gray-400 rounded-lg p-36 shadow"
             style={{
               backgroundImage: "url('/StartOfficeVisit.png')",
               backgroundSize: 'cover',
@@ -449,11 +449,11 @@ ${doc}
   return (
     <div className="flex flex-col w-full h-full bg-white dark:bg-[#343541] text-black dark:text-white">
       {/* Top bar => template & model */}
-      <div className="border-b border-gray-400 dark:border-gray-400 px-4 py-2 flex items-center gap-4">
+      <div className="border-b border-white dark:border-gray-400 px-4 py-2 flex items-center gap-4">
         {/* Template dropdown */}
         <div className="relative">
           <button
-            className="flex items-center gap-1 rounded-md bg-neutral-50 px-3 py-2
+            className="flex items-center gap-1 rounded-md border border-gray-400 bg-neutral-50 px-3 py-2
                        text-sm font-semibold text-gray-700 hover:bg-gray-100"
             onClick={() => setShowTemplatesDropdown(!showTemplatesDropdown)}
           >
