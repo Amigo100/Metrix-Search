@@ -414,13 +414,6 @@ export const ChatInput = ({
               ) : (
                 <IconSend size={24} />
               )}
-            </button>
-
-            {/* Mic button (speech to text) */}
-            <ChatInputMicButton
-              onSend={onSend}
-              messageIsStreaming={messageIsStreaming}
-            />
           </div>
 
           {/* Bottom row: optional scroll-down button */}
