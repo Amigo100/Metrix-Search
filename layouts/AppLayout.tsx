@@ -47,7 +47,7 @@ export default function AppLayout({
       {/* Header */}
       <header
         className="sticky top-0 z-30 bg-neutral-50 text-black px-4 
-                   shadow-md border-b border-gray-200 
+                   shadow-md border-b border-gray-400 
                    flex items-center justify-between overflow-hidden"
         style={{ height: headerHeight, minHeight: headerHeight }}
       >
