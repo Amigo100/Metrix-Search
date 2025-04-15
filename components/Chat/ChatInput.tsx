@@ -414,6 +414,7 @@ export const ChatInput = ({
               ) : (
                 <IconSend size={24} />
               )}
+            </button>
           </div>
 
           {/* Bottom row: optional scroll-down button */}
