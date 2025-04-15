@@ -487,11 +487,11 @@ const TaskItem: React.FC<TaskItemProps> = ({
     timerTextStyle += ' text-red-600';
   } else if (task.timerEnd) {
     // Previously used black; changed to white for visibility
-    taskTextStyle += ' text-white';
-    timerTextStyle += ' text-white';
+    taskTextStyle += ' text-black';
+    timerTextStyle += ' text-black';
   } else {
     // no timer, but still on a dark background => use white
-    taskTextStyle += ' text-white';
+    taskTextStyle += ' text-black';
     timerTextStyle += ' text-gray-200';
   }
 
@@ -767,33 +767,33 @@ const PatientCard: React.FC<PatientCardProps> = ({
   return (
     <Card className={`mb-4 border-2 ${borderColor} ${bgColor} transition-colors duration-500`}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base font-medium text-white">{patient.name}</CardTitle>
+        <CardTitle className="text-base font-medium text-black">{patient.name}</CardTitle>
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 text-white hover:text-red-500"
+          className="h-6 w-6 text-black hover:text-red-500"
           onClick={() => removePatient(patient.id)}
         >
           <X className="h-4 w-4" />
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="text-xs text-white mb-2">
+        <div className="text-xs text-black mb-2">
           <Clock className="inline h-3 w-3 mr-1" />
-          Length of Stay: <span className="font-semibold text-white">{lengthOfStayFormatted}</span>
-          <span className="ml-2 text-white">
+          Length of Stay: <span className="font-semibold text-black">{lengthOfStayFormatted}</span>
+          <span className="ml-2 text-black">
             (Arrival: {format(patient.arrivalTime, 'HH:mm')})
           </span>
         </div>
 
         {/* Patient notes */}
         <div className="mb-2 flex items-center justify-between">
-          <div className="text-xs text-white font-medium flex items-center">
+          <div className="text-xs text-black font-medium flex items-center">
             Notes:
             <Button
               variant="ghost"
               size="icon"
-              className={`h-6 w-6 ml-1 ${patient.notes ? 'text-blue-400' : 'text-white'}`}
+              className={`h-6 w-6 ml-1 ${patient.notes ? 'text-blue-400' : 'text-black'}`}
               onClick={() => setIsEditingPatientNotes((prev) => !prev)}
               title={patient.notes ? 'Edit/View Notes' : 'Add Notes'}
             >
@@ -833,16 +833,16 @@ const PatientCard: React.FC<PatientCardProps> = ({
           </div>
         )}
         {!isEditingPatientNotes && patient.notes && (
-          <div className="mb-2 text-xs text-white italic break-words">
+          <div className="mb-2 text-xs text-black italic break-words">
             Note: {patient.notes}
           </div>
         )}
 
         {/* Pending tasks */}
         <div className="mt-2 border-t border-gray-700 pt-2">
-          <h4 className="text-sm font-medium text-white mb-1">Pending Tasks:</h4>
+          <h4 className="text-sm font-medium text-black mb-1">Pending Tasks:</h4>
           {pendingTasks.length === 0 ? (
-            <p className="text-xs text-white italic">No pending tasks.</p>
+            <p className="text-xs text-black italic">No pending tasks.</p>
           ) : (
             pendingTasks.map((task) => (
               <TaskItem
@@ -864,7 +864,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
         {/* Completed tasks */}
         {completedTasks.length > 0 && (
           <div className="mt-2 border-t border-gray-700/50 pt-2">
-            <h4 className="text-sm font-medium text-white mb-1">Completed Tasks:</h4>
+            <h4 className="text-sm font-medium text-black mb-1">Completed Tasks:</h4>
             {completedTasks.map((task) => (
               <TaskItem
                 key={task.id}
@@ -907,7 +907,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
               type="submit"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-white hover:bg-[#008080]/50"
+              className="h-8 w-8 text-black hover:bg-gray-100"
               disabled={newTaskText.trim() === ''}
               title="Add Task"
             >
@@ -1122,11 +1122,11 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
               type="button"
               variant="secondary"
               onClick={onClose}
-              className="text-black bg-neutral-50 hover:bg-neutral-50"
+              className="text-black bg-neutral-50 hover:bg-gray-100"
             >
               Cancel
             </Button>
-            <Button type="submit" className="bg-[#008080] hover:bg-[#008080] text-white">
+            <Button type="submit" className="bg-[#008080] hover:bg-[#008080] text-black">
               Add Patient
             </Button>
           </DialogFooter>
@@ -1392,7 +1392,7 @@ const Tasks: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={() => setIsModalOpen(true)}
-              className="bg-[#008080] hover:bg-[#008080] border-[#008080] text-white"
+              className="bg-[#008080] hover:bg-[#008080] border-[#008080] text-black"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Patient
