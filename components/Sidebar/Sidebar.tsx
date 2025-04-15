@@ -84,7 +84,7 @@ const Sidebar = <T,>({
                 <button
                   className={`
                     flex w-[190px] flex-shrink-0 cursor-pointer items-center gap-3
-                    rounded-md border border-gray-200 p-3 text-black
+                    rounded-md border border-gray-400 p-3 text-black
                     transition-colors duration-200 hover:bg-gray-100
                   `}
                   onClick={() => {
