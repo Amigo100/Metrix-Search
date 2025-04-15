@@ -78,7 +78,7 @@ export default function AppLayout({
         >
           <nav className="flex items-center" style={{ gap: '2rem' }}>
             <Link href="/dashboard" className="text-base hover:underline">
-              Dashboard
+              Home
             </Link>
             <Link href="/clinical-scribe" className="text-base hover:underline">
               AI Scribe
