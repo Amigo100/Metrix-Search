@@ -225,13 +225,13 @@ function DiagnosticAssistancePage() {
           <div className="mt-2 flex space-x-2 text-xs">
             <button
               onClick={onRegenerate}
-              className="px-3 py-1 bg-gray-300 text-black rounded-full hover:bg-gray-400"
+              className="px-4 py-2 bg-gray-300 text-black rounded-full hover:bg-gray-400"
             >
               Regenerate
             </button>
             <button
               onClick={handleEditLastUserInput}
-              className="px-3 py-1 bg-gray-300 text-black rounded-full hover:bg-gray-400"
+              className="px-4 py-2 bg-gray-300 text-black rounded-full hover:bg-gray-400"
             >
               Edit
             </button>
