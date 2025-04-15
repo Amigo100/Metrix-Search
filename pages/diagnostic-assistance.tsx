@@ -1,5 +1,3 @@
-// /pages/diagnostic-assistance.tsx
-
 import React, { useState } from 'react';
 import { marked } from 'marked';
 
@@ -47,10 +45,7 @@ function DiagnosticAssistancePage() {
     const trimmed = text.trim();
     if (!trimmed) return;
 
-    const newHistory = [
-      ...messages,
-      { role: 'user' as const, content: trimmed },
-    ];
+    const newHistory = [...messages, { role: 'user' as const, content: trimmed }];
     setMessages(newHistory);
     setUserInput('');
 
@@ -248,17 +243,38 @@ function DiagnosticAssistancePage() {
             alt="Metrix AI Logo"
             className="w-40 h-40 object-cover mr-3"
           />
-          <div className="uppercase font-semibold tracking-wide text-lg text-black"></div>
+          <div className="uppercase font-semibold tracking-wide text-lg text-black" />
         </div>
-        <div className="mt-1 text-base text-black font-normal"></div>
+        <div className="mt-1 text-base text-black font-normal" />
       </header>
     );
   }
 
-  function renderDisclaimer() {
+  // New wrapper to center disclaimers only on first screen
+  function renderDisclaimer(centered = false) {
     return (
-      <div className="mt-6 mb-4 max-w-2xl text-left text-sm text-gray-600 leading-5">
+      <div
+        className={`mt-6 mb-4 max-w-2xl ${
+          centered ? 'text-center' : 'text-left'
+        } text-sm text-gray-600 leading-5`}
+      >
         {DISCLAIMER_TEXT}
+      </div>
+    );
+  }
+
+  // Chat header with centered “Metrix AI” plus logo
+  function renderChatHeader() {
+    return (
+      <div className="flex flex-col items-center justify-center mb-6">
+        <div className="flex items-center justify-center">
+          <img
+            src="/MetrixAI.png"
+            alt="Metrix AI Logo"
+            className="w-10 h-10 object-cover mr-2"
+          />
+          <h2 className="text-2xl font-bold">Metrix AI Chat</h2>
+        </div>
       </div>
     );
   }
@@ -320,7 +336,8 @@ function DiagnosticAssistancePage() {
           </button>
         </div>
 
-        {renderDisclaimer()}
+        {/* Centered disclaimer on the first screen */}
+        {renderDisclaimer(true)}
       </div>
     );
   }
@@ -355,7 +372,8 @@ function DiagnosticAssistancePage() {
           </div>
         </div>
 
-        {renderDisclaimer()}
+        {/* Disclaimer here remains left-aligned */}
+        {renderDisclaimer(false)}
       </div>
     );
   }
@@ -363,8 +381,10 @@ function DiagnosticAssistancePage() {
   function renderChatScreen() {
     return (
       <div className="flex flex-col min-h-full pt-16 pb-24 px-4">
+        {/* New centered header with logo */}
+        {renderChatHeader()}
+
         <div className="w-full mx-auto">
-          <h2 className="text-2xl font-bold mb-4">Metrix AI Chat</h2>
           <div className="w-full min-h-[50vh] max-h-[70vh] overflow-y-auto p-4 bg-gray-50 border border-gray-200 rounded">
             {messages.map((msg, i) => renderMessageBubble(msg, i))}
           </div>
