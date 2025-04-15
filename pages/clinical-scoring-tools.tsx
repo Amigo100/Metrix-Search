@@ -1,5 +1,3 @@
-// /pages/clinical-scoring-tools.tsx
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
 
@@ -31,6 +29,13 @@ const calcTypeOptions = [
   'Treatment',
   'Drug Conversion',
 ];
+
+// Optionally, you can place your more detailed disclaimers here if desired
+const DISCLAIMER_TEXT = `
+Our Metrix AI platform enhances clinicians' decision-making processes.
+It provides a range of risk and scoring tools, but these are not designed
+for automated diagnoses or to replace clinical judgment in any capacity.
+`;
 
 export default function ClinicalScoringToolsPage() {
   const [inputValue, setInputValue] = useState('');
@@ -101,15 +106,37 @@ export default function ClinicalScoringToolsPage() {
 
   return (
     <div className="w-full min-h-screen bg-white p-6 flex flex-col items-center">
-      <div className="w-full">
-        <h1 className="text-3xl font-bold text-gray-800 text-center">
-          Clinical Scoring Tools
-        </h1>
-        <p className="text-gray-600 mb-6 text-center">
-          Search or select from many clinical calculators grouped by category. You can
-          also filter by calculator type to find the relevant tool.
-        </p>
+      {/* 
+        1) Brand and heading (mimicking the style of the first-stage layout),
+        2) Disclaimer,
+        3) Then the existing type-filter buttons, search bar, etc.
+      */}
+      <div className="flex flex-col items-center pt-8 pb-12 px-4">
+        {/* Brand Header / Logo */}
+        <header className="flex flex-col items-center justify-center text-center">
+          <div className="flex items-center justify-center">
+            <img
+              src="/MetrixAI.png"
+              alt="Metrix AI Logo"
+              className="w-28 h-28 object-cover mr-3"
+            />
+          </div>
+        </header>
 
+        {/* Main heading */}
+        <div className="mt-4 text-center max-w-3xl">
+          <h1 className="text-3xl font-bold mb-3">
+            Metrix AI Risk and Scoring Tool
+          </h1>
+          {/* Optional short disclaimer or subheading */}
+          <p className="text-gray-700 text-base leading-snug whitespace-pre-line">
+            {DISCLAIMER_TEXT}
+          </p>
+        </div>
+      </div>
+
+      {/* Existing content: filter buttons, search bar, tool display, etc. */}
+      <div className="w-full max-w-2xl mx-auto">
         {/* Type Filter Buttons */}
         <div className="flex gap-2 mb-4 flex-wrap justify-center">
           {calcTypeOptions.map((option) => (
@@ -128,7 +155,7 @@ export default function ClinicalScoringToolsPage() {
         </div>
 
         {/* Combined Search & Dropdown by Category */}
-        <div className="relative mb-8 mx-auto w-full max-w-md" ref={dropdownRef}>
+        <div className="relative mb-8 w-full" ref={dropdownRef}>
           <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
             Search or Select a Tool
           </label>
@@ -200,7 +227,12 @@ export default function ClinicalScoringToolsPage() {
                         id={field.key}
                         className="mr-2 h-5 w-5 text-[#008080]"
                         checked={!!formValues[field.key]}
-                        onChange={(e) => handleFieldChange(field.key, e.target.checked)}
+                        onChange={(e) =>
+                          setFormValues((prev) => ({
+                            ...prev,
+                            [field.key]: e.target.checked,
+                          }))
+                        }
                       />
                       <label htmlFor={field.key} className="text-gray-800">
                         {field.label}
@@ -225,7 +257,12 @@ export default function ClinicalScoringToolsPage() {
                         id={field.key}
                         className="mt-1 sm:mt-0 border border-gray-300 p-2 rounded-md w-full sm:w-40 focus:ring-[#008080] focus:outline-none"
                         value={formValues[field.key] || ''}
-                        onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                        onChange={(e) =>
+                          setFormValues((prev) => ({
+                            ...prev,
+                            [field.key]: e.target.value,
+                          }))
+                        }
                       />
                     </div>
                   );
@@ -246,7 +283,12 @@ export default function ClinicalScoringToolsPage() {
                         id={field.key}
                         className="mt-1 sm:mt-0 border border-gray-300 p-2 rounded-md w-full sm:w-60 focus:ring-[#008080] focus:outline-none"
                         value={formValues[field.key] || ''}
-                        onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                        onChange={(e) =>
+                          setFormValues((prev) => ({
+                            ...prev,
+                            [field.key]: e.target.value,
+                          }))
+                        }
                       >
                         <option value="">-- Select --</option>
                         {field.options?.map((option) => (
@@ -285,18 +327,18 @@ export default function ClinicalScoringToolsPage() {
               <div className="mt-6 flex gap-3 justify-center">
                 {selectedTool.nextSteps && (
                   <button
-                    onClick={() => setShowNextSteps(!showNextSteps)}
+                    onClick={() => setShowNextSteps((prev) => !prev)}
                     className="bg-[#008080] text-white px-4 py-2 rounded-md hover:bg-[#008080]"
                   >
-                    {showNextSteps ? 'Hide Next Steps' : 'Show Next Steps'}
+                    {!showNextSteps ? 'Show Next Steps' : 'Hide Next Steps'}
                   </button>
                 )}
                 {selectedTool.evidence && (
                   <button
-                    onClick={() => setShowEvidence(!showEvidence)}
+                    onClick={() => setShowEvidence((prev) => !prev)}
                     className="bg-[#008080] text-white px-4 py-2 rounded-md hover:bg-[#008080]"
                   >
-                    {showEvidence ? 'Hide Evidence' : 'Show Evidence'}
+                    {!showEvidence ? 'Show Evidence' : 'Hide Evidence'}
                   </button>
                 )}
               </div>
@@ -340,6 +382,7 @@ export default function ClinicalScoringToolsPage() {
           </div>
         )}
 
+        {/* Original small disclaimer at the bottom */}
         <div className="mt-10 text-xs text-gray-500 leading-relaxed text-center">
           <p className="mb-2">
             <strong>Disclaimer:</strong> These calculators are provided for reference
