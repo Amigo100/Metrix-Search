@@ -316,7 +316,7 @@ ${doc}
         {/* New heading & explainer text */}
         <div className="mb-4">
           <h1 className="text-xl font-bold text-center">Metrix AI Clinical Scribe</h1>
-          <p className="text-center text-gray-600 mt-2">
+          <p className="text-center text-gray-800 mt-2">
             Use the clinical scribe to record speech or consultations. 
             Select a template from the options above and produce a 
             professional clinical document with associated recommendations. 
@@ -364,7 +364,7 @@ ${doc}
         {/* Transcript at top */}
         <div className="text-center text-lg font-semibold mb-2">Transcript</div>
         <div className="flex justify-center mb-6">
-          <div className="max-w-2xl bg-gray-200 text-black p-4 rounded shadow whitespace-pre-wrap">
+          <div className="max-w-2xl bg-gray-100 text-black p-4 rounded shadow whitespace-pre-wrap">
             {transcript}
           </div>
         </div>
@@ -434,7 +434,7 @@ ${doc}
               {analysis ? (
                 <ReactMarkdown>{analysis}</ReactMarkdown>
               ) : (
-                <p className="italic text-gray-500">
+                <p className="italic text-gray-800">
                   Generating comparison and recommendations...
                 </p>
               )}
@@ -449,19 +449,19 @@ ${doc}
   return (
     <div className="flex flex-col w-full h-full bg-white dark:bg-[#343541] text-black dark:text-white">
       {/* Top bar => template & model */}
-      <div className="border-b border-gray-300 dark:border-gray-700 px-4 py-2 flex items-center gap-4">
+      <div className="border-b border-gray-400 dark:border-gray-400 px-4 py-2 flex items-center gap-4">
         {/* Template dropdown */}
         <div className="relative">
           <button
-            className="flex items-center gap-1 rounded-md bg-gray-200 px-3 py-2
-                       text-sm font-semibold text-gray-700 hover:bg-gray-300"
+            className="flex items-center gap-1 rounded-md bg-neutral-50 px-3 py-2
+                       text-sm font-semibold text-gray-700 hover:bg-gray-100"
             onClick={() => setShowTemplatesDropdown(!showTemplatesDropdown)}
           >
             {`${t('Template')}: ${activeTemplateName}`}
             <IconChevronDown size={16} />
           </button>
           {showTemplatesDropdown && (
-            <div className="absolute left-0 mt-2 w-[220px] rounded-md border border-gray-300
+            <div className="absolute left-0 mt-2 w-[220px] rounded-md border border-gray-400
                             bg-white p-2 shadow-lg z-50">
               {prompts.map((prompt: Prompt) => (
                 <button
@@ -482,15 +482,15 @@ ${doc}
         {/* Model dropdown */}
         <div className="relative">
           <button
-            className="flex items-center gap-1 rounded-md bg-gray-200 px-3 py-2
-                       text-sm font-semibold text-gray-700 hover:bg-gray-300"
+            className="flex items-center gap-1 rounded-md bg-neutral-50 px-3 py-2
+                       text-sm font-semibold text-gray-700 hover:bg-gray-100"
             onClick={() => setShowModelsDropdown(!showModelsDropdown)}
           >
             {`${t('Model')}: ${activeModelName}`}
             <IconChevronDown size={16} />
           </button>
           {showModelsDropdown && (
-            <div className="absolute left-0 mt-2 w-[220px] rounded-md border border-gray-200
+            <div className="absolute left-0 mt-2 w-[220px] rounded-md border border-gray-400
                             bg-white p-2 shadow-lg z-50">
               {models.map((m) => (
                 <button
@@ -533,7 +533,7 @@ ${doc}
         BOTTOM BAR — updated to match the style from diagnostic-assistance.tsx.
         We keep the ChatInput functionality but apply the same 'sticky' & border layout.
       */}
-      <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3">
+      <div className="sticky bottom-0 bg-white border-t border-gray-400 px-4 py-3">
         <div className="w-full max-w-4xl mx-auto flex items-center space-x-3">
           <ChatInput
             stopConversationRef={stopConversationRef}
