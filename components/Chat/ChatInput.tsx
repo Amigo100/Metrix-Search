@@ -143,7 +143,10 @@ export const ChatInput = ({
   const handleInitModal = () => {
     const selectedPrompt = filteredPrompts[activePromptIndex];
     if (selectedPrompt) {
-      const newContent = textInputContent?.replace(/\/\w*$/, selectedPrompt.content);
+      const newContent = textInputContent?.replace(
+        /\/\w*$/,
+        selectedPrompt.content,
+      );
       setTextInputContent(newContent || '');
       handlePromptSelect(selectedPrompt);
     }
@@ -182,12 +185,7 @@ export const ChatInput = ({
         // If user typed something else, reset to 0
         setActivePromptIndex(0);
       }
-    } else if (
-      e.key === 'Enter' &&
-      !isTyping &&
-      !isMobile() &&
-      !e.shiftKey
-    ) {
+    } else if (e.key === 'Enter' && !isTyping && !isMobile() && !e.shiftKey) {
       // Regular "Enter" => Send
       e.preventDefault();
       handleSend();
@@ -223,7 +221,11 @@ export const ChatInput = ({
     const vars = parseVariables(prompt.content);
     setVariables(vars);
     if (vars.length > 0) {
-      homeDispatch({ type: 'change', field: 'promptModalVisible', value: true });
+      homeDispatch({
+        type: 'change',
+        field: 'promptModalVisible',
+        value: true,
+      });
     } else {
       const replaced = textInputContent?.replace(/\/\w*$/, prompt.content);
       setTextInputContent(replaced || '');
@@ -233,10 +235,13 @@ export const ChatInput = ({
 
   const handleSubmit = (updatedVars: string[]) => {
     // Fill in the prompt placeholders with user-provided values
-    const newContent = textInputContent?.replace(/{{(.*?)}}/g, (match, variable) => {
-      const idx = promptVariables.indexOf(variable);
-      return updatedVars[idx];
-    });
+    const newContent = textInputContent?.replace(
+      /{{(.*?)}}/g,
+      (match, variable) => {
+        const idx = promptVariables.indexOf(variable);
+        return updatedVars[idx];
+      },
+    );
     setTextInputContent(newContent || '');
     if (textareaRef?.current) {
       textareaRef.current.focus();
@@ -277,155 +282,160 @@ export const ChatInput = ({
   }, []);
 
   return (
-    <div className="w-full flex flex-col">
-      <div className="flex items-center gap-2 w-full">
-        {/* If streaming => Stop button */}
-        {messageIsStreaming && (
-          <button
-            className="flex h-12 items-center gap-2 rounded-md border border-neutral-200
-                       bg-white px-4 text-black hover:opacity-70
-                       dark:border-neutral-600 dark:bg-[#343541] dark:text-white"
-            onClick={handleStopConversation}
-          >
-            <IconPlayerStop size={16} /> {t('Stop Generating')}
-          </button>
-        )}
+    <>
+      {/* Sticky bottom bar container (similar to script #2) */}
+      <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 dark:bg-[#343541] dark:border-neutral-600">
+        <div className="w-full max-w-4xl mx-auto flex flex-col gap-2">
+          {/* Top row: Stop / Regenerate (if any) */}
+          <div className="flex items-center gap-3">
+            {/* If streaming => Stop button */}
+            {messageIsStreaming && (
+              <button
+                className="flex h-10 items-center gap-2 rounded-full border border-neutral-300
+                           bg-white px-3 text-black text-sm hover:opacity-70
+                           dark:border-neutral-600 dark:bg-[#40414F] dark:text-white"
+                onClick={handleStopConversation}
+              >
+                <IconPlayerStop size={16} /> {t('Stop Generating')}
+              </button>
+            )}
 
-        {/* If we have at least 1 msg => show "Regenerate response" */}
-        {!messageIsStreaming &&
-          selectedConversation &&
-          selectedConversation.messages.length > 0 && (
+            {/* If we have at least 1 msg => show "Regenerate response" */}
+            {!messageIsStreaming &&
+              selectedConversation &&
+              selectedConversation.messages.length > 0 && (
+                <button
+                  className="flex h-10 items-center gap-2 rounded-full border border-neutral-300
+                             bg-white px-3 text-black text-sm hover:opacity-70
+                             dark:border-neutral-600 dark:bg-[#40414F] dark:text-white"
+                  onClick={onRegenerate}
+                >
+                  <IconRepeat size={16} /> {t('Regenerate response')}
+                </button>
+              )}
+          </div>
+
+          {/* Middle row: input area + plugin button + send button + mic */}
+          <div className="flex items-center space-x-3">
+            {/* Plugin toggle button */}
             <button
-              className="flex h-12 items-center gap-2 rounded-md border border-neutral-200
-                         bg-white px-4 text-black hover:opacity-70
-                         dark:border-neutral-600 dark:bg-[#343541] dark:text-white"
-              onClick={onRegenerate}
+              className="text-neutral-600 dark:text-neutral-100
+                         hover:bg-neutral-200 dark:hover:bg-neutral-600
+                         p-2 rounded-full border border-gray-300 dark:border-neutral-600"
+              onClick={() => setShowPluginSelect(!showPluginSelect)}
             >
-              <IconRepeat size={16} /> {t('Regenerate response')}
+              {plugin ? <IconBrandGoogle size={20} /> : <IconBolt size={20} />}
             </button>
-          )}
 
-        {/* Input area */}
-        <div
-          className="relative flex-1 flex items-center h-12 border border-black/10
-                     rounded-md bg-white shadow-sm dark:border-gray-900/50
-                     dark:bg-[#40414F]"
-        >
-          {/* Plugin button */}
-          <button
-            className="absolute left-2 text-neutral-600 dark:text-neutral-100
-                       hover:bg-neutral-200 dark:hover:bg-neutral-600
-                       p-1 rounded-sm"
-            onClick={() => setShowPluginSelect(!showPluginSelect)}
-          >
-            {plugin ? <IconBrandGoogle size={20} /> : <IconBolt size={20} />}
-          </button>
-
-          {showPluginSelect && (
-            <div className="absolute left-0 bottom-14 rounded bg-white dark:bg-[#343541]">
-              <PluginSelect
-                plugin={plugin}
-                onKeyDown={(e) => {
-                  if (e.key === 'Escape') {
-                    e.preventDefault();
+            {/* Plugin select pop-up */}
+            {showPluginSelect && (
+              <div className="absolute left-4 bottom-20 rounded bg-white dark:bg-[#343541] z-10 shadow-md">
+                <PluginSelect
+                  plugin={plugin}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      e.preventDefault();
+                      setShowPluginSelect(false);
+                      textareaRef?.current?.focus();
+                    }
+                  }}
+                  onPluginChange={(newPlugin: Plugin) => {
+                    setPlugin(newPlugin);
                     setShowPluginSelect(false);
                     textareaRef?.current?.focus();
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Textarea styled similar to script #2's input */}
+            <div className="relative flex-1">
+              <textarea
+                ref={textareaRef || undefined}
+                className="flex-1 w-full border border-gray-300 rounded-full px-4 py-2
+                           focus:outline-none text-lg text-black dark:text-white
+                           dark:border-neutral-600 dark:bg-[#40414F] 
+                           max-h-60 overflow-hidden resize-none"
+                style={{
+                  // Overridden by auto-height in effect, but we keep to ensure
+                  // the text does not overflow beyond 400px
+                  maxHeight: '400px',
+                }}
+                placeholder={t('Enter a question to ask...') || ''}
+                value={textInputContent}
+                rows={1}
+                onCompositionStart={() => setIsTyping(true)}
+                onCompositionEnd={() => setIsTyping(false)}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+              />
+
+              {/* Prompt suggestions */}
+              {showPromptList && filteredPrompts.length > 0 && (
+                <div className="absolute bottom-full left-0 w-full mb-1 z-10">
+                  <PromptList
+                    activePromptIndex={activePromptIndex}
+                    prompts={filteredPrompts}
+                    onSelect={handleInitModal}
+                    onMouseOver={setActivePromptIndex}
+                    promptListRef={promptListRef}
+                  />
+                </div>
+              )}
+
+              {promptModalVisible && (
+                <VariableModal
+                  prompt={filteredPrompts[activePromptIndex]}
+                  variables={promptVariables}
+                  onSubmit={handleSubmit}
+                  onClose={() =>
+                    homeDispatch({
+                      type: 'change',
+                      field: 'promptModalVisible',
+                      value: false,
+                    })
                   }
-                }}
-                onPluginChange={(newPlugin: Plugin) => {
-                  setPlugin(newPlugin);
-                  setShowPluginSelect(false);
-                  textareaRef?.current?.focus();
-                }}
-              />
+                />
+              )}
             </div>
-          )}
 
-          <textarea
-            ref={textareaRef || undefined}
-            className="flex-1 h-full resize-none border-0 bg-transparent pl-9 pr-10 py-2
-                       text-black dark:bg-transparent dark:text-white"
-            style={{
-              maxHeight: '400px',
-              overflow:
-                textareaRef?.current &&
-                textareaRef.current.scrollHeight > 400
-                  ? 'auto'
-                  : 'hidden',
-            }}
-            placeholder={t('Enter a question to ask...') || ''}
-            value={textInputContent}
-            rows={1}
-            onCompositionStart={() => setIsTyping(true)}
-            onCompositionEnd={() => setIsTyping(false)}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-          />
+            {/* Send button */}
+            <button
+              className={`px-4 py-2 rounded-full text-white font-medium transition-colors
+                          ${
+                            messageIsStreaming
+                              ? 'bg-[#008080] cursor-not-allowed'
+                              : 'bg-[#008080] hover:bg-[#008080]'
+                          }`}
+              onClick={handleSend}
+              disabled={messageIsStreaming}
+            >
+              {messageIsStreaming ? t('Sending...') : <IconSend size={18} />}
+            </button>
 
-          {/* Prompt suggestions */}
-          {showPromptList && filteredPrompts.length > 0 && (
-            <div className="absolute bottom-full left-0 w-full mb-1">
-              <PromptList
-                activePromptIndex={activePromptIndex}
-                prompts={filteredPrompts}
-                onSelect={handleInitModal}
-                onMouseOver={setActivePromptIndex}
-                promptListRef={promptListRef}
-              />
-            </div>
-          )}
-
-          {promptModalVisible && (
-            <VariableModal
-              prompt={filteredPrompts[activePromptIndex]}
-              variables={promptVariables}
-              onSubmit={handleSubmit}
-              onClose={() =>
-                homeDispatch({
-                  type: 'change',
-                  field: 'promptModalVisible',
-                  value: false,
-                })
-              }
+            {/* Mic button (speech to text) */}
+            <ChatInputMicButton
+              onSend={onSend}
+              messageIsStreaming={messageIsStreaming}
             />
+          </div>
+
+          {/* Bottom row: optional scroll-down button */}
+          {showScrollDownButton && (
+            <div className="flex justify-end">
+              <button
+                className="flex h-7 w-7 items-center justify-center rounded-full 
+                           bg-neutral-300 text-gray-800 shadow-md hover:shadow-lg 
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 
+                           dark:bg-gray-700 dark:text-neutral-200"
+                onClick={onScrollDownClick}
+              >
+                <IconArrowDown size={18} />
+              </button>
+            </div>
           )}
         </div>
-
-        {/* Send button */}
-        <button
-          className="flex h-12 items-center justify-center rounded-md border border-neutral-200
-                     bg-white px-4 text-black hover:opacity-70
-                     dark:border-neutral-600 dark:bg-[#343541] dark:text-white"
-          onClick={handleSend}
-        >
-          {messageIsStreaming ? (
-            <div className="h-4 w-4 animate-spin rounded-full border-t-2 border-neutral-800 dark:border-neutral-100" />
-          ) : (
-            <IconSend size={18} />
-          )}
-        </button>
-
-        {/* Microphone button (dictation) */}
-        <ChatInputMicButton
-          onSend={onSend}
-          messageIsStreaming={messageIsStreaming}
-        />
       </div>
-
-      {/* Optional scroll-down button */}
-      {showScrollDownButton && (
-        <div className="flex justify-end mt-1">
-          <button
-            className="flex h-7 w-7 items-center justify-center rounded-full 
-                       bg-neutral-300 text-gray-800 shadow-md hover:shadow-lg 
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 
-                       dark:bg-gray-700 dark:text-neutral-200"
-            onClick={onScrollDownClick}
-          >
-            <IconArrowDown size={18} />
-          </button>
-        </div>
-      )}
-    </div>
+    </>
   );
 };
