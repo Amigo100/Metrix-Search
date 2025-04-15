@@ -174,7 +174,7 @@ const PredictiveAnalyticsPage: React.FC = () => {
   return (
     <div className="p-4 md:p-6 w-full bg-stone-50 text-stone-900">
       <h1 className="text-xl font-semibold mb-6 text-stone-900">
-        Predictive Analytics - ED Wait Time
+        Predictive Insights from Metrix - Get forecasts for wait times, admission likelihood and more...
       </h1>
 
       {error && ( <div className="mb-4 p-3 border border-red-300 bg-red-100 rounded-md flex items-center text-sm text-red-700" role="alert"> <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" /> <span>{error}</span> </div> )}
