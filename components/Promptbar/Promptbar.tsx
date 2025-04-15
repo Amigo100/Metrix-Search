@@ -10,7 +10,7 @@ const Promptbar = () => {
     state: { showSidePromptbar, hasChatOutput },
   } = useContext(HomeContext);
 
-  const sidebarWidth = showSidePromptbar ? 'w-60' : 'w-0';
+  const sidebarWidth = showSidePromptbar ? 'w-50' : 'w-0';
 
   return (
     <div
