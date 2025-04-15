@@ -1507,7 +1507,7 @@ const Tasks: React.FC = () => {
   );
 
   // Sidebar width toggle
-  const sidebarWidth = showSidePromptbar ? 'w-80 lg:w-96' : 'w-0';
+  const sidebarWidth = showSidePromptbar ? 'w-70 lg:w-96' : 'w-0';
 
   return (
     <div
