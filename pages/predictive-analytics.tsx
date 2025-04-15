@@ -674,7 +674,7 @@ const PredictiveAnalyticsPage: FC = () => {
         <div className="flex items-center justify-center gap-4">
           <img src="/MetrixAI.png" alt="MetrixAI" className="h-10" />
           <h1 className="text-xl font-semibold text-center text-stone-900">
-            Predictive Insights from Metrix - Get forecasts for wait times, admission likelihood and more...
+            Predictive Insights from Metrix
           </h1>
         </div>
         <p className="text-center mt-4 text-xs text-stone-500 max-w-lg">
