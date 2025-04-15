@@ -37,6 +37,7 @@ export default function DashboardPage() {
       <div className="bg-white rounded-lg shadow p-4">
         <h1 className="text-2xl font-bold text-brand-dark">
           Welcome to Metrix!
+        </h1>
       </div>
 
       {/* 2. Recent Activity Log */}
