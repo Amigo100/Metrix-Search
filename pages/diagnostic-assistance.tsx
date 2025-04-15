@@ -412,7 +412,7 @@ function DiagnosticAssistancePage() {
     );
   }
 
-  // Main return: the pinned bottom bar with text input & buttons for ALL stages
+  // Main return: pinned bottom bar with text input & conditionally displayed buttons
   return (
     <div className="flex flex-col h-screen bg-white">
       {/* Content area above the input */}
@@ -424,8 +424,8 @@ function DiagnosticAssistancePage() {
 
       {/* 
         Bottom bar: includes 
-        1) text input + Send (left side)
-        2) Copy & Clear chat (right side)
+        1) text input + send (left side)
+        2) Copy & Clear chat (right side) => ONLY if stage === 3
       */}
       <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3">
         <div className="w-full max-w-5xl mx-auto flex items-center justify-between">
@@ -453,24 +453,28 @@ function DiagnosticAssistancePage() {
             </button>
           </div>
 
-          {/* Right side => copy + clear buttons (only needed for Stage 3, but safe to show any time) */}
-          <div className="flex items-center space-x-2 ml-4">
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(JSON.stringify(messages, null, 2));
-                alert('Conversation copied successfully!');
-              }}
-              className="px-4 py-2 bg-gray-300 text-black rounded-full hover:bg-gray-400"
-            >
-              Copy Conversation
-            </button>
-            <button
-              onClick={handleClearChat}
-              className="px-4 py-2 bg-red-300 text-black rounded-full hover:bg-red-400"
-            >
-              Clear Chat
-            </button>
-          </div>
+          {/* Right side => copy + clear buttons => only for stage 3 */}
+          {stage === 3 && (
+            <div className="flex items-center space-x-2 ml-4">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    JSON.stringify(messages, null, 2),
+                  );
+                  alert('Conversation copied successfully!');
+                }}
+                className="px-4 py-2 bg-gray-300 text-black rounded-full hover:bg-gray-400"
+              >
+                Copy Conversation
+              </button>
+              <button
+                onClick={handleClearChat}
+                className="px-4 py-2 bg-red-300 text-black rounded-full hover:bg-red-400"
+              >
+                Clear Chat
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
