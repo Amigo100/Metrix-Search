@@ -57,14 +57,13 @@ export default function AppLayout({
             src="/MetrixAI.png"
             alt="Metrix AI Logo"
             style={{
-              width: `${logoSize * 0.5}px`,  // Reduced by 30%
-              height: `${logoSize * 0.5}px`, // Reduced by 30%
+              width: `${logoSize * 0.5}px`,  // Reduced by 50%
+              height: `${logoSize * 0.5}px`, // Reduced by 50%
               objectFit: 'contain',
             }}
           />
           <h2 className="text-2xl font-semibold">Metrix</h2>
         </div>
-        
 
         {/* Centered Navigation */}
         <div
@@ -118,6 +117,22 @@ export default function AppLayout({
         {/* Right Tasks Sidebar */}
         <Tasks />
       </div>
+
+      {/* Footer */}
+      <footer className="bg-neutral-50 border-t border-gray-300 py-4 px-6 text-black text-sm">
+        <div className="flex justify-between items-center">
+          <div>© {new Date().getFullYear()} Metrix AI. All rights reserved.</div>
+          <div>
+            <Link href="https://www.metrixai.com/privacy" className="hover:underline">
+              Privacy Policy
+            </Link>
+            {' | '}
+            <Link href="https://www.metrixai.com/terms" className="hover:underline">
+              Terms of Service
+            </Link>
+          </div>
+        </div>
+      </footer>
 
       {/* Modals */}
       {openModal === 'profile' && <ProfileModal />}
