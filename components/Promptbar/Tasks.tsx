@@ -227,10 +227,10 @@ const getBorderColor = (minutes: number): string => {
 };
 
 const getBackgroundColor = (minutes: number): string => {
-  if (minutes >= 300) return 'bg-red-900/50';
-  if (minutes >= 240) return 'bg-red-900/50';
-  if (minutes >= 120) return 'bg-amber-900/50';
-  return 'bg-green-900/50';
+  if (minutes >= 300) return 'bg-neutral-50';
+  if (minutes >= 240) return 'bg-neutral-50';
+  if (minutes >= 120) return 'bg-neutral-50';
+  return 'bg-neutral-50';
 };
 
 // --- LocalStorage Parsing ---
@@ -887,7 +887,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
           <form onSubmit={(e) => handleAddTaskSubmit(e)} className="flex items-center gap-2">
             <Input
               type="text"
-              placeholder="Add a new task..."
+              placeholder="Add Task"
               value={newTaskText}
               onChange={(e) => setNewTaskText(e.target.value)}
               onKeyDown={handleNewTaskKeyDown}
