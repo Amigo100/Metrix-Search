@@ -1507,17 +1507,17 @@ const Tasks: React.FC = () => {
   );
 
   // Sidebar width toggle
-  const sidebarWidth = showSidePromptbar ? 'w-70 lg:w-96' : 'w-0';
+  const sidebarWidth = showSidePromptbar ? 'w-50 lg:w-96' : 'w-0';
 
   return (
     <div
-      className={`flex flex-col h-full overflow-y-auto transition-all duration-300 bg-neutral-50 border-l border-gray-700 ${sidebarWidth}`}
+      className={`flex flex-col h-full overflow-y-auto transition-all duration-300 bg-neutral-50 shadow-md border-l border-gray-200 ${sidebarWidth}`}
     >
       {/* Only render content if open */}
       {showSidePromptbar && (
         <>
           {/* Sidebar Header */}
-          <div className="flex justify-between items-center p-4 border-b border-gray-700 flex-shrink-0">
+          <div className="flex justify-between items-center p-4 shadow-md border-b border-gray-200 flex-shrink-0">
             <h2 className="text-lg font-semibold text-black">Patient Tracker</h2>
             <Button
               variant="outline"
