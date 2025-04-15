@@ -324,7 +324,7 @@ export const ChatInput = ({
                          p-2 rounded-full border border-gray-300 dark:border-neutral-600"
               onClick={() => setShowPluginSelect(!showPluginSelect)}
             >
-              {plugin ? <IconBrandGoogle size={20} /> : <IconBolt size={20} />}
+              {plugin ? <IconBrandGoogle size={28} /> : <IconBolt size={28} />}
             </button>
 
             {/* Plugin select pop-up */}
@@ -410,7 +410,7 @@ export const ChatInput = ({
               onClick={handleSend}
               disabled={messageIsStreaming}
             >
-              {messageIsStreaming ? t('Sending...') : <IconSend size={18} />}
+              {messageIsStreaming ? t('Sending...') : <IconSend size={28} />}
             </button>
 
             {/* Mic button (speech to text) */}
