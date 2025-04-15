@@ -1126,7 +1126,7 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
             >
               Cancel
             </Button>
-            <Button type="submit" className="bg-[#008080] hover:bg-[#008080] text-black">
+            <Button type="submit" className="bg-[#008080] hover:bg-[#008080] text-white">
               Add Patient
             </Button>
           </DialogFooter>
