@@ -75,7 +75,7 @@ export const ChatInput = ({
     prompt.name.toLowerCase().includes(promptInputValue.toLowerCase()),
   );
 
-  // Dispatch-based “setter” for activePromptIndex
+  // Dispatch-based setter for activePromptIndex
   const setActivePromptIndex = (idx: number) => {
     homeDispatch({ type: 'change', field: 'activePromptIndex', value: idx });
   };
@@ -283,7 +283,7 @@ export const ChatInput = ({
 
   return (
     <>
-      {/* Sticky bottom bar container (similar to script #2) */}
+      {/* Sticky bottom bar container */}
       <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 dark:bg-[#343541] dark:border-neutral-600">
         <div className="w-full max-w-4xl mx-auto flex flex-col gap-2">
           {/* Top row: Stop / Regenerate (if any) */}
@@ -291,12 +291,13 @@ export const ChatInput = ({
             {/* If streaming => Stop button */}
             {messageIsStreaming && (
               <button
-                className="flex h-10 items-center gap-2 rounded-full border border-neutral-300
-                           bg-white px-3 text-black text-sm hover:opacity-70
+                className="flex items-center gap-2 rounded-full border border-neutral-300
+                           bg-white px-3 py-2 text-black text-sm hover:opacity-70
                            dark:border-neutral-600 dark:bg-[#40414F] dark:text-white"
                 onClick={handleStopConversation}
               >
-                <IconPlayerStop size={16} /> {t('Stop Generating')}
+                <IconPlayerStop size={20} />
+                {t('Stop Generating')}
               </button>
             )}
 
@@ -305,12 +306,13 @@ export const ChatInput = ({
               selectedConversation &&
               selectedConversation.messages.length > 0 && (
                 <button
-                  className="flex h-10 items-center gap-2 rounded-full border border-neutral-300
-                             bg-white px-3 text-black text-sm hover:opacity-70
+                  className="flex items-center gap-2 rounded-full border border-neutral-300
+                             bg-white px-3 py-2 text-black text-sm hover:opacity-70
                              dark:border-neutral-600 dark:bg-[#40414F] dark:text-white"
                   onClick={onRegenerate}
                 >
-                  <IconRepeat size={16} /> {t('Regenerate response')}
+                  <IconRepeat size={20} />
+                  {t('Regenerate response')}
                 </button>
               )}
           </div>
@@ -319,12 +321,12 @@ export const ChatInput = ({
           <div className="flex items-center space-x-3">
             {/* Plugin toggle button */}
             <button
-              className="text-neutral-600 dark:text-neutral-100
-                         hover:bg-neutral-200 dark:hover:bg-neutral-600
-                         p-2 rounded-full border border-gray-300 dark:border-neutral-600"
+              className="h-10 w-10 flex items-center justify-center text-neutral-600 
+                         dark:text-neutral-100 border border-gray-300 dark:border-neutral-600 
+                         rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-600"
               onClick={() => setShowPluginSelect(!showPluginSelect)}
             >
-              {plugin ? <IconBrandGoogle size={28} /> : <IconBolt size={28} />}
+              {plugin ? <IconBrandGoogle size={24} /> : <IconBolt size={24} />}
             </button>
 
             {/* Plugin select pop-up */}
@@ -348,7 +350,7 @@ export const ChatInput = ({
               </div>
             )}
 
-            {/* Textarea styled similar to script #2's input */}
+            {/* Textarea */}
             <div className="relative flex-1">
               <textarea
                 ref={textareaRef || undefined}
@@ -356,11 +358,7 @@ export const ChatInput = ({
                            focus:outline-none text-lg text-black dark:text-white
                            dark:border-neutral-600 dark:bg-[#40414F] 
                            max-h-60 overflow-hidden resize-none"
-                style={{
-                  // Overridden by auto-height in effect, but we keep to ensure
-                  // the text does not overflow beyond 400px
-                  maxHeight: '400px',
-                }}
+                style={{ maxHeight: '400px' }}
                 placeholder={t('Enter a question to ask...') || ''}
                 value={textInputContent}
                 rows={1}
@@ -401,16 +399,21 @@ export const ChatInput = ({
 
             {/* Send button */}
             <button
-              className={`px-4 py-2 rounded-full text-white font-medium transition-colors
-                          ${
+              className={`h-10 w-10 flex items-center justify-center rounded-full text-white
+                          transition-colors ${
                             messageIsStreaming
                               ? 'bg-[#008080] cursor-not-allowed'
-                              : 'bg-[#008080] hover:bg-[#008080]'
+                              : 'bg-[#008080] hover:bg-[#006666]'
                           }`}
               onClick={handleSend}
               disabled={messageIsStreaming}
             >
-              {messageIsStreaming ? t('Sending...') : <IconSend size={28} />}
+              {/* If streaming, you can show text or spinner; otherwise icon */}
+              {messageIsStreaming ? (
+                <span className="text-sm">{t('Sending...')}</span>
+              ) : (
+                <IconSend size={24} />
+              )}
             </button>
 
             {/* Mic button (speech to text) */}
@@ -424,13 +427,13 @@ export const ChatInput = ({
           {showScrollDownButton && (
             <div className="flex justify-end">
               <button
-                className="flex h-7 w-7 items-center justify-center rounded-full 
-                           bg-neutral-300 text-gray-800 shadow-md hover:shadow-lg 
+                className="h-10 w-10 flex items-center justify-center rounded-full 
+                           bg-neutral-300 text-gray-800 shadow-md hover:shadow-lg
                            focus:outline-none focus:ring-2 focus:ring-blue-500 
                            dark:bg-gray-700 dark:text-neutral-200"
                 onClick={onScrollDownClick}
               >
-                <IconArrowDown size={18} />
+                <IconArrowDown size={24} />
               </button>
             </div>
           )}
