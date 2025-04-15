@@ -262,7 +262,7 @@ function DiagnosticAssistancePage() {
           <img
             src="/MetrixAI.png"
             alt="Metrix AI Logo"
-            className="w-50 h-50 object-cover mr-3"
+            className="w-70 h-70 object-cover mr-3"
           />
           <div className="uppercase font-semibold tracking-wide text-lg text-black" />
         </div>
