@@ -144,7 +144,7 @@ function DiagnosticAssistancePage() {
     const isUser = msg.role === 'user';
     const isAssistant = msg.role === 'assistant';
 
-    // Show "thinking" animation
+    // If assistant is "thinking"
     if (isAssistant && msg.content === '...thinking...') {
       return (
         <div key={index} className="mb-4 flex items-start space-x-2 text-base">
@@ -199,7 +199,7 @@ function DiagnosticAssistancePage() {
               <span>Metrix AI</span>
             </>
           )}
-          {/* Copy button only if content is not empty */}
+          {/* Copy button if there's content */}
           {isAssistant && msg.content.trim() && (
             <button
               onClick={() => {
@@ -221,7 +221,7 @@ function DiagnosticAssistancePage() {
           {bubbleContent}
         </div>
 
-        {/* Regenerate / Edit buttons under the last assistant message */}
+        {/* Regenerate/Edit on last assistant */}
         {isLastAssistant && (
           <div className="mt-2 flex space-x-2 text-xs">
             <button
@@ -242,6 +242,7 @@ function DiagnosticAssistancePage() {
     );
   }
 
+  // TTS if needed
   function handlePlayTTS(text: string) {
     if (!('speechSynthesis' in window)) {
       alert('Your browser does not support speech synthesis.');
@@ -255,7 +256,7 @@ function DiagnosticAssistancePage() {
     window.speechSynthesis.speak(utterance);
   }
 
-  // Brand header (for the top of first & second screens)
+  // Brand header (for Stage 1 & 2)
   function renderBrandHeader() {
     return (
       <header className="flex flex-col items-center justify-center text-center">
@@ -285,21 +286,7 @@ function DiagnosticAssistancePage() {
     );
   }
 
-  // Header for the chat (Stage 3)
-  function renderChatHeader() {
-    return (
-      <div className="flex items-center justify-center h-16 border-b border-gray-200 px-4">
-        <img
-          src="/MetrixAI.png"
-          alt="Metrix AI Logo"
-          className="w-8 h-8 object-cover mr-2"
-        />
-        <h2 className="text-2xl font-bold">Metrix AI Chat</h2>
-      </div>
-    );
-  }
-
-  // Stage 1: Home Screen
+  // Stage 1: Home
   function renderHomeScreen() {
     return (
       <div className="flex flex-col items-center pt-16 pb-24 px-4">
@@ -309,7 +296,8 @@ function DiagnosticAssistancePage() {
             Welcome to Metrix AI Clinical Assistant
           </h1>
           <p className="text-lg text-gray-700">
-            Select a request type below to get started.
+            Select a request type below to get started,
+            or simply type a question in the box below.
           </p>
         </div>
 
@@ -357,13 +345,13 @@ function DiagnosticAssistancePage() {
           </button>
         </div>
 
-        {/* Centered disclaimer on the first screen */}
+        {/* Centered disclaimer on Stage 1 */}
         {renderDisclaimer(true)}
       </div>
     );
   }
 
-  // Stage 2: Query Screen
+  // Stage 2: Query
   function renderQueryScreen() {
     let heading = '';
     if (requestType === 'investigation') {
@@ -394,97 +382,94 @@ function DiagnosticAssistancePage() {
           </div>
         </div>
 
-        {/* Left-aligned disclaimer on screen 2 */}
+        {/* Left-aligned disclaimer on Stage 2 */}
         {renderDisclaimer(false)}
       </div>
     );
   }
 
-  // Stage 3: Chat Screen
+  // Stage 3: Chat
   function renderChatScreen() {
-    /*
-      We create a full-height container with three main areas:
-      1) A pinned header (Metrix AI Chat)
-      2) A scrollable conversation window
-      3) The Copy & Clear Chat buttons pinned just below the conversation
-         (or we can place them in the bottom bar; you can choose either approach)
-    */
     return (
       <div className="flex flex-col h-full">
-        {/* Fixed chat header at the top */}
-        {renderChatHeader()}
-
-        {/* Scrollable conversation area */}
-        <div className="flex-1 overflow-y-auto p-4 bg-gray-50 border-b border-gray-200">
-          {messages.map((msg, i) => renderMessageBubble(msg, i))}
+        {/* Sticky top header with brand, copy, clear buttons */}
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center space-x-2">
+              <img
+                src="/MetrixAI.png"
+                alt="Metrix AI Logo"
+                className="w-8 h-8 object-cover"
+              />
+              <h2 className="text-2xl font-bold">Metrix AI Chat</h2>
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    JSON.stringify(messages, null, 2),
+                  );
+                  alert('Conversation copied successfully!');
+                }}
+                className="px-4 py-2 bg-gray-300 text-black rounded-full hover:bg-gray-400"
+              >
+                Copy Conversation
+              </button>
+              <button
+                onClick={handleClearChat}
+                className="px-4 py-2 bg-red-300 text-black rounded-full hover:bg-red-400"
+              >
+                Clear Chat
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Copy & Clear Chat actions in a pinned row */}
-        <div className="flex items-center justify-center space-x-3 py-3 bg-white border-b border-gray-200">
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(JSON.stringify(messages, null, 2));
-              alert('Conversation copied successfully!');
-            }}
-            className="px-4 py-2 bg-gray-300 text-black rounded-full hover:bg-gray-400"
-          >
-            Copy Conversation
-          </button>
-          <button
-            onClick={handleClearChat}
-            className="px-4 py-2 bg-red-300 text-black rounded-full hover:bg-red-400"
-          >
-            Clear Chat
-          </button>
+        {/* Scrollable conversation window */}
+        <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+          {messages.map((msg, i) => renderMessageBubble(msg, i))}
         </div>
       </div>
     );
   }
 
+  // Main return: text-input bar is pinned for *all* stages
   return (
     <div className="flex flex-col h-screen bg-white">
-      {/* 
-        Stage 1 or 2 uses the full vertical space but is not pinned,
-        only Stage 3 (renderChatScreen) is pinned for the chat parts.
-      */}
-      <div className="flex-1 flex flex-col">
+      {/* Content area above the input */}
+      <div className="flex-1">
         {stage === 1 && renderHomeScreen()}
         {stage === 2 && renderQueryScreen()}
         {stage === 3 && (
-          // Let the chat fill the entire area
-          <div className="h-full">
-            {renderChatScreen()}
-          </div>
+          <div className="h-full">{renderChatScreen()}</div>
         )}
       </div>
 
-      {/* Bottom bar: message input + Send button pinned at the bottom */}
-      {stage === 3 && (
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3">
-          <div className="w-full max-w-4xl mx-auto flex items-center space-x-3">
-            <input
-              type="text"
-              className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none text-base"
-              placeholder="Type your message..."
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={messageIsStreaming}
-            />
-            <button
-              onClick={() => handleSendUserMessage(userInput)}
-              disabled={messageIsStreaming}
-              className={`px-4 py-2 rounded-full text-white font-medium transition-colors ${
-                messageIsStreaming
-                  ? 'bg-[#008080] cursor-not-allowed'
-                  : 'bg-[#008080] hover:bg-[#008080]'
-              }`}
-            >
-              {messageIsStreaming ? 'Sending...' : 'Send'}
-            </button>
-          </div>
+      {/* Pinned bottom bar with text input, for ALL stages */}
+      <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3">
+        <div className="w-full max-w-4xl mx-auto flex items-center space-x-3">
+          <input
+            type="text"
+            className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none text-base"
+            placeholder="Type your message..."
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={messageIsStreaming}
+          />
+          <button
+            onClick={() => handleSendUserMessage(userInput)}
+            disabled={messageIsStreaming}
+            className={`px-4 py-2 rounded-full text-white font-medium transition-colors ${
+              messageIsStreaming
+                ? 'bg-[#008080] cursor-not-allowed'
+                : 'bg-[#008080] hover:bg-[#008080]'
+            }`}
+          >
+            {messageIsStreaming ? 'Sending...' : 'Send'}
+          </button>
         </div>
-      )}
+      </div>
 
       <style jsx>{`
         .dot {
@@ -516,7 +501,6 @@ function DiagnosticAssistancePage() {
             opacity: 0.5;
           }
         }
-        /* Slightly bigger text for code blocks, paragraphs, etc. */
         .prose p {
           margin: 0.5em 0;
         }
