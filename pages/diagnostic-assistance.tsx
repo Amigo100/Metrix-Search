@@ -407,7 +407,7 @@ function DiagnosticAssistancePage() {
 
         {/* Scrollable conversation window with 10% margin => 80% width */}
         <div className="flex-1 overflow-y-auto bg-gray-50 flex justify-center">
-          <div className="w-[80%] max-w-3xl py-4 px-2">
+          <div className="w-[70%] max-w-3xl py-4 px-2">
             {messages.map((msg, i) => renderMessageBubble(msg, i))}
           </div>
         </div>
