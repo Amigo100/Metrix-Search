@@ -11,6 +11,7 @@ import {
   Children,
   isValidElement,
   FC,
+  ReactElement, // <-- Added ReactElement here
 } from 'react';
 import {
   AlertCircle,
@@ -64,6 +65,7 @@ interface ApiPredictionInput {
 }
 
 // =============== Helper UI / Mocked Components (Updated Theme) ===============
+
 function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(' ');
 }
@@ -141,9 +143,9 @@ const Select: FC<SelectProps> = ({
   required,
   id,
 }) => {
-  // Instead of React.Children / React.isValidElement
-  const selectChildren = Children.toArray(children).filter((child): child is ReactElement<SelectItemProps> =>
-    isValidElement(child)
+  // Instead of React.Children / React.isValidElement, we use named imports:
+  const selectChildren = Children.toArray(children).filter(
+    (child): child is ReactElement<SelectItemProps> => isValidElement(child)
   );
 
   const selectedChild = selectChildren.find(
@@ -405,6 +407,7 @@ const PredictiveAnalyticsPage: FC = () => {
     const parsedPatientsAhead = parseInt(patientsAhead, 10);
     const parsedPatientsInED = parseInt(patientsInED, 10);
 
+    // Basic validations
     if (
       isNaN(parsedAge) ||
       isNaN(parsedTriage) ||
@@ -419,13 +422,11 @@ const PredictiveAnalyticsPage: FC = () => {
       setIsLoading(false);
       return;
     }
-
     if (parsedAge <= 0 || parsedPatientsAhead < 0 || parsedPatientsInED < 0) {
       setError('Age must be positive. Patient counts cannot be negative.');
       setIsLoading(false);
       return;
     }
-
     if (!isValid(dateTime)) {
       setError('Invalid Date/Time selected.');
       setIsLoading(false);
@@ -439,6 +440,7 @@ const PredictiveAnalyticsPage: FC = () => {
       return;
     }
 
+    // Prepare request data
     const apiInput: ApiPredictionInput = {
       age: encodedAge,
       gender,
@@ -592,6 +594,7 @@ const PredictiveAnalyticsPage: FC = () => {
     setIsCalendarOpen(false);
   };
 
+  // For closing the popover if clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -663,6 +666,7 @@ const PredictiveAnalyticsPage: FC = () => {
   const handleAccidentChange = (checked: boolean) => setIsAccident(checked);
   const handleFeverChange = (checked: boolean) => setHasFever(checked);
 
+  // --- JSX Rendering ---
   return (
     <div className="p-4 md:p-6 w-full bg-stone-50 text-stone-900">
       {/* Header + Logo + Disclaimer */}
@@ -1068,14 +1072,14 @@ const PredictiveAnalyticsPage: FC = () => {
                         <CardHeader>
                           <CardTitle className="flex items-center justify-between">
                             <span>&gt; {pred.hours} Hours Wait</span>
-                            <Icon className={`w-5 h-5 ${color} flex-shrink-0`} />
+                            <Icon
+                              className={`w-5 h-5 ${color} flex-shrink-0`}
+                            />
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
                           <div className="flex justify-between items-baseline mb-1">
-                            <span
-                              className={`text-xl font-semibold ${color}`}
-                            >
+                            <span className={`text-xl font-semibold ${color}`}>
                               {text}
                             </span>
                             <span
@@ -1084,10 +1088,7 @@ const PredictiveAnalyticsPage: FC = () => {
                               {pred.likelihood.toFixed(1)}%
                             </span>
                           </div>
-                          <Progress
-                            value={pred.likelihood}
-                            colorClass={bgColor}
-                          />
+                          <Progress value={pred.likelihood} colorClass={bgColor} />
                         </CardContent>
                       </Card>
                     );
