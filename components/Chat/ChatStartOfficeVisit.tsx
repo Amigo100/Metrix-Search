@@ -106,9 +106,9 @@ export const ChatStartOfficeVisit = ({ onSend }: Props) => {
       className={`
         flex items-center justify-center w-64 h-24 
         rounded-lg border border-neutral-200 
-        bg-100-600 bg-opacity-100
+        bg-gray-100 bg-opacity-100
         cursor-pointer 
-        hover:bg-gray-200 hover:bg-opacity-70
+        hover:bg-gray-100 hover:bg-opacity-70
         record-button 
         ${recording ? 'is-recording' : ''}
       `}
@@ -130,10 +130,10 @@ export const ChatStartOfficeVisit = ({ onSend }: Props) => {
             className="w-6 h-6 object-contain"
           />
           <div className="flex flex-col text-left">
-            <h3 className="text-sm font-semibold text-white">
+            <h3 className="text-sm font-semibold text-black">
               {t('Consultations')}
             </h3>
-            <p className="text-[10px] text-white">
+            <p className="text-[10px] text-black">
               {t('Have Metrix produce a structured consultation summary')}
             </p>
           </div>
