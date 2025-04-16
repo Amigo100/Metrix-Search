@@ -1,17 +1,11 @@
-import React, { useEffect, useRef, useContext } from 'react';
-import axios from 'axios';
-import { useTranslation } from 'next-i18next';
-import HomeContext from '@/pages/api/home/home.context'; // Adjust path as needed
-import { Message, Role } from '@/types/chat'; // Adjust path
-import { Plugin } from '@/types/plugin'; // Adjust path
-import { IconMicrophone, IconLoader2 } from '@tabler/icons-react'; // Using Tabler icons
-
-type RecordRTCInstance = any;
-let RecordRTC_TTS: any; // Use separate variable to avoid potential naming conflicts
-
-const ChatTextToSpeech = ({ onSend }: { onSend: (message: Message, plugin: Plugin | null) => void }) => {
+// ============================================================
+// file: /components/Chat/ChatTextToSpeech.tsx - Add Export
+// ============================================================
+let RecordRTC_TTS: any;
+// *** ADDED EXPORT HERE ***
+export const ChatTextToSpeech = ({ onSend }: { onSend: (message: Message, plugin: Plugin | null) => void }) => {
   const { t } = useTranslation('chat');
-  const recordRTC_TTS_Ref = useRef<RecordRTCInstance | null>(null);
+  const recordRTC_TTS_Ref = useRef<any>(null);
   const { state: { recording, transcribingAudio }, dispatch: homeDispatch } = useContext(HomeContext);
 
   // --- Logic (Preserved) ---
