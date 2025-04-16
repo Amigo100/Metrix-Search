@@ -58,14 +58,15 @@ const cn = (...inputs: any[]) => {
 // ================================
 // Placeholder Image References (Update with actual paths or URLs)
 // ================================
-// Using placehold.co for robust placeholders
+// Using placehold.co for robust placeholders and local public path for PredictionImage
 const HeroImage = 'https://placehold.co/600x400/e0f2f7/37474f?text=Metrix+AI+Platform'; // Light teal bg, dark text
-const MetrixAILogo = 'https://placehold.co/48x48/3D7F80/ffffff?text=MAI'; // Medium teal bg, white text
+const MetrixAILogo = '/MetrixAI.png'; // Medium teal bg, white text
 const ScribeImage = 'https://placehold.co/600x400/f5f5f4/78716c?text=AI+Scribe'; // Stone bg, gray text
-const PredictionImage = 'https://placehold.co/600x400/ffffff/a8a29e?text=ED+Predictions'; // White bg, gray text
+// === Updated PredictionImage path ===
+const PredictionImage = '/Predictive_Screenshot.png'; // Path relative to the public folder root
 const ChatbotImage = 'https://placehold.co/600x400/f5f5f4/78716c?text=AI+Chatbot'; // Stone bg, gray text
 const TechImage = 'https://placehold.co/600x400/ffffff/a8a29e?text=Deployment'; // White bg, gray text
-const VideoPlaceholderImage = 'https://placehold.co/1280x720/e5e7eb/a8a29e?text=Demo+Video'; // Gray bg, gray text
+const VideoPlaceholderImage = '/Patient_Tasks_Video.mp4'; // Gray bg, gray text
 
 // Example testimonial images using placehold.co with initials
 const DrWilliamsPNG = 'https://placehold.co/48x48/ffffff/a8a29e?text=JW';
@@ -461,11 +462,12 @@ const MetrixAIHomePage = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
+              {/* === Updated Image Source === */}
               <img
-                src={PredictionImage}
+                src={PredictionImage} // Now using the local path constant
                 alt="Dashboard showing ED prediction metrics"
                 className="rounded-xl shadow-lg border border-stone-200 w-full"
-                // Placeholder fallback
+                // Placeholder fallback (still useful if the local image fails to load)
                 onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                   e.currentTarget.src = 'https://placehold.co/600x400/ffffff/a8a29e?text=ED+Predictions';
                 }}
