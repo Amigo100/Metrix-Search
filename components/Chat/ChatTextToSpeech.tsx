@@ -158,7 +158,7 @@ export const ChatTextToSpeech = ({ onSend }: Props) => {
           <IconMicrophone size={36} className="text-white" />
           <div className="flex flex-col text-left">
             <h3 className="text-sm font-semibold text-black">Dictation</h3>
-            <p className="text-[10px] text-white">
+            <p className="text-[10px] text-black">
               {t('Dictate Clerking Notes, SOAP Notes and Discharge Summaries')}
             </p>
           </div>
