@@ -1,14 +1,13 @@
 // /components/Chat/ChatInput.tsx
-// UPDATED VERSION 3 (Style consistency)
+// CORRECTED VERSION 4 (Fixes i18next title type error)
 
 import {
   ArrowDown,   // Lucide replacement
   Bolt,        // Lucide replacement
   Send,        // Lucide replacement
   Repeat,      // Lucide replacement
-  XCircle,     // Lucide replacement (for Stop button) - or Zap, PauseCircle etc.
+  XCircle,     // Lucide replacement (for Stop button)
   Loader2,     // Lucide replacement
-  // BrandGoogle - Not directly replaceable, maybe use MessageSquare or Bot? Using Bolt as placeholder.
 } from 'lucide-react';
 import {
   KeyboardEvent,
@@ -175,10 +174,12 @@ export const ChatInput = ({
                 className={`${primaryButtonStyles} absolute right-1.5 bottom-1.5 !px-2.5 !py-1.5 h-8 w-8 flex items-center justify-center !rounded-md`} // Adjusted size, position, make square-ish
                 onClick={handleSend}
                 disabled={messageIsStreaming || !textInputContent?.trim()}
-                title={t('Send message')}
+                // *** TYPE ERROR FIX: Use type assertion ***
+                title={t('Send message') as string}
               >
                  {messageIsStreaming ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
               </button>
+
 
               {/* Prompt suggestions */}
               {showPromptList && filteredPrompts.length > 0 && (
@@ -208,7 +209,8 @@ export const ChatInput = ({
             <button
                 className="absolute bottom-[-15px] left-1/2 -translate-x-1/2 z-10 h-7 w-7 flex items-center justify-center rounded-full bg-white text-gray-500 shadow-md border border-gray-200 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500"
                 onClick={onScrollDownClick}
-                title={t('Scroll to bottom')}
+                // *** TYPE ERROR FIX: Use type assertion ***
+                title={t('Scroll to bottom') as string}
             >
                 <ArrowDown size={16} />
             </button>
