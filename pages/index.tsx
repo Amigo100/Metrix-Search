@@ -82,11 +82,14 @@ const Header: React.FC = () => {
         {/* Logo */}
         <Link href="/" legacyBehavior>
             <a className="flex items-center space-x-2 animate-fadeInLeft cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 60 60" fill="none">
-                {/* SVG Logo Defs */}
-                <defs> <linearGradient id="reactGrad1H" x1="0%" y1="0%" x2="100%" y2="100%"> <stop offset="0%" style={{ stopColor: '#5fc2b1', stopOpacity: 1 }} /> <stop offset="100%" style={{ stopColor: '#3b9a9c', stopOpacity: 1 }} /> </linearGradient> <linearGradient id="reactGrad2H" x1="100%" y1="0%" x2="0%" y2="100%"> <stop offset="0%" style={{ stopColor: '#3b9a9c', stopOpacity: 1 }} /> <stop offset="100%" style={{ stopColor: '#1e6b6b', stopOpacity: 1 }} /> </linearGradient> </defs>
-                <path d="M20 5 H40 Q45 5 45 10 V50 Q45 55 40 55 H20 Q15 55 15 50 V10 Q15 5 20 5 Z" fill="url(#reactGrad1H)"/> <path d="M5 20 H25 Q30 20 30 25 V35 Q30 40 25 40 H5 Q0 40 0 35 V25 Q0 20 5 20 Z" fill="url(#reactGrad2H)"/> <path d="M35 20 H55 Q60 20 60 25 V35 Q60 40 55 40 H35 Q30 40 30 35 V25 Q30 20 35 20 Z" fill="url(#reactGrad1H)" transform="translate(-2, 0)" />
-              </svg>
+              < xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 60 60" fill="none">
+              <img
+                src="/MetrixAI.png" // Or metrix-logo.svg
+                alt="Metrix Logo"
+                width={32} // Corresponds to h-8 w-8
+                height={32} // Corresponds to h-8 w-8
+                className="h-8 w-8" // Keep size consistent
+              />
               <span className="font-bold text-2xl text-gray-800">Metrix</span>
             </a>
         </Link>
