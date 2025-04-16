@@ -786,7 +786,6 @@ ${doc}
                   chatContainerRef.current.clientHeight
             )
           }
-          isLoading={loading}
         />
       </div>
 
