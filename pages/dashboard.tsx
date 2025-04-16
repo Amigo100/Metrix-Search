@@ -53,7 +53,7 @@ const coreTools = [
   { title: 'Risk & Scoring Tools', description: 'Calculate clinical scores.', href: '/clinical-scoring-tools', icon: Calculator, color: 'text-green-600', bgColor: 'bg-green-50' },
   { title: 'Guideline Search', description: 'Find local protocols.', href: '/guideline-search', icon: Search, color: 'text-orange-600', bgColor: 'bg-orange-50' }, // Add this page if it exists
   { title: 'Predictive Insights', description: 'View ED forecasts.', href: '/predictive-analytics', icon: TrendingUp, color: 'text-red-600', bgColor: 'bg-red-50' },
-  { title: 'Patient Tracker', description: 'Manage tasks & timers.', href: '/#tasks', // Link to open task sidebar? Or a dedicated page?
+  { title: 'Patient Tracker', description: 'Manage tasks & timers.', onClick={handleTogglePromptbar}',
     icon: ClipboardCheck, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
 ];
 
@@ -154,7 +154,7 @@ export default function DashboardPage() {
         {/* 2. Quick Access Tools Grid */}
         <section className="animate-fadeInUp delay-100"> {/* Assuming animate-fadeInUp is defined globally */}
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Access Tools</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
             {coreTools.map((tool) => (
                 <QuickAccessCard
                     key={tool.title}
