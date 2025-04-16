@@ -1,10 +1,11 @@
-import React, { useState, useCallback, SVGProps } from 'react';
+import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import {
   ClipboardCheck,
   TrendingUp,
   Search,
   ArrowRight,
+  type LucideProps,
 } from 'lucide-react';
 
 interface Card {
@@ -12,7 +13,7 @@ interface Card {
   description: string;
   href?: string;
   onClick?: () => void;
-  icon: (props: SVGProps<SVGSVGElement>) => JSX.Element;
+  icon: React.ComponentType<LucideProps>;
   color: string;
   bgColor: string;
 }
