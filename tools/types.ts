@@ -1,14 +1,46 @@
-// /tools/types.ts
+// file: /tools/types.ts
 
 /**
- * A single calculator field: either boolean, numeric, or select options.
+ * Base interface for common properties of all score fields.
  */
-export interface ScoreField {
+interface ScoreFieldBase {
   label: string;
-  type: 'number' | 'boolean' | 'select';
   key: string;
-  options?: string[]; // used if type === 'select'
+  type: 'number' | 'boolean' | 'select';
 }
+
+/**
+ * Interface for a numeric input field, extending the base.
+ * Includes optional properties for step, min, and max values.
+ */
+interface ScoreFieldNumber extends ScoreFieldBase {
+  type: 'number';
+  step?: number | string; // step can be a number or 'any'
+  min?: number;
+  max?: number;
+}
+
+/**
+ * Interface for a boolean (checkbox) input field.
+ */
+interface ScoreFieldBoolean extends ScoreFieldBase {
+  type: 'boolean';
+}
+
+/**
+ * Interface for a select (dropdown) input field.
+ * Includes optional 'options' array.
+ */
+interface ScoreFieldSelect extends ScoreFieldBase {
+  type: 'select';
+  options?: string[];
+}
+
+/**
+ * A union type representing any possible score field.
+ * This is the type used in ScoreDefinition.fields.
+ */
+export type ScoreField = ScoreFieldNumber | ScoreFieldBoolean | ScoreFieldSelect;
 
 /**
  * Optional "next steps" block for each calculator:
@@ -41,11 +73,11 @@ export interface EvidenceBlock {
 export interface ScoreDefinition {
   name: string;
   description: string;
-  fields: ScoreField[];
+  fields: ScoreField[]; // Uses the updated union type
   /**
    * A function that takes user-entered values and returns:
-   *   - score: numeric result
-   *   - interpretation: textual meaning
+   * - score: numeric result
+   * - interpretation: textual meaning
    */
   computeScore: (values: Record<string, any>) => {
     score: number;
@@ -64,3 +96,4 @@ export interface ScoreDefinition {
    */
   evidence?: EvidenceBlock;
 }
+
