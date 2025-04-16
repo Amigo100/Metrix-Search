@@ -54,7 +54,7 @@ const predictiveSnippet = {
     { title: 'Guideline Search', description: 'Find local protocols.', href: '/guideline-search', icon: Search, color: 'text-orange-600', bgColor: 'bg-orange-50' },
     { title: 'Predictive Insights', description: 'View ED forecasts.', href: '/predictive-analytics', icon: TrendingUp, color: 'text-red-600', bgColor: 'bg-red-50' },
     // Use onClick for Patient Tracker, removed href
-    { title: 'Patient Tracker', description: 'Manage tasks & timers.', onClick: handleTogglePromptbar, icon: ClipboardCheck, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
+    { title: 'Patient Tracker', description: 'Manage tasks & timers.', icon: ClipboardCheck, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
   ];
 
 // --- Reusable Quick Access Card Component ---
