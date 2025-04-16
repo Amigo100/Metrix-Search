@@ -154,7 +154,7 @@ function DiagnosticAssistancePage() {
     return (
       <header className="flex flex-col items-center justify-center text-center mb-6">
         <img
-            src="/images/metrix-logo.png" // Ensure path is correct
+            src="/MetrixAI.png" // Ensure path is correct
             alt="Metrix Logo"
             width={stage === 1 ? 80 : 48} // Set explicit width/height
             height={stage === 1 ? 80 : 48}
@@ -244,7 +244,7 @@ function DiagnosticAssistancePage() {
   // Stage 3: Chat Screen - Updated Styling
   function renderChatScreen() {
     return (
-      <div className="flex flex-col h-full bg-gray-50"> {/* Light background for chat area */}
+      <div className="flex flex-col h-full bg-gradient-to-b from-white via-teal-50 to-white"> {/* Light background for chat area */}
         {/* Chat messages */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
           <div className="max-w-4xl mx-auto space-y-5"> {/* Add spacing between messages */}
@@ -325,7 +325,7 @@ function DiagnosticAssistancePage() {
 
   // --- Main Return: Renders current stage + bottom input bar ---
   return (
-    <div className="flex flex-col h-screen bg-gray-100"> {/* Use consistent light background */}
+    <div className="flex flex-col h-screen bg-gradient-to-b from-white via-teal-50 to-white"> {/* Use consistent light background */}
       {/* Content area above the input */}
       <div className="flex-1 overflow-y-auto">
         {stage === 1 && renderHomeScreen()}
