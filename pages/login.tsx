@@ -65,18 +65,18 @@ const LoginPage = () => {
             transition={{ duration: 0.5 }}
             className="flex justify-center"
         >
-            <Link href="/" legacyBehavior>
-                <a className="flex items-center space-x-2 cursor-pointer">
-                    <img
-                        src="/images/metrix-logo.png" // Ensure this path is correct
-                        alt="Metrix Logo"
-                        width={40} // Adjust size as needed
-                        height={40}
-                        className="h-10 w-10"
-                    />
-                     <span className="font-bold text-3xl text-gray-800">Metrix</span>
-                </a>
+            {/* --- Link Fix 1: Removed legacyBehavior and inner <a> tag --- */}
+            <Link href="/" className="flex items-center space-x-2 cursor-pointer">
+                <img
+                    src="/images/metrix-logo.png" // Ensure this path is correct
+                    alt="Metrix Logo"
+                    width={40} // Adjust size as needed
+                    height={40}
+                    className="h-10 w-10"
+                />
+                 <span className="font-bold text-3xl text-gray-800">Metrix</span>
             </Link>
+            {/* --- End Link Fix 1 --- */}
         </motion.div>
 
         <div>
@@ -209,19 +209,19 @@ const LoginPage = () => {
         <div className="text-center">
           <p className="text-sm text-gray-600"> {/* Updated text color */}
             Need access?{' '}
-            <Link href="/#contact" legacyBehavior> {/* Link to contact section on landing page */}
-                <a className="font-medium text-teal-600 hover:text-teal-500 hover:underline">
-                    Request Demo
-                </a>
+            {/* --- Link Fix 2: Removed legacyBehavior and inner <a> tag --- */}
+            <Link href="/#contact" className="font-medium text-teal-600 hover:text-teal-500 hover:underline">
+                Request Demo
             </Link>
+            {/* --- End Link Fix 2 --- */}
           </p>
            <div className="mt-4">
-                <Link href="/" legacyBehavior>
-                    <a className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-teal-600 group">
-                        <ArrowLeft className="h-4 w-4 mr-1 transition-transform duration-200 ease-in-out group-hover:-translate-x-1" />
-                        Back to Home
-                    </a>
+                {/* --- Link Fix 3: Removed legacyBehavior and inner <a> tag --- */}
+                <Link href="/" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-teal-600 group">
+                    <ArrowLeft className="h-4 w-4 mr-1 transition-transform duration-200 ease-in-out group-hover:-translate-x-1" />
+                    Back to Home
                 </Link>
+                {/* --- End Link Fix 3 --- */}
             </div>
         </div>
       </div>
