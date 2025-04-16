@@ -1,5 +1,5 @@
 // /components/Chat/Chat.tsx
-// REDESIGNED VERSION
+// CORRECTED VERSION (Fixes TypeScript error)
 
 import {
   IconChevronDown,
@@ -11,7 +11,8 @@ import {
   IconAlertTriangle, // For errors
   IconInfoCircle, // For info messages
   IconLoader2, // For loading states
-} from '@tabler/icons-react';
+  IconX, // Added for Cancel Edit button
+} from '@tabler/icons-react'; // Using Tabler icons
 import React, {
   MutableRefObject,
   memo,
@@ -42,7 +43,7 @@ import { TemplatesModal } from '@/components/Modals/TemplatesModal';
 import { HelpModal } from '@/components/Modals/HelpModal';
 import { SettingsModal } from '@/components/Modals/SettingsModal';
 
-import { Conversation, Message } from '@/types/chat'; // Adjust path
+import { Conversation, Message, ErrorMessage } from '@/types/chat'; // Adjust path, assuming ErrorMessage type exists
 import { Prompt } from '@/types/prompt'; // Adjust path
 
 // PDF generation
@@ -51,11 +52,12 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 // --- Helper: Error Message Display ---
-const ErrorMessageDiv = ({ error }: { error: { message: string } | null }) => {
+// This component now strictly expects { message: string } | null
+const ErrorMessageDivComponent = ({ error }: { error: { message: string } | null }) => {
   if (!error) return null;
   return (
     <div className="p-4 md:p-6">
-      <div className="flex items-center space-x-3 bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-lg shadow-sm max-w-2xl mx-auto">
+      <div className="flex items-center space-x-3 bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-lg shadow-sm max-w-3xl mx-auto">
         <IconAlertTriangle size={20} className="flex-shrink-0" />
         <span className="text-sm">{error.message || 'An unexpected error occurred.'}</span>
       </div>
@@ -83,7 +85,7 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
 
   const {
     state: {
-      modelError,
+      modelError, // This is type ErrorMessage | null from context
       loading,
       conversations,
       selectedConversation,
@@ -196,9 +198,10 @@ Instructions:
       setLastDocPrompt(docPrompt); // Store prompt for potential regeneration
       setLastOutputType('doc'); // Set last output type
       await handleAnalyzeDoc(docMarkdown, text); // Run analysis after doc creation
-    } catch (err) {
+    } catch (err: any) { // Explicitly type err
       console.error('[handleCreateDocFromTranscript] error =>', err);
-      dispatch({ type: 'change', field: 'modelError', value: { message: 'Failed to create document. Please check the API connection and try again.' } });
+      const errorMsg = err.response?.data?.detail || err.message || 'Failed to create document. Please check the API connection and try again.';
+      dispatch({ type: 'change', field: 'modelError', value: { message: errorMsg } }); // Pass the error message correctly
       setClinicalDoc('');
       setAnalysis('');
       // Need to set loading false here if analysis doesn't run
@@ -241,9 +244,10 @@ ${doc}
       setAnalysis(analysisOutput);
       setLastAnalysisPrompt(analysisPrompt); // Store for regeneration
       // Don't set lastOutputType here, let doc creation handle it if called sequentially
-    } catch (err) {
+    } catch (err: any) { // Explicitly type err
       console.error('[handleAnalyzeDoc] error =>', err);
-      dispatch({ type: 'change', field: 'modelError', value: { message: 'Failed to analyze document.' } });
+      const errorMsg = err.response?.data?.detail || err.message || 'Failed to analyze document.';
+      dispatch({ type: 'change', field: 'modelError', value: { message: errorMsg } }); // Pass the error message correctly
       setAnalysis(''); // Clear analysis on error
     } finally {
       dispatch({ type: 'change', field: 'loading', value: false }); // Always set loading false when analysis finishes/errors
@@ -286,9 +290,10 @@ ${doc}
         const docMarkdown = res.data.response || '';
         setClinicalDoc(docMarkdown);
         await handleAnalyzeDoc(docMarkdown, transcript); // Re-analyze after regenerating doc
-      } catch (err) {
+      } catch (err: any) { // Explicitly type err
         console.error('[handleRegenerate - doc] error =>', err);
-        dispatch({ type: 'change', field: 'modelError', value: { message: 'Failed to regenerate document.' } });
+         const errorMsg = err.response?.data?.detail || err.message || 'Failed to regenerate document.';
+        dispatch({ type: 'change', field: 'modelError', value: { message: errorMsg } }); // Pass the error message correctly
         setClinicalDoc('');
         setAnalysis('');
         dispatch({ type: 'change', field: 'loading', value: false });
@@ -302,9 +307,10 @@ ${doc}
          const payload = { message: lastAnalysisPrompt, history: [], mode: 'analysis', model_name: activeModelName };
          const res = await axios.post('http://localhost:8000/rag/ask_rag', payload);
          setAnalysis(res.data.response || '');
-       } catch (err) {
+       } catch (err: any) { // Explicitly type err
          console.error('[handleRegenerate - analysis] error =>', err);
-         dispatch({ type: 'change', field: 'modelError', value: { message: 'Failed to regenerate analysis.' } });
+         const errorMsg = err.response?.data?.detail || err.message || 'Failed to regenerate analysis.';
+         dispatch({ type: 'change', field: 'modelError', value: { message: errorMsg } }); // Pass the error message correctly
          setAnalysis('');
        } finally {
          dispatch({ type: 'change', field: 'loading', value: false });
@@ -398,6 +404,14 @@ ${doc}
   const hasTranscript = Boolean(transcript);
   let mainContent: ReactNode;
 
+   // *** TYPE ERROR FIX ***
+   // Prepare the error prop for ErrorMessageDivComponent, ensuring it matches the expected type.
+   // We safely access modelError?.message and provide a fallback.
+   const errorForDiv = modelError
+     ? { message: (modelError as any)?.message || 'An unexpected error occurred.' }
+     : null;
+
+
   if (!hasTranscript && !loading && !modelError) {
     // --- REDESIGNED "Initial Screen / No Transcript" View ---
     mainContent = (
@@ -448,10 +462,8 @@ ${doc}
               onRegenerate={() => { /* No regenerate action here */ }}
               onScrollDownClick={() => { /* No scroll down here */ }}
               showScrollDownButton={false}
-              // Pass only necessary props, maybe disable regenerate/stop here?
-              // placeholder="Type or paste your clinical summary, notes, or transcription here..." // Context-specific placeholder
-              // showRegenerateButton={false} // Hide regenerate on initial screen
-              // showStopButton={false} // Hide stop on initial screen
+              placeholder="Type or paste your clinical summary, notes, or transcription here..." // Context-specific placeholder
+              showRegenerateButton={false} // Hide regenerate on initial screen
             />
           </div>
         </div>
@@ -462,36 +474,40 @@ ${doc}
     mainContent = (
       <>
         {/* === Error Display (if any) === */}
-        <ErrorMessageDiv error={modelError} />
+         {/* Pass the correctly formatted error prop */}
+        <ErrorMessageDivComponent error={errorForDiv} />
 
         {/* === Collapsible Transcript Section === */}
-        <div className="px-4 md:px-6 pt-3 mb-4 border-b border-gray-200 pb-4">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold text-teal-800">
-              Input Transcript
-            </h2>
-            <button
-              onClick={() => setIsTranscriptExpanded(!isTranscriptExpanded)}
-              className="p-1 rounded text-teal-600 hover:bg-teal-100 focus:outline-none focus:ring-1 focus:ring-teal-500"
-              title={isTranscriptExpanded ? 'Collapse Transcript' : 'Expand Transcript'}
-              aria-expanded={isTranscriptExpanded}
-            >
-              {isTranscriptExpanded ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}
-            </button>
-          </div>
-          <div
-            className={`
-              w-full bg-gray-100 text-gray-800
-              rounded-md shadow-inner border border-gray-200 transition-all duration-300 ease-in-out
-              ${isTranscriptExpanded ? 'p-3 max-h-40 overflow-y-auto text-sm' : 'p-2 h-9 overflow-hidden whitespace-nowrap cursor-pointer text-xs'}
-            `}
-            onClick={!isTranscriptExpanded ? () => setIsTranscriptExpanded(true) : undefined}
-          >
-            <span className={`${!isTranscriptExpanded ? 'block truncate' : 'whitespace-pre-wrap'}`}>
-              {transcript || <span className="italic text-gray-500">No transcript available.</span>}
-            </span>
-          </div>
-        </div>
+        {/* Only render transcript section if transcript actually exists */}
+        {hasTranscript && (
+            <div className="px-4 md:px-6 pt-3 mb-4 border-b border-gray-200 pb-4">
+                <div className="flex items-center justify-between mb-2">
+                    <h2 className="text-lg font-semibold text-teal-800">
+                    Input Transcript
+                    </h2>
+                    <button
+                    onClick={() => setIsTranscriptExpanded(!isTranscriptExpanded)}
+                    className="p-1 rounded text-teal-600 hover:bg-teal-100 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    title={isTranscriptExpanded ? 'Collapse Transcript' : 'Expand Transcript'}
+                    aria-expanded={isTranscriptExpanded}
+                    >
+                    {isTranscriptExpanded ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}
+                    </button>
+                </div>
+                <div
+                    className={`
+                    w-full bg-gray-100 text-gray-800
+                    rounded-md shadow-inner border border-gray-200 transition-all duration-300 ease-in-out
+                    ${isTranscriptExpanded ? 'p-3 max-h-40 overflow-y-auto text-sm' : 'p-2 h-9 overflow-hidden whitespace-nowrap cursor-pointer text-xs'}
+                    `}
+                    onClick={!isTranscriptExpanded ? () => setIsTranscriptExpanded(true) : undefined}
+                >
+                    <span className={`${!isTranscriptExpanded ? 'block truncate' : 'whitespace-pre-wrap'}`}>
+                    {transcript || <span className="italic text-gray-500">No transcript available.</span>}
+                    </span>
+                </div>
+            </div>
+        )}
         {/* === End Collapsible Transcript Section === */}
 
         {/* Main Two columns layout */}
@@ -510,7 +526,7 @@ ${doc}
                 {isEditingDoc ? (
                     <>
                     <button onClick={handleSaveEdit} title="Save Edits" className="p-1.5 rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500"> <IconCheck size={16} /> </button>
-                    <button onClick={handleCancelEdit} title="Cancel Edits" className="p-1.5 rounded-md text-gray-600 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400"> <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /> </svg> </button>
+                    <button onClick={handleCancelEdit} title="Cancel Edits" className="p-1.5 rounded-md text-gray-600 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400"> <IconX size={16}/> </button> {/* Use IconX */}
                     </>
                 ) : (
                     <button onClick={handleStartEdit} title="Edit Document" disabled={!clinicalDoc || loading || isEditingDoc} className="p-1 rounded text-teal-600 hover:bg-teal-100 disabled:opacity-50 disabled:cursor-not-allowed" > <IconEdit size={16} /> </button>
@@ -538,12 +554,12 @@ ${doc}
                     <LoadingIndicator text="Generating document..." />
                   ) : clinicalDoc ? (
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{clinicalDoc}</ReactMarkdown>
-                  ) : !modelError ? ( // Only show placeholder if no error
+                  ) : !modelError && hasTranscript ? ( // Only show placeholder if no error *and* transcript exists
                      <div className="flex flex-col items-center justify-center h-full text-gray-400 italic">
                        <IconInfoCircle size={24} className="mb-2"/>
                        <span>Document will appear here once generated.</span>
                     </div>
-                  ) : null } {/* Don't show placeholder if there's an error */}
+                  ) : null } {/* Don't show placeholder if there's an error or no transcript yet */}
                 </div>
               )}
             </div>
@@ -569,12 +585,12 @@ ${doc}
                      <IconInfoCircle size={24} className="mb-2"/>
                     <span>Analysis will appear here.</span>
                  </div>
-              ) : !clinicalDoc ? (
+              ) : !clinicalDoc && hasTranscript && !modelError ? ( // Show waiting message if transcript exists but doc doesn't (and no error)
                  <div className="flex flex-col items-center justify-center h-full text-gray-400 italic">
                      <IconInfoCircle size={24} className="mb-2"/>
                     <span>Generate a document first.</span>
                  </div>
-              ): null } {/* Don't show placeholder if there's an error */}
+              ): null } {/* Don't show placeholder if there's an error or no transcript */}
             </div>
           </div>
         </div>
@@ -636,10 +652,10 @@ ${doc}
             <div className="absolute left-0 mt-2 w-60 rounded-md border border-gray-300 bg-white p-1 shadow-lg z-50 max-h-60 overflow-y-auto focus:outline-none">
               {models.length > 0 ? models.map((m) => (
                 <button
-                  key={m.id}
+                  key={m.id} // Assuming model object has an id property
                   className="block w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-teal-50 rounded focus:bg-teal-100 focus:outline-none"
                   onClick={() => {
-                      setActiveModelName(m.name);
+                      setActiveModelName(m.name); // Assuming model object has a name property
                       setShowModelsDropdown(false);
                       // Optional: Re-generate analysis/doc if content exists?
                       // Decide if changing the model should trigger immediate regeneration
@@ -665,7 +681,7 @@ ${doc}
       </div>
 
       {/* === Bottom Chat Input (for follow-up actions when transcript exists) === */}
-       {/* Only show this input bar if a transcript exists */}
+       {/* Only show this input bar if a transcript exists AND we are not editing */}
       {hasTranscript && !isEditingDoc && (
           <div className="flex-shrink-0 border-t border-gray-200 bg-white">
               <ChatInput
@@ -679,7 +695,7 @@ ${doc}
                   onScrollDownClick={scrollToBottom}
                   showScrollDownButton={!autoScrollEnabled && Boolean(chatContainerRef.current && chatContainerRef.current.scrollHeight > chatContainerRef.current.clientHeight + 50)} // Show if not scrolled near bottom
                   placeholder="Ask a follow-up question or give refinement instructions..." // Context-specific placeholder
-                  // showRegenerateButton={!loading && Boolean(clinicalDoc || analysis)} // Show regenerate only if there's output
+                  showRegenerateButton={!loading && Boolean(clinicalDoc || analysis)} // Show regenerate only if there's output
               />
           </div>
       )}
@@ -695,4 +711,4 @@ ${doc}
 });
 
 Chat.displayName = 'Chat';
-export default Chat; // Ensure this is the correct export for your file structure
+export default Chat;
