@@ -1,13 +1,18 @@
 // /components/Settings/Key.tsx
+// UPDATED VERSION
 
-import { IconCheck, IconKey, IconX } from '@tabler/icons-react';
+import { Check, KeyRound, X } from 'lucide-react'; // Use Lucide icons
 import React, { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { SidebarButton } from '../Sidebar/SidebarButton';
 
+// Style constants consistent with the theme
+const formInputStyles = "block w-full rounded-md border border-gray-300 py-1.5 px-2 shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 placeholder-gray-400 text-sm bg-white text-gray-900";
+const ghostButtonStyles = "flex items-center justify-center p-1 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-gray-300";
+
 interface Props {
   apiKey: string;
-  onApiKeyChange: (apiKey: string) => void; // must be provided by parent
+  onApiKeyChange: (apiKey: string) => void;
 }
 
 export const Key: FC<Props> = ({ apiKey, onApiKeyChange }) => {
@@ -16,18 +21,16 @@ export const Key: FC<Props> = ({ apiKey, onApiKeyChange }) => {
   const [newKey, setNewKey] = useState(apiKey);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Press Enter => update key
-  const handleEnterDown = (e: KeyboardEvent<HTMLDivElement>) => {
+  const handleEnterDown = (e: KeyboardEvent<HTMLInputElement>) => { // Target input directly
     if (e.key === 'Enter') {
       e.preventDefault();
       handleUpdateKey(newKey);
     }
   };
 
-  // Actually save or update the key
   const handleUpdateKey = (rawKey: string) => {
     if (typeof onApiKeyChange !== 'function') {
-      console.warn('[Key.tsx] onApiKeyChange is not a function, but was called');
+      console.warn('[Key.tsx] onApiKeyChange is not a function');
       setIsChanging(false);
       return;
     }
@@ -35,64 +38,54 @@ export const Key: FC<Props> = ({ apiKey, onApiKeyChange }) => {
     setIsChanging(false);
   };
 
-  // Focus on the input as soon as we switch to "isChanging"
   useEffect(() => {
     if (isChanging) {
       inputRef.current?.focus();
     }
   }, [isChanging]);
 
-  // If editing => show the password input + icons
+  // Editing State
   if (isChanging) {
     return (
-      <div
-        className="duration-200 flex w-full cursor-pointer items-center
-          rounded-md py-3 px-3 transition-colors hover:bg-gray-500/10"
-      >
-        <IconKey size={18} />
+      // Use padding consistent with SidebarButton, light hover background
+      <div className="flex w-full items-center gap-2 rounded-md py-2 px-3 bg-gray-50 border border-gray-200">
+        <KeyRound size={18} className="text-gray-500 flex-shrink-0" />
         <input
           ref={inputRef}
-          className="ml-2 h-[20px] flex-1 overflow-hidden overflow-ellipsis border-b
-            border-neutral-400 bg-transparent pr-1 text-[12.5px] leading-3
-            text-left text-white outline-none focus:border-neutral-100"
+          className={`${formInputStyles} flex-1 h-7`} // Use themed input styles
           type="password"
           value={newKey}
           onChange={(e) => setNewKey(e.target.value)}
           onKeyDown={handleEnterDown}
-          placeholder={t('API Key') || 'API Key'}
+          placeholder={t('Enter API Key') || 'Enter API Key'}
         />
-        <div className="flex w-[40px]">
-          <IconCheck
-            className="ml-auto min-w-[20px] text-neutral-400 hover:text-neutral-100"
-            size={18}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleUpdateKey(newKey);
-            }}
-          />
-          <IconX
-            className="ml-auto min-w-[20px] text-neutral-400 hover:text-neutral-100"
-            size={18}
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsChanging(false);
-              setNewKey(apiKey); // revert to old key
-            }}
-          />
-        </div>
+        {/* Use themed ghost buttons for actions */}
+        <button
+            className={`${ghostButtonStyles} hover:bg-green-100 hover:text-green-700`}
+            onClick={(e) => { e.stopPropagation(); handleUpdateKey(newKey); }}
+            title="Save Key"
+        >
+            <Check size={18} />
+        </button>
+         <button
+            className={`${ghostButtonStyles} hover:bg-red-100 hover:text-red-700`}
+            onClick={(e) => { e.stopPropagation(); setIsChanging(false); setNewKey(apiKey); }}
+            title="Cancel"
+        >
+             <X size={18} />
+        </button>
       </div>
     );
   }
 
-  // If not editing => return something (button or null)
+  // Read-only State (Uses updated SidebarButton)
   return (
-    // Example: Use a "SidebarButton" for read-only mode:
     <SidebarButton
-      text={apiKey ? '••••••••••' : t('Add API Key') || 'Add API Key'}
-      icon={<IconKey size={18} />}
+      text={apiKey ? t('API Key Set') || 'API Key Set' : t('Add API Key') || 'Add API Key'}
+      icon={<KeyRound size={18} />} // Use Lucide icon
       onClick={() => setIsChanging(true)}
     />
   );
 };
 
-export default Key;
+// No default export needed if imported directly by name
