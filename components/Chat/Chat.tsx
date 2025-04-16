@@ -1,5 +1,5 @@
 // /components/Chat/Chat.tsx
-// CORRECTED VERSION (Fixes TypeScript error)
+// CORRECTED VERSION 2 (Removes incorrect ErrorMessage import)
 
 import {
   IconChevronDown,
@@ -43,7 +43,8 @@ import { TemplatesModal } from '@/components/Modals/TemplatesModal';
 import { HelpModal } from '@/components/Modals/HelpModal';
 import { SettingsModal } from '@/components/Modals/SettingsModal';
 
-import { Conversation, Message, ErrorMessage } from '@/types/chat'; // Adjust path, assuming ErrorMessage type exists
+// *** CORRECTED IMPORT: Removed ErrorMessage ***
+import { Conversation, Message } from '@/types/chat'; // Adjust path
 import { Prompt } from '@/types/prompt'; // Adjust path
 
 // PDF generation
@@ -85,7 +86,7 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
 
   const {
     state: {
-      modelError, // This is type ErrorMessage | null from context
+      modelError, // Type is determined by context, not imported here
       loading,
       conversations,
       selectedConversation,
@@ -201,10 +202,10 @@ Instructions:
     } catch (err: any) { // Explicitly type err
       console.error('[handleCreateDocFromTranscript] error =>', err);
       const errorMsg = err.response?.data?.detail || err.message || 'Failed to create document. Please check the API connection and try again.';
-      dispatch({ type: 'change', field: 'modelError', value: { message: errorMsg } }); // Pass the error message correctly
+      // Dispatch an object that likely matches the structure your reducer expects for modelError
+      dispatch({ type: 'change', field: 'modelError', value: { message: errorMsg } });
       setClinicalDoc('');
       setAnalysis('');
-      // Need to set loading false here if analysis doesn't run
       dispatch({ type: 'change', field: 'loading', value: false });
     } finally {
       // Loading state is handled within handleAnalyzeDoc or the catch block above
@@ -230,11 +231,9 @@ ${doc}
 `.trim();
 
     try {
-      // If not already loading (e.g., called directly, not after doc creation)
       if (!loading) {
         dispatch({ type: 'change', field: 'loading', value: true });
       }
-      // Ensure modelError is cleared even if analysis is called after doc creation error
       dispatch({ type: 'change', field: 'modelError', value: null });
 
       const payload = { message: analysisPrompt, history: [], mode: 'analysis', model_name: activeModelName }; // Added model_name
@@ -243,11 +242,11 @@ ${doc}
       const analysisOutput = res.data.response || '';
       setAnalysis(analysisOutput);
       setLastAnalysisPrompt(analysisPrompt); // Store for regeneration
-      // Don't set lastOutputType here, let doc creation handle it if called sequentially
     } catch (err: any) { // Explicitly type err
       console.error('[handleAnalyzeDoc] error =>', err);
       const errorMsg = err.response?.data?.detail || err.message || 'Failed to analyze document.';
-      dispatch({ type: 'change', field: 'modelError', value: { message: errorMsg } }); // Pass the error message correctly
+       // Dispatch an object that likely matches the structure your reducer expects for modelError
+      dispatch({ type: 'change', field: 'modelError', value: { message: errorMsg } });
       setAnalysis(''); // Clear analysis on error
     } finally {
       dispatch({ type: 'change', field: 'loading', value: false }); // Always set loading false when analysis finishes/errors
@@ -266,10 +265,6 @@ ${doc}
   const handleSendFollowUp = async (message: Message) => {
      // Basic placeholder - ideally, this would interact with the existing doc/analysis
     console.log("Follow-up message received (needs implementation):", message.content);
-    // Example: Send to a different API endpoint or modify the existing one
-    // For now, just add it to the display (if you had a message list here)
-    // Or potentially re-run analysis with the new context?
-    // This part requires defining the desired behavior for follow-up questions.
     alert("Follow-up functionality not fully implemented in this example.");
     dispatch({ type: 'change', field: 'textInputContent', value: '' }); // Clear context input bar
   };
@@ -293,7 +288,8 @@ ${doc}
       } catch (err: any) { // Explicitly type err
         console.error('[handleRegenerate - doc] error =>', err);
          const errorMsg = err.response?.data?.detail || err.message || 'Failed to regenerate document.';
-        dispatch({ type: 'change', field: 'modelError', value: { message: errorMsg } }); // Pass the error message correctly
+        // Dispatch an object that likely matches the structure your reducer expects for modelError
+        dispatch({ type: 'change', field: 'modelError', value: { message: errorMsg } });
         setClinicalDoc('');
         setAnalysis('');
         dispatch({ type: 'change', field: 'loading', value: false });
@@ -310,7 +306,8 @@ ${doc}
        } catch (err: any) { // Explicitly type err
          console.error('[handleRegenerate - analysis] error =>', err);
          const errorMsg = err.response?.data?.detail || err.message || 'Failed to regenerate analysis.';
-         dispatch({ type: 'change', field: 'modelError', value: { message: errorMsg } }); // Pass the error message correctly
+        // Dispatch an object that likely matches the structure your reducer expects for modelError
+         dispatch({ type: 'change', field: 'modelError', value: { message: errorMsg } });
          setAnalysis('');
        } finally {
          dispatch({ type: 'change', field: 'loading', value: false });
@@ -320,6 +317,7 @@ ${doc}
       await handleCreateDocFromTranscript(transcript);
     } else {
         // Nothing to regenerate
+        // Dispatch an object that likely matches the structure your reducer expects for modelError
         dispatch({ type: 'change', field: 'modelError', value: { message: 'No previous input found to regenerate.' } });
     }
   };
@@ -345,24 +343,37 @@ ${doc}
         const now = new Date();
         const timeStamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
 
-        // Basic Markdown to pdfmake conversion (limited support)
-        // For complex Markdown, a library like 'markdown-to-pdfmake' might be needed
-        // This simple version handles basic text and maybe bold/italics.
         const content = clinicalDoc.split('\n').map(line => {
-            // Rudimentary handling for simple bold/headings
             if (line.startsWith('# ')) return { text: line.substring(2), style: 'h1', margin: [0, 5, 0, 5] as [number, number, number, number] };
             if (line.startsWith('## ')) return { text: line.substring(3), style: 'h2', margin: [0, 5, 0, 5] as [number, number, number, number] };
-             if (line.startsWith('**') && line.endsWith('**')) return { text: line.substring(2, line.length - 2), bold: true };
-            // Handle simple bullet points (assuming '*' or '-')
+            if (line.startsWith('**') && line.endsWith('**')) return { text: line.substring(2, line.length - 2), bold: true };
             if (line.trim().startsWith('* ') || line.trim().startsWith('- ')) {
-                return { text: line.trim().substring(2), margin: [10, 0, 0, 2] as [number, number, number, number] }; // Indent bullets slightly
+                return { ul: [ line.trim().substring(2) ], margin: [10, 0, 0, 2] as [number, number, number, number] }; // Use ul for bullets
             }
-            // Default paragraph
-            return { text: line, margin: [0, 0, 0, 5] as [number, number, number, number] }; // Add spacing between paragraphs
+            return { text: line, margin: [0, 0, 0, 5] as [number, number, number, number] };
         });
 
-        const pdfDefinition = {
-            content: content,
+        // Attempt to group bullet points
+        const groupedContent: any[] = [];
+        let currentList: any[] | null = null;
+
+        content.forEach(item => {
+            if (item.ul) {
+                if (!currentList) {
+                    currentList = item.ul;
+                    groupedContent.push({ ul: currentList, margin: [10, 0, 0, 2] });
+                } else {
+                    currentList.push(item.ul[0]); // Add item to existing list
+                }
+            } else {
+                currentList = null; // End of list
+                groupedContent.push(item);
+            }
+        });
+
+
+        const pdfDefinition: any = { // Use any for flexibility with pdfmake types
+            content: groupedContent,
             styles: {
                 h1: { fontSize: 16, bold: true },
                 h2: { fontSize: 14, bold: true },
@@ -404,9 +415,7 @@ ${doc}
   const hasTranscript = Boolean(transcript);
   let mainContent: ReactNode;
 
-   // *** TYPE ERROR FIX ***
    // Prepare the error prop for ErrorMessageDivComponent, ensuring it matches the expected type.
-   // We safely access modelError?.message and provide a fallback.
    const errorForDiv = modelError
      ? { message: (modelError as any)?.message || 'An unexpected error occurred.' }
      : null;
@@ -474,11 +483,9 @@ ${doc}
     mainContent = (
       <>
         {/* === Error Display (if any) === */}
-         {/* Pass the correctly formatted error prop */}
         <ErrorMessageDivComponent error={errorForDiv} />
 
         {/* === Collapsible Transcript Section === */}
-        {/* Only render transcript section if transcript actually exists */}
         {hasTranscript && (
             <div className="px-4 md:px-6 pt-3 mb-4 border-b border-gray-200 pb-4">
                 <div className="flex items-center justify-between mb-2">
@@ -650,7 +657,7 @@ ${doc}
           </button>
           {showModelsDropdown && (
             <div className="absolute left-0 mt-2 w-60 rounded-md border border-gray-300 bg-white p-1 shadow-lg z-50 max-h-60 overflow-y-auto focus:outline-none">
-              {models.length > 0 ? models.map((m) => (
+              {models.length > 0 ? models.map((m: any) => ( // Use any for models if type isn't defined yet
                 <button
                   key={m.id} // Assuming model object has an id property
                   className="block w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-teal-50 rounded focus:bg-teal-100 focus:outline-none"
@@ -658,7 +665,6 @@ ${doc}
                       setActiveModelName(m.name); // Assuming model object has a name property
                       setShowModelsDropdown(false);
                       // Optional: Re-generate analysis/doc if content exists?
-                      // Decide if changing the model should trigger immediate regeneration
                        if (clinicalDoc && transcript) { handleAnalyzeDoc(clinicalDoc, transcript); }
                        else if (transcript) { handleInitialInput(transcript); }
                    }}
@@ -672,36 +678,28 @@ ${doc}
       </div>
 
       {/* === Scrollable main content area === */}
-      {/* Use flex-grow to make this section take available space */}
       <div ref={chatContainerRef} className="flex-1 overflow-y-auto flex flex-col">
-        {/* Render the content based on state (initial screen or main view) */}
         {mainContent}
-        {/* Scroll target */}
         <div ref={messagesEndRef} className="h-1 flex-shrink-0" />
       </div>
 
       {/* === Bottom Chat Input (for follow-up actions when transcript exists) === */}
-       {/* Only show this input bar if a transcript exists AND we are not editing */}
       {hasTranscript && !isEditingDoc && (
           <div className="flex-shrink-0 border-t border-gray-200 bg-white">
               <ChatInput
                   stopConversationRef={stopConversationRef}
-                  textareaRef={followUpInputRef} // Use the follow-up ref
-                  // !IMPORTANT: Decide what onSend should do here.
-                  // The original code sends to handleTranscriptReceived, which seems wrong for follow-up.
-                  // Using handleSendFollowUp placeholder - needs proper implementation.
-                  onSend={handleSendFollowUp}
-                  onRegenerate={handleRegenerate} // Keep regenerate for the main output
+                  textareaRef={followUpInputRef}
+                  onSend={handleSendFollowUp} // Needs proper implementation
+                  onRegenerate={handleRegenerate}
                   onScrollDownClick={scrollToBottom}
-                  showScrollDownButton={!autoScrollEnabled && Boolean(chatContainerRef.current && chatContainerRef.current.scrollHeight > chatContainerRef.current.clientHeight + 50)} // Show if not scrolled near bottom
-                  placeholder="Ask a follow-up question or give refinement instructions..." // Context-specific placeholder
-                  showRegenerateButton={!loading && Boolean(clinicalDoc || analysis)} // Show regenerate only if there's output
+                  showScrollDownButton={!autoScrollEnabled && Boolean(chatContainerRef.current && chatContainerRef.current.scrollHeight > chatContainerRef.current.clientHeight + 50)}
+                  placeholder="Ask a follow-up question or give refinement instructions..."
+                  showRegenerateButton={!loading && Boolean(clinicalDoc || analysis)}
               />
           </div>
       )}
 
-
-      {/* Modals (Assuming they are styled consistently elsewhere) */}
+      {/* Modals */}
       {openModal === 'profile' && <ProfileModal />}
       {openModal === 'templates' && <TemplatesModal />}
       {openModal === 'help' && <HelpModal />}
