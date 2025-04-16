@@ -1,4 +1,4 @@
-// /components/Chat/Chat.tsx
+// /components/Chat/Chat.tsx 
 // CORRECTED VERSION 6 (Adds openModal back to context destructuring)
 
 import {
