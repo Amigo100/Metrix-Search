@@ -120,7 +120,7 @@ export default function ClinicalScoringToolsPage() {
       <div className="w-full max-w-4xl mx-auto flex flex-col items-center pt-8 pb-10 px-4 text-center">
          {/* Logo can be smaller here */}
          <img
-            src="/images/metrix-logo.png" // Ensure path is correct
+            src="/MetrixAI.png" // Ensure path is correct
             alt="Metrix Logo"
             width={64} // Example size
             height={64}
