@@ -58,49 +58,56 @@ const coreTools = [
 ];
 
 
-// --- Reusable Quick Access Card Component (Link wrapper REMOVED) ---
+// --- Reusable Quick Access Card Component (Modified for passHref) ---
 interface QuickAccessCardProps {
   title: string;
   description: string;
-  // href is no longer needed here, it will be handled by the wrapping Link
-  icon: React.ElementType; // Pass icon component directly
+  icon: React.ElementType;
+  // href will be passed down by Link via passHref + rest props
+  // We also accept standard anchor attributes like className, onClick, etc.
+  className?: string; // Allow className to be passed
+  href?: string; // Make href optional here, Link will provide it
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+  onMouseEnter?: React.MouseEventHandler<HTMLAnchorElement>;
+  onTouchStart?: React.TouchEventHandler<HTMLAnchorElement>;
+  ref?: React.Ref<HTMLAnchorElement>; // Accept ref if needed
 }
 
-// ** Removed Link wrapper from inside the component **
-const QuickAccessCard: React.FC<QuickAccessCardProps> = ({ title, description, icon: Icon }) => {
-  // Using consistent teal theme internally
-  const iconBgColor = 'bg-teal-50';
-  const iconTextColor = 'text-teal-600';
-  const linkTextColor = 'text-teal-600';
-  const linkHoverTextColor = 'hover:text-teal-700';
-  const hoverBorderColor = 'hover:border-teal-200'; // Subtle teal border on hover
+// ** Modified to accept ref and render an <a> tag as root **
+const QuickAccessCard = React.forwardRef<HTMLAnchorElement, QuickAccessCardProps>(
+    ({ title, description, icon: Icon, className, ...rest }, ref) => {
+        // Using consistent teal theme internally
+        const iconBgColor = 'bg-teal-50';
+        const iconTextColor = 'text-teal-600';
+        const linkTextColor = 'text-teal-600';
+        const linkHoverTextColor = 'hover:text-teal-700';
+        const hoverBorderColor = 'hover:border-teal-200'; // Subtle teal border on hover
 
-  return (
-    // The component now returns the styled div directly
-    <div
-      // Card styling remains the same
-      className={`group relative flex flex-col justify-between p-6 rounded-xl shadow-lg bg-white border border-gray-100 hover:shadow-xl ${hoverBorderColor} hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 overflow-hidden h-full`} // Added h-full
-    >
-        <div>
-            {/* Icon with consistent teal background */}
-            <div className={`mb-3 inline-flex items-center justify-center h-10 w-10 rounded-lg ${iconBgColor} ${iconTextColor}`}>
-                <Icon size={20} aria-hidden="true" />
-            </div>
-            {/* Standard text colors */}
-            <h3 className={`text-lg font-semibold mb-1 text-gray-900`}>{title}</h3>
-            <p className={`text-sm text-gray-600`}>{description}</p>
-        </div>
-        <div className="mt-4">
-             {/* Teal link text */}
-            <span className={`text-sm font-medium ${linkTextColor} ${linkHoverTextColor} group-hover:underline inline-flex items-center`}>
-                Open Tool <ArrowRight size={16} className="ml-1 transition-transform duration-200 group-hover:translate-x-1"/>
-            </span>
-        </div>
-         {/* Optional: Subtle background pattern */}
-         <div className={`absolute bottom-0 right-0 h-16 w-16 ${iconTextColor} opacity-5 rounded-full -mr-4 -mb-4`}></div>
-    </div>
-  );
-};
+        return (
+            // Render <a> tag as the root element, passing down props from <Link>
+            <a
+            ref={ref} // Forward the ref
+            className={`group relative flex flex-col justify-between p-6 rounded-xl shadow-lg bg-white border border-gray-100 hover:shadow-xl ${hoverBorderColor} hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 overflow-hidden h-full ${className || ''}`}
+            {...rest} // Spread other props like href, onClick, etc.
+            >
+                <div>
+                    <div className={`mb-3 inline-flex items-center justify-center h-10 w-10 rounded-lg ${iconBgColor} ${iconTextColor}`}>
+                        <Icon size={20} aria-hidden="true" />
+                    </div>
+                    <h3 className={`text-lg font-semibold mb-1 text-gray-900`}>{title}</h3>
+                    <p className={`text-sm text-gray-600`}>{description}</p>
+                </div>
+                <div className="mt-4">
+                    <span className={`text-sm font-medium ${linkTextColor} ${linkHoverTextColor} group-hover:underline inline-flex items-center`}>
+                        Open Tool <ArrowRight size={16} className="ml-1 transition-transform duration-200 group-hover:translate-x-1"/>
+                    </span>
+                </div>
+                <div className={`absolute bottom-0 right-0 h-16 w-16 ${iconTextColor} opacity-5 rounded-full -mr-4 -mb-4`}></div>
+            </a>
+        );
+    }
+);
+QuickAccessCard.displayName = 'QuickAccessCard'; // Add display name for React DevTools
 
 
 // --- Dashboard Page Component ---
@@ -115,7 +122,7 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* 1. Greeting and Quick Stats Row */}
-        <section className="animate-fadeInUp"> {/* Assuming animate-fadeInUp is defined globally */}
+        <section className="animate-fadeInUp">
            {/* Greeting and Alert Button */}
            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900"> Welcome back, <span className="text-teal-700">{userName}</span>! </h1>
@@ -135,15 +142,15 @@ export default function DashboardPage() {
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Access Tools</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {coreTools.map((tool) => (
-                 // *** FIX: Wrap QuickAccessCard in Link with legacyBehavior and <a> tag ***
-                 <Link key={tool.title} href={tool.href} legacyBehavior>
-                    <a className="block h-full"> {/* Anchor tag wraps the card, added h-full */}
-                        <QuickAccessCard
-                            title={tool.title}
-                            description={tool.description}
-                            icon={tool.icon}
-                        />
-                    </a>
+                 // *** FIX: Use Link WITHOUT legacyBehavior, add passHref ***
+                 // *** Let QuickAccessCard render the actual <a> tag ***
+                 <Link key={tool.title} href={tool.href} passHref>
+                     <QuickAccessCard
+                         title={tool.title}
+                         description={tool.description}
+                         icon={tool.icon}
+                         // href is passed automatically by Link via passHref
+                     />
                  </Link>
                  // *** END FIX ***
             ))}
@@ -184,4 +191,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
