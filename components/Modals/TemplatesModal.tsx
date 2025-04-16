@@ -6,7 +6,7 @@ import HomeContext from '@/pages/api/home/home.context'; // Context for global s
 import { Prompt } from '@/types/prompt'; // Type definition for a prompt/template
 import { v4 as uuidv4 } from 'uuid'; // Library for generating unique IDs
 
-// PDFMake library for generating PDFs client-side
+// PDFMake library for generating PDFs client-side 
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 pdfMake.vfs = pdfFonts.pdfMake.vfs; // Assign virtual file system for fonts
