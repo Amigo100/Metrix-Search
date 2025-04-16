@@ -359,7 +359,7 @@ export const ChatInput = ({
                            dark:border-neutral-600 dark:bg-[#40414F] 
                            max-h-60 overflow-hidden resize-none"
                 style={{ maxHeight: '400px' }}
-                placeholder={t('Enter a question to ask...') || ''}
+                placeholder={t('Enter Text Transcription or Written Summary Here') || ''}
                 value={textInputContent}
                 rows={1}
                 onCompositionStart={() => setIsTyping(true)}
