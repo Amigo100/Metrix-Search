@@ -1,9 +1,10 @@
 // ============================================================
-// file: /components/Chat/ChatInput.tsx - Redesigned & Themed
+// file: /components/Chat/ChatInput.tsx - Add Export
 // ============================================================
 // Props interface remains the same
 interface ChatInputProps { onSend: (message: Message, plugin: Plugin | null) => void; onRegenerate: () => void; onScrollDownClick: () => void; stopConversationRef: MutableRefObject<boolean>; textareaRef: MutableRefObject<HTMLTextAreaElement | null> | null; showScrollDownButton: boolean; }
-const ChatInput = ({ onSend, onRegenerate, onScrollDownClick, stopConversationRef, textareaRef, showScrollDownButton, }: ChatInputProps) => {
+// *** ADDED EXPORT HERE ***
+export const ChatInput = ({ onSend, onRegenerate, onScrollDownClick, stopConversationRef, textareaRef, showScrollDownButton, }: ChatInputProps) => {
   const { t } = useTranslation('chat');
   const { state: { selectedConversation, messageIsStreaming, prompts, activePromptIndex, promptModalVisible, promptVariables, textInputContent, }, dispatch: homeDispatch, } = useContext(HomeContext);
   // State and Logic (Preserved)
@@ -85,4 +86,5 @@ const ChatInput = ({ onSend, onRegenerate, onScrollDownClick, stopConversationRe
       </div>
     </>
   );
-                                                                            };
+};
+
