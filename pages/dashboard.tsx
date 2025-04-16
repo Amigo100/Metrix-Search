@@ -58,24 +58,17 @@ const coreTools = [
 ];
 
 
-// --- Reusable Quick Access Card Component (Modified for passHref) ---
+// --- Reusable Quick Access Card Component (Reverted: No Link/a tag inside) ---
 interface QuickAccessCardProps {
   title: string;
   description: string;
   icon: React.ElementType;
-  // href will be passed down by Link via passHref + rest props
-  // We also accept standard anchor attributes like className, onClick, etc.
-  className?: string; // Allow className to be passed
-  href?: string; // Make href optional here, Link will provide it
-  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
-  onMouseEnter?: React.MouseEventHandler<HTMLAnchorElement>;
-  onTouchStart?: React.TouchEventHandler<HTMLAnchorElement>;
-  ref?: React.Ref<HTMLAnchorElement>; // Accept ref if needed
+  className?: string; // Keep className if needed for direct styling
 }
 
-// ** Modified to accept ref and render an <a> tag as root **
-const QuickAccessCard = React.forwardRef<HTMLAnchorElement, QuickAccessCardProps>(
-    ({ title, description, icon: Icon, className, ...rest }, ref) => {
+// ** Component now returns a div, Link wrapper will be outside **
+const QuickAccessCard: React.FC<QuickAccessCardProps> =
+    ({ title, description, icon: Icon, className }) => {
         // Using consistent teal theme internally
         const iconBgColor = 'bg-teal-50';
         const iconTextColor = 'text-teal-600';
@@ -84,11 +77,9 @@ const QuickAccessCard = React.forwardRef<HTMLAnchorElement, QuickAccessCardProps
         const hoverBorderColor = 'hover:border-teal-200'; // Subtle teal border on hover
 
         return (
-            // Render <a> tag as the root element, passing down props from <Link>
-            <a
-            ref={ref} // Forward the ref
-            className={`group relative flex flex-col justify-between p-6 rounded-xl shadow-lg bg-white border border-gray-100 hover:shadow-xl ${hoverBorderColor} hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 overflow-hidden h-full ${className || ''}`}
-            {...rest} // Spread other props like href, onClick, etc.
+            // Root element is now a div
+            <div
+                className={`group relative flex flex-col justify-between p-6 rounded-xl shadow-lg bg-white border border-gray-100 hover:shadow-xl ${hoverBorderColor} hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 overflow-hidden h-full ${className || ''}`}
             >
                 <div>
                     <div className={`mb-3 inline-flex items-center justify-center h-10 w-10 rounded-lg ${iconBgColor} ${iconTextColor}`}>
@@ -103,11 +94,10 @@ const QuickAccessCard = React.forwardRef<HTMLAnchorElement, QuickAccessCardProps
                     </span>
                 </div>
                 <div className={`absolute bottom-0 right-0 h-16 w-16 ${iconTextColor} opacity-5 rounded-full -mr-4 -mb-4`}></div>
-            </a>
+            </div>
         );
-    }
-);
-QuickAccessCard.displayName = 'QuickAccessCard'; // Add display name for React DevTools
+    };
+// QuickAccessCard.displayName = 'QuickAccessCard';
 
 
 // --- Dashboard Page Component ---
@@ -142,15 +132,15 @@ export default function DashboardPage() {
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Access Tools</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {coreTools.map((tool) => (
-                 // *** FIX: Use Link WITHOUT legacyBehavior, add passHref ***
-                 // *** Let QuickAccessCard render the actual <a> tag ***
-                 <Link key={tool.title} href={tool.href} passHref>
-                     <QuickAccessCard
-                         title={tool.title}
-                         description={tool.description}
-                         icon={tool.icon}
-                         // href is passed automatically by Link via passHref
-                     />
+                 // *** FIX: Reverted to legacyBehavior + <a> wrapper ***
+                 <Link key={tool.title} href={tool.href} legacyBehavior>
+                     <a className="block h-full"> {/* Anchor tag wraps the card */}
+                         <QuickAccessCard // Pass props needed for display only
+                             title={tool.title}
+                             description={tool.description}
+                             icon={tool.icon}
+                         />
+                     </a>
                  </Link>
                  // *** END FIX ***
             ))}
