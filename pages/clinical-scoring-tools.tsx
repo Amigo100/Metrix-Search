@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronDown, ChevronUp, Calculator, HelpCircle, FileText } from 'lucide-react'; // Using Lucide icons
+import { Label } from '@/components/ui/label'; // *** ADDED IMPORT FOR LABEL *** Adjust path if needed
 
 // Assuming tool definitions are imported correctly
 import { cardioRiskTools } from '@/tools/cardiorisk-tools'; // Adjust path
@@ -37,6 +38,9 @@ const calcTypeOptions = [
 const DISCLAIMER_TEXT = `Metrix AI enhances clinical decision-making with risk and scoring tools. These tools are intended for reference and informational purposes only and do not substitute for professional clinical judgment. Always verify results and consult relevant guidelines.`;
 
 // --- Input Styles (Consistent with Login Page) ---
+// Assuming Input component is imported or defined elsewhere if needed
+// If using shadcn/ui Input, import it: import { Input } from '@/components/ui/input';
+// Define styles directly if not using a component library for basic elements
 const formInputStyles = "block w-full rounded-lg border border-gray-300 py-2 px-3 shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 focus:border-teal-500 placeholder-gray-400 text-sm";
 const formSelectStyles = `${formInputStyles} appearance-none pr-8`; // Add padding for dropdown arrow
 const formCheckboxStyles = "h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500 focus:ring-offset-1";
@@ -136,7 +140,7 @@ export default function ClinicalScoringToolsPage() {
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100 space-y-4">
            {/* Type Filter Buttons - Updated Styling */}
            <div>
-             <label className="block text-sm font-medium text-gray-700 mb-2 text-center sm:text-left">Filter by Type:</label>
+             <Label className="block text-sm font-medium text-gray-700 mb-2 text-center sm:text-left">Filter by Type:</Label> {/* Use imported Label */}
              <div className="flex gap-2 flex-wrap justify-center">
                 {calcTypeOptions.map((option) => (
                   <button
@@ -152,14 +156,15 @@ export default function ClinicalScoringToolsPage() {
 
           {/* Combined Search & Dropdown - Updated Styling */}
           <div className="relative" ref={dropdownRef}>
-            <Label htmlFor="tool-search" className="block text-sm font-medium text-gray-700 mb-1 text-center sm:text-left">
+            <Label htmlFor="tool-search" className="block text-sm font-medium text-gray-700 mb-1 text-center sm:text-left"> {/* Use imported Label */}
               Search or Select a Tool:
             </Label>
             <div className="relative">
-              <Input
+              {/* Assuming you have an Input component or use a standard input */}
+              <input
                 id="tool-search"
                 type="text"
-                className="pr-10" // Add padding for the dropdown icon
+                className={`${formInputStyles} pr-10`} // Use consistent style, Add padding for the dropdown icon
                 placeholder="Type to search tools..."
                 value={inputValue}
                 onChange={(e) => { setInputValue(e.target.value); setShowDropdown(true); }}
@@ -237,7 +242,7 @@ export default function ClinicalScoringToolsPage() {
                         checked={!!formValues[field.key]}
                         onChange={(e) => handleFieldChange(field.key, e.target.checked)}
                       />
-                      <Label htmlFor={field.key} className="text-gray-800 text-sm cursor-pointer"> {/* Make label clickable */}
+                      <Label htmlFor={field.key} className="text-gray-800 text-sm cursor-pointer"> {/* Use imported Label */}
                         {field.label}
                       </Label>
                     </div>
@@ -247,18 +252,19 @@ export default function ClinicalScoringToolsPage() {
                 if (field.type === 'number') {
                   return (
                     <div key={field.key} className="space-y-1.5">
-                      <Label htmlFor={field.key} className="text-gray-700 font-medium text-sm">
+                      <Label htmlFor={field.key} className="text-gray-700 font-medium text-sm"> {/* Use imported Label */}
                         {field.label}
                       </Label>
-                      <Input
+                      {/* Assuming you have an Input component or use a standard input */}
+                      <input
                         type="number"
                         id={field.key}
                         className={formInputStyles} // Use consistent style
                         value={formValues[field.key] || ''}
                         onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                        step={field.step || 'any'} // Add step if needed
-                        min={field.min} // Add min if needed
-                        max={field.max} // Add max if needed
+                        step={field.step || 'any'}
+                        min={field.min}
+                        max={field.max}
                       />
                     </div>
                   );
@@ -267,7 +273,7 @@ export default function ClinicalScoringToolsPage() {
                 if (field.type === 'select') {
                   return (
                      <div key={field.key} className="space-y-1.5">
-                       <Label htmlFor={field.key} className="text-gray-700 font-medium text-sm">
+                       <Label htmlFor={field.key} className="text-gray-700 font-medium text-sm"> {/* Use imported Label */}
                          {field.label}
                        </Label>
                        <div className="relative">
@@ -379,4 +385,3 @@ export default function ClinicalScoringToolsPage() {
     </div>
   );
 }
-
