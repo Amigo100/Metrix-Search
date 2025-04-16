@@ -1,5 +1,3 @@
-### 2️⃣  **/components/Chat/ChatStartOfficeVisit.tsx**
-```tsx
 import React, { useContext, useEffect, useRef } from 'react';
 import { useTranslation } from 'next-i18next';
 import axios from 'axios';
