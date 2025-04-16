@@ -282,7 +282,7 @@ const LandingPage: React.FC = () => {
               <p className="mt-6 text-sm text-gray-500 animate-fadeInUp delay-400">Seeking Seed Funding & Pilot Partners.</p>
               <div className="mt-20 animate-fadeInUp delay-500">
                 <img
-                    src="/images/metrix-overview.png" // Local image path
+                    src="/metrix-overview.png" // Local image path
                     alt="Metrix Platform Overview"
                     width={1000} // Specify width
                     height={600} // Specify height
@@ -336,7 +336,7 @@ const LandingPage: React.FC = () => {
                     <h3 className="text-2xl font-semibold text-gray-900 mb-3 tracking-tight"> Customizable Scribe </h3> <p className="text-gray-600 max-w-md mx-auto"> Adjust templates, acronym expansions, and formatting rules for notes that fit your documentation style. </p>
                   </div>
                   <div className="text-center animate-fadeInUp delay-400">
-                    <img src="/images/chatbot-knowledge-ui.png" alt="UI showing chatbot knowledge source selection" width={500} height={350} className="rounded-2xl shadow-xl mx-auto mb-8 border border-gray-200 w-full max-w-lg bg-white p-4 object-contain" onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src='/images/placeholder-500x350.png';}}/>
+                    <img src="/chatbot-knowledge-ui.png" alt="UI showing chatbot knowledge source selection" width={500} height={350} className="rounded-2xl shadow-xl mx-auto mb-8 border border-gray-200 w-full max-w-lg bg-white p-4 object-contain" onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src='/images/placeholder-500x350.png';}}/>
                      <h3 className="text-2xl font-semibold text-gray-900 mb-3 tracking-tight"> Configurable Knowledge </h3> <p className="text-gray-600 max-w-md mx-auto"> Point the chatbot and semantic search towards your specific local guidelines, formularies, and protocols. </p>
                   </div>
               </div>
