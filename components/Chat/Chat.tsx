@@ -4,7 +4,8 @@
 interface ChatProps { // Renamed from Props for clarity
   stopConversationRef: MutableRefObject<boolean>;
 }
-const Chat = memo(function Chat({ stopConversationRef }: ChatProps) {
+// *** ADDED EXPORT HERE ***
+export const Chat = memo(function Chat({ stopConversationRef }: ChatProps) {
   const { t } = useTranslation('chat');
   const { state: { modelError, loading, conversations, selectedConversation, openModal, models, prompts, }, dispatch, handleUpdateConversation, } = useContext(HomeContext);
   // State and Logic (Preserved)
@@ -217,5 +218,4 @@ const Chat = memo(function Chat({ stopConversationRef }: ChatProps) {
 });
 
 Chat.displayName = 'Chat';
-export default Chat; // Ensure this is the default export
-
+export default Chat; // Ensure this is the default exp
