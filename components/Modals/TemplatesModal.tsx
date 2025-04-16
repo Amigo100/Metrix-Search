@@ -1,7 +1,7 @@
 // /components/Modals/TemplatesModal.tsx
 
 import React, { useState, useContext, useEffect, useMemo, useCallback } from 'react';
-import { useTranslation, DefaultTFuncReturn } from 'next-i18next'; // Hook for internationalization // Import DefaultTFuncReturn if needed, though casting works too
+import { useTranslation, DefaultTFuncReturn } from 'next-i18next'; // Hook for internationalization
 import HomeContext from '@/pages/api/home/home.context'; // Context for global state
 // Assuming Prompt type exists - adding conceptual fields here for clarity
 // import { Prompt } from '@/types/prompt';
@@ -307,7 +307,8 @@ export const TemplatesModal = () => {
   };
 
   const handleDeleteTemplate = (tplId: string) => {
-    if (window.confirm(t('Are you sure you want to delete this template?') as string)) { // Cast confirmation message
+    // FIX: Cast result of t() to string for window.confirm
+    if (window.confirm(t('Are you sure you want to delete this template?') as string)) {
       const filtered = allTemplates.filter((tpl) => tpl.id !== tplId);
       updateAllTemplates(filtered);
       if (expandedTemplateId === tplId) setExpandedTemplateId(null);
@@ -326,7 +327,8 @@ export const TemplatesModal = () => {
          setNotification({ type: 'info', message: t('No templates selected for deletion.') });
          return;
       }
-      if (window.confirm(t('Are you sure you want to delete {{count}} selected templates?', { count: selectedTemplateIds.size }) as string)) { // Cast confirmation message
+      // FIX: Cast result of t() to string for window.confirm
+      if (window.confirm(t('Are you sure you want to delete {{count}} selected templates?', { count: selectedTemplateIds.size }) as string)) {
          const filtered = allTemplates.filter((tpl) => !selectedTemplateIds.has(tpl.id));
          updateAllTemplates(filtered);
          setSelectedTemplateIds(new Set()); // Clear selection
