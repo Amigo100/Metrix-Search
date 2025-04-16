@@ -318,9 +318,9 @@ ${doc}
           <h1 className="text-xl font-bold text-center">Metrix AI Clinical Scribe</h1>
           <p className="text-center text-gray-800 mt-2">
             Use the clinical scribe to record speech or consultations. 
-            Select a template from the options above and produce a 
+            Select a template from the options above, click either the Dictation or Consultations button below and allow Metrix to record. Click the button again to finish your session and produce a 
             professional clinical document with associated recommendations. 
-            You can then download or copy it into the patient's EHR.
+            You can then download or copy it into the patient's EHR as needed.
           </p>
         </div>
 
