@@ -1,14 +1,13 @@
-// components/Sidebar.tsx
 import { IconFolderPlus, IconMistOff, IconPlus } from '@tabler/icons-react';
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react'; // Import React
 import { useTranslation } from 'react-i18next';
 
 import {
   CloseSidebarButton,
   OpenSidebarButton,
-} from './components/OpenCloseButton';
+} from './components/OpenCloseButton'; // Adjust path as needed
 
-import Search from '../Search';
+import Search from '../Search'; // Adjust path as needed
 
 interface Props<T> {
   isOpen: boolean;
@@ -28,7 +27,7 @@ interface Props<T> {
   handleSearchTerm?: (searchTerm: string) => void;
   handleCreateItem?: () => void;
   handleCreateFolder?: () => void;
-  handleDrop?: (e: any) => void;
+  handleDrop?: (e: React.DragEvent<HTMLDivElement>) => void; // Corrected type for e
   children?: ReactNode;
 }
 
@@ -49,27 +48,29 @@ const Sidebar = <T,>({
   handleDrop,
   children,
 }: Props<T>) => {
-  const { t } = useTranslation('promptbar');
+  const { t } = useTranslation('promptbar'); // Assuming 'promptbar' is the correct namespace
 
   // Drag & drop helpers
-  const allowDrop = (e: any) => {
+  const allowDrop = (e: React.DragEvent<HTMLDivElement>) => { // Corrected type
     e.preventDefault();
   };
-  const highlightDrop = (e: any) => {
-    e.target.style.background = '#3f3f46'; // e.g. dark gray to indicate drop target
+  const highlightDrop = (e: React.DragEvent<HTMLDivElement>) => { // Corrected type
+    // Updated highlight color for light theme
+    (e.target as HTMLElement).style.background = 'rgba(20, 184, 166, 0.1)'; // teal-500 with low opacity
   };
-  const removeHighlight = (e: any) => {
-    e.target.style.background = 'none';
+  const removeHighlight = (e: React.DragEvent<HTMLDivElement>) => { // Corrected type
+    (e.target as HTMLElement).style.background = 'none';
   };
 
   return isOpen ? (
-    <div>
+    <div className="relative h-full"> {/* Added relative positioning for close button */}
       <div
-        // Merge default classes with optional className
+        // Updated styling for light theme
         className={`
-          fixed top-0 ${side}-0 z-40 flex h-full w-[260px] flex-col space-y-2
-          bg-neutral-50 shadow-md border border-gray-200 text-black p-2 text-[14px] transition-all
-          sm:relative sm:top-0
+          fixed top-0 ${side}-0 z-20 flex h-full w-[260px] flex-col space-y-3 /* Increased space */
+          bg-white shadow-lg border-r border-gray-200 /* Changed border side */
+          text-gray-800 p-3 text-sm transition-transform duration-300 ease-in-out /* Adjusted padding */
+          /* Removed sm:relative sm:top-0 as AppLayout handles responsiveness */
           ${className ?? ''}
         `}
       >
@@ -79,13 +80,15 @@ const Sidebar = <T,>({
         ) : (
           // Otherwise, render the default layout (used by Chatbar, etc.)
           <>
-            <div className="flex items-center">
+            <div className="flex items-center gap-2"> {/* Use gap */}
               {handleCreateItem && addItemButtonTitle && (
                 <button
+                  // Updated button styling
                   className={`
-                    flex w-[190px] flex-shrink-0 cursor-pointer items-center gap-3
-                    rounded-md border border-gray-400 p-3 text-black
-                    transition-colors duration-200 hover:bg-gray-100
+                    flex flex-grow items-center gap-2 cursor-pointer
+                    rounded-md border border-gray-300 p-3 text-gray-700
+                    transition-colors duration-200 hover:bg-teal-50 hover:border-teal-400 hover:text-teal-700
+                    focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500
                   `}
                   onClick={() => {
                     handleCreateItem();
@@ -98,18 +101,22 @@ const Sidebar = <T,>({
               )}
               {handleCreateFolder && (
                 <button
+                  // Updated button styling
                   className={`
-                    ml-2 flex flex-shrink-0 cursor-pointer items-center gap-3
-                    rounded-md border border-gray-400 p-4 text-sm text-black
-                    transition-colors duration-200 hover:bg-gray-100
+                    flex flex-shrink-0 cursor-pointer items-center justify-center
+                    rounded-md border border-gray-300 p-3 text-gray-600
+                    transition-colors duration-200 hover:bg-teal-50 hover:border-teal-400 hover:text-teal-700
+                    focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500
                   `}
                   onClick={handleCreateFolder}
+                  title="Create Folder" // Added title
                 >
                   <IconFolderPlus size={16} />
                 </button>
               )}
             </div>
 
+            {/* Assuming Search component is styled consistently */}
             {handleSearchTerm && (
               <Search
                 placeholder={t('Search...') || ''}
@@ -118,9 +125,11 @@ const Sidebar = <T,>({
               />
             )}
 
-            <div className="flex-grow overflow-auto">
+            {/* Main content area */}
+            <div className="flex-grow overflow-auto pr-1" style={{ scrollbarWidth: 'thin' }}> {/* Added padding-right for scrollbar */}
               {items && items.length > 0 && folderComponent && (
-                <div className="flex border-b border-gray-400 pb-2">
+                // Updated border color
+                <div className="flex border-b border-gray-200 pb-2">
                   {folderComponent}
                 </div>
               )}
@@ -135,18 +144,26 @@ const Sidebar = <T,>({
                   {itemComponent}
                 </div>
               ) : (
-                <div className="mt-8 select-none text-center opacity-50">
-                  <IconMistOff className="mx-auto mb-3" />
-                  <span className="text-[14px] leading-normal">{t('No data.')}</span>
+                 // Updated "No data" state styling
+                <div className="mt-8 select-none text-center text-gray-400">
+                  <IconMistOff className="mx-auto mb-3 h-8 w-8" /> {/* Made icon larger */}
+                  <span className="text-sm leading-normal">{t('No data.')}</span>
                 </div>
               )}
             </div>
 
-            {footerComponent}
+            {/* Footer area */}
+            {footerComponent && (
+                // Updated border color
+                <div className="pt-2 border-t border-gray-200 flex-shrink-0">
+                    {footerComponent}
+                </div>
+            )}
           </>
         )}
       </div>
 
+      {/* Close button positioned relative to the sidebar itself */}
       <CloseSidebarButton onClick={toggleOpen} side={side} />
     </div>
   ) : (
