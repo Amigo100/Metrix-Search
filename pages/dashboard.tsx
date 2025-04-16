@@ -58,46 +58,7 @@ const coreTools = [
 ];
 
 
-// --- Reusable Quick Access Card Component (Reverted: No Link/a tag inside) ---
-interface QuickAccessCardProps {
-  title: string;
-  description: string;
-  icon: React.ElementType;
-  className?: string; // Keep className if needed for direct styling
-}
-
-// ** Component now returns a div, Link wrapper will be outside **
-const QuickAccessCard: React.FC<QuickAccessCardProps> =
-    ({ title, description, icon: Icon, className }) => {
-        // Using consistent teal theme internally
-        const iconBgColor = 'bg-teal-50';
-        const iconTextColor = 'text-teal-600';
-        const linkTextColor = 'text-teal-600';
-        const linkHoverTextColor = 'hover:text-teal-700';
-        const hoverBorderColor = 'hover:border-teal-200'; // Subtle teal border on hover
-
-        return (
-            // Root element is now a div
-            <div
-                className={`group relative flex flex-col justify-between p-6 rounded-xl shadow-lg bg-white border border-gray-100 hover:shadow-xl ${hoverBorderColor} hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 overflow-hidden h-full ${className || ''}`}
-            >
-                <div>
-                    <div className={`mb-3 inline-flex items-center justify-center h-10 w-10 rounded-lg ${iconBgColor} ${iconTextColor}`}>
-                        <Icon size={20} aria-hidden="true" />
-                    </div>
-                    <h3 className={`text-lg font-semibold mb-1 text-gray-900`}>{title}</h3>
-                    <p className={`text-sm text-gray-600`}>{description}</p>
-                </div>
-                <div className="mt-4">
-                    <span className={`text-sm font-medium ${linkTextColor} ${linkHoverTextColor} group-hover:underline inline-flex items-center`}>
-                        Open Tool <ArrowRight size={16} className="ml-1 transition-transform duration-200 group-hover:translate-x-1"/>
-                    </span>
-                </div>
-                <div className={`absolute bottom-0 right-0 h-16 w-16 ${iconTextColor} opacity-5 rounded-full -mr-4 -mb-4`}></div>
-            </div>
-        );
-    };
-// QuickAccessCard.displayName = 'QuickAccessCard';
+// *** REMOVED QuickAccessCard Component Definition ***
 
 
 // --- Dashboard Page Component ---
@@ -105,6 +66,13 @@ export default function DashboardPage() {
   // Helper to get trend indicator color (Kept functional colors)
   const getTrendColor = (trend: string) => { /* ... function code ... */ switch (trend) { case 'up': return 'text-red-600'; case 'down': return 'text-green-600'; default: return 'text-gray-500'; } };
   const getTrendIndicator = (trend: string) => { /* ... function code ... */ switch (trend) { case 'up': return '↑'; case 'down': return '↓'; default: return '→'; } }
+
+  // Define card styles locally or import from a constants file
+  const iconBgColor = 'bg-teal-50';
+  const iconTextColor = 'text-teal-600';
+  const linkTextColor = 'text-teal-600';
+  const linkHoverTextColor = 'hover:text-teal-700';
+  const hoverBorderColor = 'hover:border-teal-200';
 
   return (
     // Main container
@@ -131,19 +99,30 @@ export default function DashboardPage() {
         <section className="animate-fadeInUp delay-100">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Access Tools</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {coreTools.map((tool) => (
-                 // *** FIX: Reverted to legacyBehavior + <a> wrapper ***
-                 <Link key={tool.title} href={tool.href} legacyBehavior>
-                     <a className="block h-full"> {/* Anchor tag wraps the card */}
-                         <QuickAccessCard // Pass props needed for display only
-                             title={tool.title}
-                             description={tool.description}
-                             icon={tool.icon}
-                         />
-                     </a>
-                 </Link>
-                 // *** END FIX ***
-            ))}
+            {coreTools.map((tool) => {
+                 const Icon = tool.icon; // Get icon component
+                 return (
+                     // *** FIX: Inlined card structure directly inside <a> tag ***
+                     <Link key={tool.title} href={tool.href} legacyBehavior>
+                         <a className={`group relative flex flex-col justify-between p-6 rounded-xl shadow-lg bg-white border border-gray-100 hover:shadow-xl ${hoverBorderColor} hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 overflow-hidden h-full block`}>
+                             <div>
+                                 <div className={`mb-3 inline-flex items-center justify-center h-10 w-10 rounded-lg ${iconBgColor} ${iconTextColor}`}>
+                                     <Icon size={20} aria-hidden="true" />
+                                 </div>
+                                 <h3 className={`text-lg font-semibold mb-1 text-gray-900`}>{tool.title}</h3>
+                                 <p className={`text-sm text-gray-600`}>{tool.description}</p>
+                             </div>
+                             <div className="mt-4">
+                                 <span className={`text-sm font-medium ${linkTextColor} ${linkHoverTextColor} group-hover:underline inline-flex items-center`}>
+                                     Open Tool <ArrowRight size={16} className="ml-1 transition-transform duration-200 group-hover:translate-x-1"/>
+                                 </span>
+                             </div>
+                             <div className={`absolute bottom-0 right-0 h-16 w-16 ${iconTextColor} opacity-5 rounded-full -mr-4 -mb-4`}></div>
+                         </a>
+                     </Link>
+                     // *** END FIX ***
+                 );
+             })}
           </div>
         </section>
 
@@ -181,3 +160,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
