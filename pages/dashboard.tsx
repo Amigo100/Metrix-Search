@@ -47,15 +47,15 @@ const predictiveSnippet = {
 // const waitTimeData = [ ... ];
 
 // --- Core Tool Links ---
-const coreTools = [
-  { title: 'AI Clinical Scribe', description: 'Generate notes from conversations.', href: '/clinical-scribe', icon: FileText, color: 'text-blue-600', bgColor: 'bg-blue-50' },
-  { title: 'AI Assistant Chat', description: 'Ask clinical questions.', href: '/diagnostic-assistance', icon: BrainCircuit, color: 'text-purple-600', bgColor: 'bg-purple-50' },
-  { title: 'Risk & Scoring Tools', description: 'Calculate clinical scores.', href: '/clinical-scoring-tools', icon: Calculator, color: 'text-green-600', bgColor: 'bg-green-50' },
-  { title: 'Guideline Search', description: 'Find local protocols.', href: '/guideline-search', icon: Search, color: 'text-orange-600', bgColor: 'bg-orange-50' }, // Add this page if it exists
-  { title: 'Predictive Insights', description: 'View ED forecasts.', href: '/predictive-analytics', icon: TrendingUp, color: 'text-red-600', bgColor: 'bg-red-50' },
-  { title: 'Patient Tracker', description: 'Manage tasks & timers.', href: '/#tasks', // Link to open task sidebar? Or a dedicated page?
-    icon: ClipboardCheck, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
-];
+  const coreTools = [
+    { title: 'AI Clinical Scribe', description: 'Generate notes from conversations.', href: '/clinical-scribe', icon: FileText, color: 'text-blue-600', bgColor: 'bg-blue-50' },
+    { title: 'AI Assistant Chat', description: 'Ask clinical questions.', href: '/diagnostic-assistance', icon: BrainCircuit, color: 'text-purple-600', bgColor: 'bg-purple-50' },
+    { title: 'Risk & Scoring Tools', description: 'Calculate clinical scores.', href: '/clinical-scoring-tools', icon: Calculator, color: 'text-green-600', bgColor: 'bg-green-50' },
+    { title: 'Guideline Search', description: 'Find local protocols.', href: '/guideline-search', icon: Search, color: 'text-orange-600', bgColor: 'bg-orange-50' },
+    { title: 'Predictive Insights', description: 'View ED forecasts.', href: '/predictive-analytics', icon: TrendingUp, color: 'text-red-600', bgColor: 'bg-red-50' },
+    // Use onClick for Patient Tracker, removed href
+    { title: 'Patient Tracker', description: 'Manage tasks & timers.', onClick: handleTogglePromptbar, icon: ClipboardCheck, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
+  ];
 
 // --- Reusable Quick Access Card Component ---
 interface QuickAccessCardProps {
@@ -151,23 +151,27 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* 2. Quick Access Tools Grid */}
-        <section className="animate-fadeInUp delay-100"> {/* Assuming animate-fadeInUp is defined globally */}
+         {/* 2. Quick Access Tools Grid */}
+        <section className="animate-fadeInUp delay-100">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Access Tools</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {/* *** UPDATED: Changed xl:grid-cols-5 to xl:grid-cols-6 *** */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-5"> {/* Use gap-5 or adjust as needed */}
             {coreTools.map((tool) => (
-                <QuickAccessCard
-                    key={tool.title}
-                    title={tool.title}
-                    description={tool.description}
-                    href={tool.href}
-                    icon={tool.icon}
-                    color={tool.color}
-                    bgColor={tool.bgColor}
-                />
+              <QuickAccessCard
+                key={tool.title}
+                title={tool.title}
+                description={tool.description}
+                // Pass href or onClick conditionally based on definition
+                href={tool.href}
+                onClick={tool.onClick}
+                icon={tool.icon}
+                color={tool.color}
+                bgColor={tool.bgColor}
+              />
             ))}
           </div>
         </section>
+
 
         {/* 3. Task & Activity Columns */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fadeInUp delay-200"> {/* Assuming animate-fadeInUp is defined globally */}
