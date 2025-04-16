@@ -156,8 +156,8 @@ function DiagnosticAssistancePage() {
         <img
             src="/MetrixAI.png" // Ensure path is correct
             alt="Metrix Logo"
-            width={stage === 1 ? 80 : 48} // Set explicit width/height
-            height={stage === 1 ? 80 : 48}
+            width={64} // Set explicit width/height
+            height={64}
             className={`${logoSizeClass} mb-2 transition-all duration-300 ease-in-out`}
         />
          <h1 className={`font-bold text-gray-900 transition-all duration-300 ease-in-out ${stage === 1 ? 'text-3xl sm:text-4xl' : 'text-2xl'}`}>
