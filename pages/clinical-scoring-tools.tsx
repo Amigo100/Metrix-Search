@@ -1,16 +1,19 @@
+// file: /pages/clinical-scoring-tools.tsx (or similar path)
+
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
+import { ChevronDown, ChevronUp, Calculator, HelpCircle, FileText } from 'lucide-react'; // Using Lucide icons
 
-import { cardioRiskTools } from '@/tools/cardiorisk-tools';
-import { pulmonaryTools } from '@/tools/pulmonary-tools';
-import { giTools } from '@/tools/gi-tools';
-import { neuroTools } from '@/tools/neuro-tools';
-import { endocrinologyTools } from '@/tools/endocrinology-tools';
-import { obgynTools } from '@/tools/obgyn-tools';
+// Assuming tool definitions are imported correctly
+import { cardioRiskTools } from '@/tools/cardiorisk-tools'; // Adjust path
+import { pulmonaryTools } from '@/tools/pulmonary-tools'; // Adjust path
+import { giTools } from '@/tools/gi-tools'; // Adjust path
+import { neuroTools } from '@/tools/neuro-tools'; // Adjust path
+import { endocrinologyTools } from '@/tools/endocrinology-tools'; // Adjust path
+import { obgynTools } from '@/tools/obgyn-tools'; // Adjust path
 
-import { ScoreDefinition } from '@/tools/types';
+import { ScoreDefinition } from '@/tools/types'; // Adjust path
 
-// Group by category
+// Group by category (Logic preserved)
 const categorizedTools: { [key: string]: ScoreDefinition[] } = {
   Cardiology: cardioRiskTools,
   Pulmonology: pulmonaryTools,
@@ -20,7 +23,7 @@ const categorizedTools: { [key: string]: ScoreDefinition[] } = {
   'OB/GYN': obgynTools,
 };
 
-// The available calcType options
+// The available calcType options (Logic preserved)
 const calcTypeOptions = [
   'All',
   'Diagnostic',
@@ -30,366 +33,350 @@ const calcTypeOptions = [
   'Drug Conversion',
 ];
 
-// Optionally, you can place your more detailed disclaimers here if desired
-const DISCLAIMER_TEXT = `
-Our Metrix AI platform enhances clinicians' decision-making processes.
-It provides a range of risk and scoring tools, but these are not designed
-for automated diagnoses or to replace clinical judgment in any capacity.
-`;
+// Updated Disclaimer Text
+const DISCLAIMER_TEXT = `Metrix AI enhances clinical decision-making with risk and scoring tools. These tools are intended for reference and informational purposes only and do not substitute for professional clinical judgment. Always verify results and consult relevant guidelines.`;
+
+// --- Input Styles (Consistent with Login Page) ---
+const formInputStyles = "block w-full rounded-lg border border-gray-300 py-2 px-3 shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 focus:border-teal-500 placeholder-gray-400 text-sm";
+const formSelectStyles = `${formInputStyles} appearance-none pr-8`; // Add padding for dropdown arrow
+const formCheckboxStyles = "h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500 focus:ring-offset-1";
+
+// --- Button Styles (Consistent with Theme) ---
+const primaryButtonStyles = "inline-flex items-center justify-center px-6 py-2 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-teal-600 to-teal-800 hover:from-teal-500 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-300 ease-in-out shadow-md disabled:opacity-70 disabled:cursor-not-allowed";
+const secondaryButtonStyles = "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 disabled:opacity-70 disabled:cursor-not-allowed";
+const filterButtonBase = "px-3 py-1.5 text-sm font-medium rounded-full border transition-colors duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500";
+const filterButtonSelected = "bg-teal-600 text-white border-teal-600";
+const filterButtonDefault = "bg-white text-gray-600 border-gray-300 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200";
+
 
 export default function ClinicalScoringToolsPage() {
+  // --- State Management (Logic Preserved) ---
   const [inputValue, setInputValue] = useState('');
   const [selectedCalcType, setSelectedCalcType] = useState('All');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedTool, setSelectedTool] = useState<ScoreDefinition | null>(null);
   const [formValues, setFormValues] = useState<Record<string, any>>({});
-  const [scoreResult, setScoreResult] =
-    useState<{ score: number; interpretation: string } | null>(null);
+  const [scoreResult, setScoreResult] = useState<{ score: number; interpretation: string } | null>(null);
   const [showNextSteps, setShowNextSteps] = useState(false);
   const [showEvidence, setShowEvidence] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  // Filter logic, respecting both search input and selected calcType
+  // --- Filtering Logic (Preserved) ---
   const filteredCategorizedTools = useMemo(() => {
     const result: { [key: string]: ScoreDefinition[] } = {};
     Object.keys(categorizedTools).forEach((category) => {
       const filtered = categorizedTools[category].filter((tool) => {
-        const matchesSearch = tool.name
-          .toLowerCase()
-          .includes(inputValue.toLowerCase());
-        const matchesType =
-          selectedCalcType === 'All' ||
-          (tool.calcType &&
-            tool.calcType.toLowerCase() === selectedCalcType.toLowerCase());
+        const matchesSearch = tool.name.toLowerCase().includes(inputValue.toLowerCase());
+        const matchesType = selectedCalcType === 'All' || (tool.calcType && tool.calcType.toLowerCase() === selectedCalcType.toLowerCase());
         return matchesSearch && matchesType;
       });
-      if (filtered.length > 0) {
-        result[category] = filtered;
-      }
+      if (filtered.length > 0) { result[category] = filtered; }
     });
     return result;
   }, [inputValue, selectedCalcType]);
 
-  // Close the dropdown if clicking outside
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
-      }
-    }
+  // --- Effects (Preserved) ---
+  useEffect(() => { // Close dropdown on outside click
+    function handleClickOutside(e: MouseEvent) { if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) { setShowDropdown(false); } }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => { document.removeEventListener('mousedown', handleClickOutside); };
   }, []);
 
+  // --- Event Handlers (Preserved) ---
   const handleSelectTool = (tool: ScoreDefinition) => {
     setSelectedTool(tool);
-    setFormValues({});
-    setScoreResult(null);
-    setInputValue(tool.name);
-    setShowDropdown(false);
-    setShowNextSteps(false);
+    setFormValues({}); // Reset form values when tool changes
+    setScoreResult(null); // Reset result
+    setInputValue(tool.name); // Update search input to reflect selection
+    setShowDropdown(false); // Close dropdown
+    setShowNextSteps(false); // Hide extra info
     setShowEvidence(false);
   };
 
   const handleFieldChange = (fieldKey: string, value: any) => {
     setFormValues((prev) => ({ ...prev, [fieldKey]: value }));
+    setScoreResult(null); // Reset score when form values change
   };
 
   const handleCalculate = () => {
     if (!selectedTool) return;
+    // Basic validation could be added here if needed
     const result = selectedTool.computeScore(formValues);
     setScoreResult(result);
+    // Optionally scroll to result
+    const resultElement = document.getElementById('score-result');
+    resultElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   return (
-    <div className="w-full min-h-screen bg-white p-6 flex flex-col items-center">
-      {/* 
-        1) Brand and heading (mimicking the style of the first-stage layout),
-        2) Disclaimer,
-        3) Then the existing type-filter buttons, search bar, etc.
-      */}
-      <div className="flex flex-col items-center pt-8 pb-12 px-4">
-        {/* Brand Header / Logo */}
-        <header className="flex flex-col items-center justify-center text-center">
-          <div className="flex items-center justify-center">
-            <img
-              src="/MetrixAI.png"
-              alt="Metrix AI Logo"
-              className="w-28 h-28 object-cover mr-3"
-            />
-          </div>
-        </header>
-
-        {/* Main heading */}
-        <div className="mt-4 text-center max-w-3xl">
-          <h1 className="text-3xl font-bold mb-3">
-            Metrix AI Risk and Scoring Tool
-          </h1>
-          {/* Optional short disclaimer or subheading */}
-          <p className="text-gray-700 text-base leading-snug whitespace-pre-line">
-            {DISCLAIMER_TEXT}
-          </p>
-        </div>
+    // --- Updated Page Layout & Styling ---
+    <div className="w-full min-h-screen bg-gradient-to-b from-white via-teal-50 to-white p-6 md:p-8 flex flex-col items-center">
+      {/* Page Header */}
+      <div className="w-full max-w-4xl mx-auto flex flex-col items-center pt-8 pb-10 px-4 text-center">
+         {/* Logo can be smaller here */}
+         <img
+            src="/images/metrix-logo.png" // Ensure path is correct
+            alt="Metrix Logo"
+            width={64} // Example size
+            height={64}
+            className="mb-4"
+          />
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+          Clinical Risk & Scoring Tools
+        </h1>
+        <p className="text-gray-600 text-base leading-relaxed max-w-2xl">
+          Access a wide range of validated scoring systems and calculators to aid in clinical decision-making. Select a tool below or search by name.
+        </p>
       </div>
 
-      {/* Existing content: filter buttons, search bar, tool display, etc. */}
-      <div className="w-full max-w-2xl mx-auto">
-        {/* Type Filter Buttons */}
-        <div className="flex gap-2 mb-4 flex-wrap justify-center">
-          {calcTypeOptions.map((option) => (
-            <button
-              key={option}
-              onClick={() => setSelectedCalcType(option)}
-              className={`px-4 py-2 rounded-md border ${
-                selectedCalcType === option
-                  ? 'bg-[#008080] text-white border-[#008080]'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-[#008080]'
-              } transition-colors`}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
+      {/* Main Content Area */}
+      <div className="w-full max-w-3xl mx-auto space-y-8">
+        {/* Filter and Search Section */}
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100 space-y-4">
+           {/* Type Filter Buttons - Updated Styling */}
+           <div>
+             <label className="block text-sm font-medium text-gray-700 mb-2 text-center sm:text-left">Filter by Type:</label>
+             <div className="flex gap-2 flex-wrap justify-center">
+                {calcTypeOptions.map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => setSelectedCalcType(option)}
+                    className={`${filterButtonBase} ${selectedCalcType === option ? filterButtonSelected : filterButtonDefault}`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+           </div>
 
-        {/* Combined Search & Dropdown by Category */}
-        <div className="relative mb-8 w-full" ref={dropdownRef}>
-          <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
-            Search or Select a Tool
-          </label>
-          <div
-            className="flex items-center bg-white border border-gray-300 rounded-md px-3 py-2 shadow-sm cursor-text"
-            onClick={() => setShowDropdown(!showDropdown)}
-          >
-            <input
-              type="text"
-              className="flex-1 focus:outline-none bg-transparent"
-              placeholder="Type to search..."
-              value={inputValue}
-              onChange={(e) => {
-                setInputValue(e.target.value);
-                setShowDropdown(true);
-              }}
-            />
-            {showDropdown ? (
-              <ChevronUpIcon className="h-5 w-5 text-gray-500" />
-            ) : (
-              <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+          {/* Combined Search & Dropdown - Updated Styling */}
+          <div className="relative" ref={dropdownRef}>
+            <Label htmlFor="tool-search" className="block text-sm font-medium text-gray-700 mb-1 text-center sm:text-left">
+              Search or Select a Tool:
+            </Label>
+            <div className="relative">
+              <Input
+                id="tool-search"
+                type="text"
+                className="pr-10" // Add padding for the dropdown icon
+                placeholder="Type to search tools..."
+                value={inputValue}
+                onChange={(e) => { setInputValue(e.target.value); setShowDropdown(true); }}
+                onClick={() => setShowDropdown(!showDropdown)} // Toggle on click as well
+                aria-autocomplete="list"
+                aria-expanded={showDropdown}
+              />
+              <button
+                 type="button"
+                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                 onClick={() => setShowDropdown(!showDropdown)}
+                 aria-label="Toggle tool list"
+              >
+                {showDropdown ? (
+                  <ChevronUp size={20} aria-hidden="true" />
+                ) : (
+                  <ChevronDown size={20} aria-hidden="true" />
+                )}
+              </button>
+            </div>
+
+            {/* Dropdown List - Updated Styling */}
+            {showDropdown && (
+              <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-80 overflow-auto focus:outline-none">
+                {Object.keys(filteredCategorizedTools).length === 0 ? (
+                  <div className="p-3 text-gray-500 text-sm">No matches found</div>
+                ) : (
+                  Object.keys(filteredCategorizedTools).map((category) => (
+                    <div key={category}>
+                      <div className="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-semibold uppercase tracking-wider sticky top-0"> {/* Sticky category header */}
+                        {category}
+                      </div>
+                      {filteredCategorizedTools[category].map((tool) => (
+                        <div
+                          key={tool.name}
+                          className="px-3 py-2 hover:bg-teal-50 cursor-pointer text-gray-800 text-sm"
+                          onClick={() => handleSelectTool(tool)}
+                          role="option"
+                          aria-selected={selectedTool?.name === tool.name}
+                          tabIndex={0} // Make it focusable
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelectTool(tool); }}
+                        >
+                          {tool.name}
+                        </div>
+                      ))}
+                    </div>
+                  ))
+                )}
+              </div>
             )}
           </div>
+        </div> {/* End Filter and Search Section */}
 
-          {showDropdown && (
-            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-80 overflow-auto">
-              {Object.keys(filteredCategorizedTools).length === 0 ? (
-                <div className="p-2 text-gray-500 text-sm">No matches found</div>
-              ) : (
-                Object.keys(filteredCategorizedTools).map((category) => (
-                  <div key={category}>
-                    <div className="px-3 py-1 bg-gray-100 text-gray-700 font-semibold">
-                      {category}
-                    </div>
-                    {filteredCategorizedTools[category].map((tool) => (
-                      <div
-                        key={tool.name}
-                        className="px-3 py-2 hover:bg-[#008080] cursor-pointer text-gray-700"
-                        onClick={() => handleSelectTool(tool)}
-                      >
-                        {tool.name}
-                      </div>
-                    ))}
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Display the selected tool */}
+        {/* Display the selected tool - Updated Card Styling */}
         {selectedTool && (
-          <div className="bg-white shadow-md rounded-lg p-6 mx-auto w-full max-w-4xl">
-            <h2 className="text-xl font-semibold text-[#008080] mb-2 text-center">
+          <div className="bg-white shadow-xl rounded-xl border border-gray-100 p-6 md:p-8 w-full">
+            <h2 className="text-xl md:text-2xl font-semibold text-teal-700 mb-2 text-center">
               {selectedTool.name}
             </h2>
-            <p className="text-sm text-gray-600 mb-5 text-center">
+            <p className="text-sm text-gray-600 mb-6 text-center max-w-xl mx-auto">
               {selectedTool.description}
             </p>
 
-            {/* Render input fields */}
-            <div className="space-y-4">
+            {/* Render input fields - Updated Styling */}
+            <div className="space-y-5">
               {selectedTool.fields.map((field) => {
+                // --- Checkbox ---
                 if (field.type === 'boolean') {
                   return (
-                    <div key={field.key} className="flex items-center">
+                    <div key={field.key} className="flex items-center space-x-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
                       <input
                         type="checkbox"
                         id={field.key}
-                        className="mr-2 h-5 w-5 text-[#008080]"
+                        className={formCheckboxStyles}
                         checked={!!formValues[field.key]}
-                        onChange={(e) =>
-                          setFormValues((prev) => ({
-                            ...prev,
-                            [field.key]: e.target.checked,
-                          }))
-                        }
+                        onChange={(e) => handleFieldChange(field.key, e.target.checked)}
                       />
-                      <label htmlFor={field.key} className="text-gray-800">
+                      <Label htmlFor={field.key} className="text-gray-800 text-sm cursor-pointer"> {/* Make label clickable */}
                         {field.label}
-                      </label>
+                      </Label>
                     </div>
                   );
                 }
+                // --- Number Input ---
                 if (field.type === 'number') {
                   return (
-                    <div
-                      key={field.key}
-                      className="flex flex-col sm:flex-row sm:items-center"
-                    >
-                      <label
-                        htmlFor={field.key}
-                        className="sm:w-48 font-medium text-gray-800"
-                      >
+                    <div key={field.key} className="space-y-1.5">
+                      <Label htmlFor={field.key} className="text-gray-700 font-medium text-sm">
                         {field.label}
-                      </label>
-                      <input
+                      </Label>
+                      <Input
                         type="number"
                         id={field.key}
-                        className="mt-1 sm:mt-0 border border-gray-300 p-2 rounded-md w-full sm:w-40 focus:ring-[#008080] focus:outline-none"
+                        className={formInputStyles} // Use consistent style
                         value={formValues[field.key] || ''}
-                        onChange={(e) =>
-                          setFormValues((prev) => ({
-                            ...prev,
-                            [field.key]: e.target.value,
-                          }))
-                        }
+                        onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                        step={field.step || 'any'} // Add step if needed
+                        min={field.min} // Add min if needed
+                        max={field.max} // Add max if needed
                       />
                     </div>
                   );
                 }
+                // --- Select Dropdown ---
                 if (field.type === 'select') {
                   return (
-                    <div
-                      key={field.key}
-                      className="flex flex-col sm:flex-row sm:items-center"
-                    >
-                      <label
-                        htmlFor={field.key}
-                        className="sm:w-48 font-medium text-gray-800"
-                      >
-                        {field.label}
-                      </label>
-                      <select
-                        id={field.key}
-                        className="mt-1 sm:mt-0 border border-gray-300 p-2 rounded-md w-full sm:w-60 focus:ring-[#008080] focus:outline-none"
-                        value={formValues[field.key] || ''}
-                        onChange={(e) =>
-                          setFormValues((prev) => ({
-                            ...prev,
-                            [field.key]: e.target.value,
-                          }))
-                        }
-                      >
-                        <option value="">-- Select --</option>
-                        {field.options?.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                     <div key={field.key} className="space-y-1.5">
+                       <Label htmlFor={field.key} className="text-gray-700 font-medium text-sm">
+                         {field.label}
+                       </Label>
+                       <div className="relative">
+                         <select
+                           id={field.key}
+                           className={formSelectStyles} // Use consistent style
+                           value={formValues[field.key] || ''}
+                           onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                         >
+                           <option value="" disabled>-- Select --</option>
+                           {field.options?.map((option) => (
+                             <option key={option} value={option}> {option} </option>
+                           ))}
+                         </select>
+                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                            <ChevronDown size={16} />
+                         </div>
+                       </div>
+                     </div>
                   );
                 }
                 return null;
               })}
             </div>
 
-            <button
-              onClick={handleCalculate}
-              className="mt-6 bg-[#008080]-600 text-white px-6 py-2 rounded-md hover:bg-[#008080] transition-colors"
-            >
-              Calculate
-            </button>
+            {/* Calculate Button - Updated Styling */}
+            <div className="mt-8 text-center">
+                <button onClick={handleCalculate} className={primaryButtonStyles}>
+                    <Calculator size={18} className="mr-2"/> Calculate Score
+                </button>
+            </div>
 
+            {/* Result Display - Updated Styling */}
             {scoreResult && (
-              <div className="mt-6 p-4 border-l-4 border-[#008080] bg-[#008080] rounded-md">
-                <h3 className="font-semibold text-[#008080] text-lg">Result</h3>
-                <p className="text-gray-800 mt-1">
+              <div id="score-result" className="mt-8 p-4 border-l-4 border-teal-500 bg-teal-50 rounded-md shadow-sm">
+                <h3 className="font-semibold text-teal-800 text-lg mb-1">Result</h3>
+                <p className="text-gray-700">
                   <strong>Score:</strong> {scoreResult.score}
                 </p>
-                <p className="text-gray-800 mt-1">
+                <p className="text-gray-700 mt-1 whitespace-pre-line"> {/* Allow line breaks */}
                   <strong>Interpretation:</strong> {scoreResult.interpretation}
                 </p>
               </div>
             )}
 
+            {/* Next Steps / Evidence Section - Updated Styling */}
             {(selectedTool.nextSteps || selectedTool.evidence) && (
-              <div className="mt-6 flex gap-3 justify-center">
-                {selectedTool.nextSteps && (
-                  <button
-                    onClick={() => setShowNextSteps((prev) => !prev)}
-                    className="bg-[#008080] text-white px-4 py-2 rounded-md hover:bg-[#008080]"
-                  >
-                    {!showNextSteps ? 'Show Next Steps' : 'Hide Next Steps'}
-                  </button>
-                )}
-                {selectedTool.evidence && (
-                  <button
-                    onClick={() => setShowEvidence((prev) => !prev)}
-                    className="bg-[#008080] text-white px-4 py-2 rounded-md hover:bg-[#008080]"
-                  >
-                    {!showEvidence ? 'Show Evidence' : 'Hide Evidence'}
-                  </button>
-                )}
-              </div>
-            )}
+              <div className="mt-8 pt-6 border-t border-gray-200 space-y-4">
+                 {/* Buttons to toggle sections */}
+                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    {selectedTool.nextSteps && (
+                      <button onClick={() => setShowNextSteps((prev) => !prev)} className={secondaryButtonStyles} >
+                        {showNextSteps ? 'Hide Next Steps' : 'Show Next Steps'}
+                        {showNextSteps ? <ChevronUp size={16} className="ml-1"/> : <ChevronDown size={16} className="ml-1"/>}
+                      </button>
+                    )}
+                    {selectedTool.evidence && (
+                      <button onClick={() => setShowEvidence((prev) => !prev)} className={secondaryButtonStyles} >
+                         {showEvidence ? 'Hide Evidence' : 'Show Evidence'}
+                         {showEvidence ? <ChevronUp size={16} className="ml-1"/> : <ChevronDown size={16} className="ml-1"/>}
+                      </button>
+                    )}
+                 </div>
 
-            {showNextSteps && selectedTool.nextSteps && (
-              <div className="mt-4 p-4 border rounded bg-gray-50">
-                <h4 className="text-md font-semibold text-[#008080] mb-2">Next Steps</h4>
-                <div className="mb-3">
-                  <p className="font-medium underline">Management:</p>
-                  <p className="text-gray-700 whitespace-pre-line">
-                    {selectedTool.nextSteps.management}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-medium underline">Critical Actions:</p>
-                  <p className="text-gray-700 whitespace-pre-line">
-                    {selectedTool.nextSteps.criticalActions}
-                  </p>
-                </div>
-              </div>
-            )}
+                 {/* Collapsible Sections */}
+                 {showNextSteps && selectedTool.nextSteps && (
+                   <div className="mt-4 p-4 border rounded-lg bg-gray-50 border-gray-200 animate-fadeInUp delay-100">
+                     <h4 className="text-md font-semibold text-teal-700 mb-3 flex items-center">
+                        <HelpCircle size={18} className="mr-2"/> Next Steps
+                     </h4>
+                     <div className="space-y-3 text-sm">
+                        {selectedTool.nextSteps.management && (
+                            <div>
+                                <p className="font-medium text-gray-800 underline mb-1">Management:</p>
+                                <p className="text-gray-700 whitespace-pre-line">{selectedTool.nextSteps.management}</p>
+                            </div>
+                        )}
+                         {selectedTool.nextSteps.criticalActions && (
+                            <div>
+                                <p className="font-medium text-gray-800 underline mb-1">Critical Actions:</p>
+                                <p className="text-gray-700 whitespace-pre-line">{selectedTool.nextSteps.criticalActions}</p>
+                            </div>
+                         )}
+                     </div>
+                   </div>
+                 )}
 
-            {showEvidence && selectedTool.evidence && (
-              <div className="mt-4 p-4 border rounded bg-gray-50">
-                <h4 className="text-md font-semibold text-[#008080] mb-2">
-                  Evidence & References
-                </h4>
-                {selectedTool.evidence.commentary && (
-                  <p className="text-gray-700 mb-3 whitespace-pre-line">
-                    {selectedTool.evidence.commentary}
-                  </p>
-                )}
-                <ul className="list-disc list-inside text-gray-800 space-y-1">
-                  {selectedTool.evidence.references.map((ref) => (
-                    <li key={ref}>{ref}</li>
-                  ))}
-                </ul>
+                 {showEvidence && selectedTool.evidence && (
+                   <div className="mt-4 p-4 border rounded-lg bg-gray-50 border-gray-200 animate-fadeInUp delay-100">
+                     <h4 className="text-md font-semibold text-teal-700 mb-3 flex items-center">
+                        <FileText size={18} className="mr-2"/> Evidence & References
+                     </h4>
+                     {selectedTool.evidence.commentary && ( <p className="text-sm text-gray-700 mb-3 whitespace-pre-line">{selectedTool.evidence.commentary}</p> )}
+                     <ul className="list-disc list-inside text-gray-700 space-y-1 text-sm">
+                       {selectedTool.evidence.references.map((ref, index) => ( <li key={index}>{ref}</li> ))}
+                     </ul>
+                   </div>
+                 )}
               </div>
             )}
           </div>
         )}
 
-        {/* Original small disclaimer at the bottom */}
-        <div className="mt-10 text-xs text-gray-500 leading-relaxed text-center">
-          <p className="mb-2">
-            <strong>Disclaimer:</strong> These calculators are provided for reference
-            only; always use clinical judgment.
-          </p>
+        {/* Final Disclaimer - Updated Styling */}
+        <div className="mt-12 text-xs text-gray-500 leading-relaxed text-center max-w-xl mx-auto">
+          <p><strong>Disclaimer:</strong> {DISCLAIMER_TEXT}</p>
         </div>
       </div>
     </div>
   );
 }
+
