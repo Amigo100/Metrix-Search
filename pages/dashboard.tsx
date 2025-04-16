@@ -15,6 +15,7 @@ import {
     CheckCircle2, // Completed Tasks
     AlertCircle, // Expired/Alert Tasks
     ArrowRight, // Links
+    BarChart3, // Stats/Analytics Icon (Can still use for general stats)
     Server, // System Status Icon
     Clock, // Added for LOS/Wait Time
     LogIn // Added for Admission Risk
@@ -35,6 +36,7 @@ const upcomingTasks = [
     { id: 't1', text: "Review Patient X's blood results", due: "in 15m", urgent: true },
     { id: 't2', text: "Check Patient Y's response to diuretics", due: "in 1h", urgent: false },
 ];
+// Updated placeholder data for text display
 const predictiveSnippet = {
     waitTimeMetric: "Est. ED Wait Time",
     waitTimeValue: "~45 min",
@@ -45,7 +47,7 @@ const predictiveSnippet = {
 };
 const pendingAlerts = overdueTaskCount; // Example: Alerts = Overdue Tasks
 
-// --- Core Tool Links (Removed color/bgColor props) ---
+// --- Core Tool Links (Removed color/bgColor properties) ---
 const coreTools = [
   { title: 'AI Clinical Scribe', description: 'Generate notes from conversations.', href: '/clinical-scribe', icon: FileText },
   { title: 'AI Assistant Chat', description: 'Ask clinical questions.', href: '/diagnostic-assistance', icon: BrainCircuit },
@@ -56,7 +58,7 @@ const coreTools = [
 ];
 
 
-// --- Reusable Quick Access Card Component (Updated Styling) ---
+// --- Reusable Quick Access Card Component (Updated Styling - No color prop) ---
 interface QuickAccessCardProps {
   title: string;
   description: string;
@@ -65,15 +67,22 @@ interface QuickAccessCardProps {
 }
 
 const QuickAccessCard: React.FC<QuickAccessCardProps> = ({ title, description, href, icon: Icon }) => {
+  // Using consistent teal theme internally
+  const iconBgColor = 'bg-teal-50';
+  const iconTextColor = 'text-teal-600';
+  const linkTextColor = 'text-teal-600';
+  const linkHoverTextColor = 'hover:text-teal-700';
+  const hoverBorderColor = 'hover:border-teal-200'; // Subtle teal border on hover
+
   return (
     <Link
       href={href}
       // Updated card styling: bg-white, teal icon/link, subtle teal border on hover
-      className={`group relative flex flex-col justify-between p-6 rounded-xl shadow-lg bg-white border border-gray-100 hover:shadow-xl hover:border-teal-200 hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 overflow-hidden`}
+      className={`group relative flex flex-col justify-between p-6 rounded-xl shadow-lg bg-white border border-gray-100 hover:shadow-xl ${hoverBorderColor} hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 overflow-hidden`}
     >
         <div>
             {/* Icon with consistent teal background */}
-            <div className={`mb-3 inline-flex items-center justify-center h-10 w-10 rounded-lg bg-teal-50 text-teal-600`}>
+            <div className={`mb-3 inline-flex items-center justify-center h-10 w-10 rounded-lg ${iconBgColor} ${iconTextColor}`}>
                 <Icon size={20} aria-hidden="true" />
             </div>
             {/* Standard text colors */}
@@ -82,12 +91,12 @@ const QuickAccessCard: React.FC<QuickAccessCardProps> = ({ title, description, h
         </div>
         <div className="mt-4">
              {/* Teal link */}
-            <span className={`text-sm font-medium text-teal-600 group-hover:text-teal-700 group-hover:underline inline-flex items-center`}>
+            <span className={`text-sm font-medium ${linkTextColor} ${linkHoverTextColor} group-hover:underline inline-flex items-center`}>
                 Open Tool <ArrowRight size={16} className="ml-1 transition-transform duration-200 group-hover:translate-x-1"/>
             </span>
         </div>
          {/* Optional: Subtle background pattern or gradient using theme color */}
-         <div className={`absolute bottom-0 right-0 h-16 w-16 text-teal-600 opacity-5 rounded-full -mr-4 -mb-4`}></div>
+         <div className={`absolute bottom-0 right-0 h-16 w-16 ${iconTextColor} opacity-5 rounded-full -mr-4 -mb-4`}></div>
     </Link>
   );
 };
@@ -189,8 +198,7 @@ export default function DashboardPage() {
                     description={tool.description}
                     href={tool.href}
                     icon={tool.icon}
-                    // Pass a base color name, component handles variants
-                    color={tool.color?.split('-')[0] || 'teal'} // Extract base color, default to teal
+                    // *** REMOVED color prop from here ***
                 />
             ))}
           </div>
@@ -286,3 +294,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
