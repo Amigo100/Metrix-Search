@@ -1,11 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 // Note: 'next/link' and 'next/router' are specific to Next.js projects.
 // Replaced Link with <a> and removed useRouter for preview compatibility.
-// import Link from 'next/link'; // Removed for preview
-// import { useRouter } from 'next/router'; // Removed for preview
 
 // Note: Assumes Button component is available, likely from shadcn/ui or similar.
-import { Button } from '@/components/ui/button';
+// Placeholder Button component for preview if not available in the environment
+const Button = ({ children, className, variant, size, ...props }: any) => {
+  // Basic styling to mimic a button for preview purposes
+  const baseStyle = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
+  const variantStyle = variant === 'outline'
+    ? "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"
+    : "bg-primary text-primary-foreground shadow hover:bg-primary/90";
+  const sizeStyle = size === 'lg' ? "h-10 px-4 py-2" : "h-9 px-3 py-2"; // Simplified sizing
+
+  return (
+    <button className={cn(baseStyle, variantStyle, sizeStyle, className)} {...props}>
+      {children}
+    </button>
+  );
+};
+
 
 // Framer Motion for animations
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,25 +42,31 @@ import {
   University,   // Partner Icon Placeholder
   HeartHandshake, // Partner Icon Placeholder
 } from 'lucide-react';
+
 // Note: Assumes 'cn' utility function is available, likely from shadcn/ui or similar.
-import { cn } from '@/lib/utils';
+// Placeholder cn function for preview
+const cn = (...inputs: any[]) => {
+    // Simplified version for joining class names
+    return inputs.filter(Boolean).join(' ');
+};
+
 
 // ================================
-// Placeholder Image References (Update with actual paths)
+// Placeholder Image References (Update with actual paths or URLs)
 // ================================
-const HeroImage = '/hero-concept.png'; // e.g., Image showing multi-feature concept
-const MetrixAILogo = '/MetrixAI.png';
-const ScribeImage = '/scribe-feature.png'; // Image focused on scribe feature
-const PredictionImage = '/prediction-dashboard.png'; // Image concept for ED predictions
-const ChatbotImage = '/chatbot-interface.png'; // Image concept for chatbot
-const TechImage = '/deployment-options.png'; // Image showing cloud/on-site concept
-const VideoPlaceholderImage = '/video-thumbnail.png'; // Thumbnail for demo video
+// Using placehold.co for robust placeholders
+const HeroImage = 'https://placehold.co/600x400/e0f2f7/37474f?text=Metrix+AI+Platform'; // Light teal bg, dark text
+const MetrixAILogo = 'https://placehold.co/48x48/3D7F80/ffffff?text=MAI'; // Medium teal bg, white text
+const ScribeImage = 'https://placehold.co/600x400/f5f5f4/78716c?text=AI+Scribe'; // Stone bg, gray text
+const PredictionImage = 'https://placehold.co/600x400/ffffff/a8a29e?text=ED+Predictions'; // White bg, gray text
+const ChatbotImage = 'https://placehold.co/600x400/f5f5f4/78716c?text=AI+Chatbot'; // Stone bg, gray text
+const TechImage = 'https://placehold.co/600x400/ffffff/a8a29e?text=Deployment'; // White bg, gray text
+const VideoPlaceholderImage = 'https://placehold.co/1280x720/e5e7eb/a8a29e?text=Demo+Video'; // Gray bg, gray text
 
-// Example testimonial images: (Consider getting testimonials covering different features/roles)
-const DrSmithPNG = '/dr-smith.png';     
-const DrWilliamsPNG = '/dr-williams.png';
-const DrLeePNG = '/dr-lee.png';        
-const AdminJonesPNG = '/admin-jones.png'; 
+// Example testimonial images using placehold.co with initials
+const DrWilliamsPNG = 'https://placehold.co/48x48/ffffff/a8a29e?text=JW';
+const AdminJonesPNG = 'https://placehold.co/48x48/ffffff/a8a29e?text=AJ';
+const DrLeePNG = 'https://placehold.co/48x48/ffffff/a8a29e?text=SL';
 
 // ================================
 // Updated Testimonial Data (Example - Tailor to real testimonials)
@@ -121,9 +140,10 @@ const TestimonialCard = ({ testimonial }: { testimonial: typeof testimonials[0] 
           className="h-12 w-12 rounded-full object-cover border border-stone-200"
           whileHover={{ scale: 1.2 }}
           transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+          // Robust onError using placehold.co
           onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
             const target = e.currentTarget;
-            target.onerror = null;
+            target.onerror = null; // Prevent infinite loop if placeholder fails
             const initials = testimonial.name.split(' ').map((n) => n[0]).join('');
             target.src = `https://placehold.co/48x48/ffffff/a8a29e?text=${initials}`;
           }}
@@ -157,7 +177,7 @@ const FeatureCard = ({
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      viewport={{ once: true }}
+      viewport={{ once: true }} // Animate only once when it enters the viewport
     >
       <motion.div
         className={cn("mb-4", iconColor)}
@@ -187,95 +207,109 @@ const partnerIcons = [
 // Main Metrix AI Home Page Component
 // ================================
 const MetrixAIHomePage = () => {
+  // State to control the visibility of features for animation trigger
   const [showFeatures, setShowFeatures] = useState(false);
+  // Ref to the features section to observe intersection
   const featuresRef = useRef<HTMLDivElement>(null);
 
+  // Effect to observe when the features section comes into view
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
+        // If the element is intersecting (visible)
         if (entry.isIntersecting) {
-          setShowFeatures(true);
+          setShowFeatures(true); // Trigger the animation state
+          // Stop observing once triggered (optional, good for performance)
           if (featuresRef.current) {
             observer.unobserve(featuresRef.current);
           }
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 } // Trigger when 10% of the element is visible
     );
 
+    // Start observing the features section if the ref is attached
     if (featuresRef.current) {
       observer.observe(featuresRef.current);
     }
 
+    // Cleanup function to unobserve when the component unmounts
     return () => {
       const currentRef = featuresRef.current;
       if (currentRef) {
         observer.unobserve(currentRef);
       }
     };
-  }, []);
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   // CSS for the scrolling animation (defined within the component for self-containment)
   const scrollAnimationStyle = `
     @keyframes scroll {
       0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
+      100% { transform: translateX(-50%); } /* Scroll one full set of logos */
     }
     .animate-scroll {
+      /* Apply the animation */
       animation: scroll 30s linear infinite;
     }
   `;
 
   return (
-    // Main container
+    // Main container with background and font settings
     <div className="min-h-screen bg-stone-50 text-stone-900 font-sans">
-      {/* Inject the CSS animation styles */}
+      {/* Inject the CSS animation styles into the head */}
       <style>{scrollAnimationStyle}</style>
 
       {/* ========================== Hero Section ========================== */}
       <section className="relative py-16 md:py-24 bg-gradient-to-br from-white via-stone-50 to-stone-100 overflow-hidden">
-        {/* Increased horizontal padding: px-16 */}
+        {/* Increased horizontal padding for wider layout */}
         <div className="relative z-10 container mx-auto px-16">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             {/* Left side: Text content */}
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, ease: 'easeInOut' }}
-              className="space-y-6"
+              initial={{ opacity: 0, x: -50 }} // Initial animation state (off-screen left)
+              animate={{ opacity: 1, x: 0 }} // Animate to visible state
+              transition={{ duration: 0.8, ease: 'easeInOut' }} // Animation timing
+              className="space-y-6" // Spacing between elements
             >
+              {/* Logo and Title */}
               <div className="flex items-center gap-4">
                 <img
                   src={MetrixAILogo}
                   alt="Metrix AI Logo"
                   className="h-12 w-12 rounded-full"
+                  // Placeholder fallback for the logo
                   onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                    e.currentTarget.src = 'https://placehold.co/48x48/ffffff/a8a29e?text=MAI';
+                    e.currentTarget.src = 'https://placehold.co/48x48/3D7F80/ffffff?text=MAI';
                   }}
                 />
                 <motion.h1
-                  className="text-4xl sm:text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#2D4F6C] to-[#3D7F80]" // Navy to Medium Teal
-                  whileHover={{ scale: 1.05, filter: 'brightness(1.1)' }}
-                  transition={{ type: 'spring', stiffness: 100 }}
+                  className="text-4xl sm:text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#2D4F6C] to-[#3D7F80]" // Navy to Medium Teal gradient
+                  whileHover={{ scale: 1.05, filter: 'brightness(1.1)' }} // Hover effect
+                  transition={{ type: 'spring', stiffness: 100 }} // Spring animation on hover
                 >
                   Metrix AI
                 </motion.h1>
               </div>
+              {/* Subtitle */}
               <h2 className="text-3xl sm:text-4xl font-semibold text-stone-900">
-                 Intelligent Clinical Workflow: Scribe, Predict, Decide
+                  Intelligent Clinical Workflow: Scribe, Predict, Decide
               </h2>
+              {/* Description */}
               <p className="text-lg text-stone-700">
                 Empowering clinicians and healthcare organizations with cutting-edge AI. Slash documentation time, predict ED flow, get instant decision support, and choose secure cloud or on-site deployment.
               </p>
+              {/* Call to Action Buttons */}
               <div className="flex flex-wrap gap-4">
-                <a href="/free-trial">
+                {/* === Updated Link for Start Free Trial === */}
+                <a href="/login.tsx"> {/* Link points to login.tsx */}
                   <Button
                     size="lg"
                     className="bg-gradient-to-r from-[#2D4F6C] to-[#3D7F80] text-white hover:from-[#254058] hover:to-[#316667] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2 cursor-pointer"
                   >
                     <motion.span
                       className="flex items-center gap-2"
-                      whileHover={{ scale: 1.1 }}
+                      whileHover={{ scale: 1.1 }} // Inner scale effect on hover
                       transition={{ type: 'spring', stiffness: 400, damping: 10 }}
                     >
                       <Zap className="w-5 h-5" />
@@ -283,6 +317,7 @@ const MetrixAIHomePage = () => {
                     </motion.span>
                   </Button>
                 </a>
+                {/* Explore Features Button (Scrolls down) */}
                 <a href="#features">
                   <Button
                     variant="outline"
@@ -297,65 +332,89 @@ const MetrixAIHomePage = () => {
 
             {/* Right side: Hero Image */}
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, ease: 'easeInOut' }}
-              className="relative mt-8 md:mt-0"
+              initial={{ opacity: 0, x: 50 }} // Initial animation state (off-screen right)
+              animate={{ opacity: 1, x: 0 }} // Animate to visible state
+              transition={{ duration: 0.8, ease: 'easeInOut' }} // Animation timing
+              className="relative mt-8 md:mt-0" // Margin top on mobile
             >
               <motion.img
                 src={HeroImage}
                 alt="Metrix AI platform showing scribe, predictions and chatbot features"
-                className="rounded-xl shadow-lg border border-stone-200 w-full max-w-md mx-auto"
-                whileHover={{ scale: 1.03, rotate: 2 }}
-                transition={{ type: 'spring', stiffness: 150, damping: 15 }}
+                className="rounded-xl shadow-lg border border-stone-200 w-full max-w-md mx-auto" // Styling and max width
+                whileHover={{ scale: 1.03, rotate: 2 }} // Hover effect
+                transition={{ type: 'spring', stiffness: 150, damping: 15 }} // Spring animation on hover
+                // Placeholder fallback for the hero image
                 onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
-                  e.currentTarget.src = 'https://placehold.co/600x400/ffffff/a8a29e?text=Metrix+AI+Platform';
+                  e.currentTarget.src = 'https://placehold.co/600x400/e0f2f7/37474f?text=Metrix+AI+Platform';
                 }}
               />
+              {/* Decorative element */}
               <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-gradient-to-tr from-[#68A9A9]/30 to-[#3D7F80]/30 rounded-full blur-xl"></div>
             </motion.div>
           </div>
         </div>
-        {/* Background Blobs */}
+        {/* Background Animated Blobs (Decorative) */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#68A9A9]/20 rounded-full filter blur-3xl opacity-70 animate-blob"></div>
             <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#3D7F80]/20 rounded-full filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
         </div>
+        {/* CSS for blob animation (needs to be defined globally or via Tailwind config usually) */}
+        <style jsx global>{`
+            @keyframes blob {
+              0% { transform: translate(0px, 0px) scale(1); }
+              33% { transform: translate(30px, -50px) scale(1.1); }
+              66% { transform: translate(-20px, 20px) scale(0.9); }
+              100% { transform: translate(0px, 0px) scale(1); }
+            }
+            .animate-blob {
+              animation: blob 7s infinite;
+            }
+            .animation-delay-2000 {
+              animation-delay: 2s;
+            }
+            .animation-delay-4000 {
+              animation-delay: 4s;
+            }
+        `}</style>
       </section>
 
       {/* ========================== AI Scribe Section ========================== */}
       <section id="scribe" className="py-16 md:py-24 bg-white">
-        {/* Increased horizontal padding: px-16 */}
+        {/* Increased horizontal padding */}
         <div className="container mx-auto px-16">
           <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Text Content */}
             <motion.div
               className="space-y-4"
               initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              whileInView={{ opacity: 1, x: 0 }} // Animate when in view
               transition={{ duration: 0.6, delay: 0.1 }}
-              viewport={{ once: true }}
+              viewport={{ once: true }} // Animate only once
             >
               <h2 className="text-3xl sm:text-4xl font-semibold text-stone-900">Effortless Real-Time Documentation</h2>
               <p className="text-lg text-stone-700">
-                Reclaim your time with our highly accurate AI clinical scribe... {/* Content shortened for brevity */}
+                Reclaim your time with our highly accurate AI clinical scribe. It listens to patient encounters and automatically generates structured clinical notes, ready for your review and EHR integration. Focus more on patient care, less on typing.
               </p>
+              {/* Benefit List */}
               <ul className="list-disc list-inside space-y-2 text-stone-600 pt-2">
-                <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Significantly reduced documentation time</motion.li>
-                <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Improved note accuracy and completeness</motion.li>
-                <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Enhanced focus on direct patient interaction</motion.li>
+                  <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Significantly reduced documentation time</motion.li>
+                  <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Improved note accuracy and completeness</motion.li>
+                  <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Enhanced focus on direct patient interaction</motion.li>
               </ul>
             </motion.div>
+            {/* Image */}
             <motion.div
-              whileHover={{ scale: 1.03 }}
+              whileHover={{ scale: 1.03 }} // Hover effect
               initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              whileInView={{ opacity: 1, x: 0 }} // Animate when in view
               transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
+              viewport={{ once: true }} // Animate only once
             >
               <img
                 src={ScribeImage}
                 alt="Metrix AI scribe interface showing real-time transcription"
                 className="rounded-xl shadow-lg border border-stone-200 w-full"
+                // Placeholder fallback
                 onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                   e.currentTarget.src = 'https://placehold.co/600x400/f5f5f4/78716c?text=AI+Scribe';
                 }}
@@ -367,11 +426,12 @@ const MetrixAIHomePage = () => {
 
       {/* ========================== ED Prediction Section ========================== */}
       <section id="predictions" className="py-16 md:py-24 bg-stone-100">
-        {/* Increased horizontal padding: px-16 */}
+        {/* Increased horizontal padding */}
         <div className="container mx-auto px-16">
           <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Image (Order changed on medium screens) */}
             <motion.div
-              className="md:order-last"
+              className="md:order-last" // Image appears on the right on md screens and up
               whileHover={{ scale: 1.03 }}
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -382,11 +442,13 @@ const MetrixAIHomePage = () => {
                 src={PredictionImage}
                 alt="Dashboard showing ED prediction metrics"
                 className="rounded-xl shadow-lg border border-stone-200 w-full"
+                // Placeholder fallback
                 onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                   e.currentTarget.src = 'https://placehold.co/600x400/ffffff/a8a29e?text=ED+Predictions';
                 }}
               />
             </motion.div>
+            {/* Text Content */}
             <motion.div
               className="space-y-4"
               initial={{ opacity: 0, x: -30 }}
@@ -396,12 +458,13 @@ const MetrixAIHomePage = () => {
             >
               <h2 className="text-3xl sm:text-4xl font-semibold text-stone-900">Proactive ED Flow Management</h2>
               <p className="text-lg text-stone-700">
-                Gain valuable foresight with our state-of-the-art ED prediction tools... {/* Content shortened for brevity */}
+                Gain valuable foresight with our state-of-the-art ED prediction tools. Predict patient length of stay, likelihood of admission, and overall department busyness to optimize staffing, resource allocation, and patient flow.
               </p>
+              {/* Benefit List */}
               <ul className="list-disc list-inside space-y-2 text-stone-600 pt-2">
-                 <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Optimize resource planning and staffing</motion.li>
-                 <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Identify potential bottlenecks proactively</motion.li>
-                 <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Enhance situational awareness for teams</motion.li>
+                  <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Optimize resource planning and staffing</motion.li>
+                  <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Identify potential bottlenecks proactively</motion.li>
+                  <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Enhance situational awareness for teams</motion.li>
               </ul>
             </motion.div>
           </div>
@@ -410,9 +473,10 @@ const MetrixAIHomePage = () => {
 
       {/* ========================== AI Chatbot Section ========================== */}
       <section id="chatbot" className="py-16 md:py-24 bg-white">
-        {/* Increased horizontal padding: px-16 */}
+        {/* Increased horizontal padding */}
         <div className="container mx-auto px-16">
           <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Text Content */}
             <motion.div
               className="space-y-4"
               initial={{ opacity: 0, x: -30 }}
@@ -422,14 +486,16 @@ const MetrixAIHomePage = () => {
             >
               <h2 className="text-3xl sm:text-4xl font-semibold text-stone-900">AI-Powered Clinical Decision Support</h2>
               <p className="text-lg text-stone-700">
-                Access critical information instantly with our curated AI chatbot... {/* Content shortened for brevity */}
+                Access critical information instantly with our curated AI chatbot. Ask questions about diagnostic criteria, treatment guidelines, medication interactions, or clinical scoring systems, receiving evidence-based answers in seconds.
               </p>
+              {/* Benefit List */}
               <ul className="list-disc list-inside space-y-2 text-stone-600 pt-2">
-                 <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Streamline diagnostic & treatment planning</motion.li>
-                 <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Improve adherence to guidelines</motion.li>
-                 <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Reduce time spent searching</motion.li>
+                  <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Streamline diagnostic & treatment planning</motion.li>
+                  <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Improve adherence to guidelines</motion.li>
+                  <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>Reduce time spent searching</motion.li>
               </ul>
             </motion.div>
+            {/* Image */}
             <motion.div
               whileHover={{ scale: 1.03 }}
               initial={{ opacity: 0, x: 30 }}
@@ -441,6 +507,7 @@ const MetrixAIHomePage = () => {
                 src={ChatbotImage}
                 alt="Metrix AI chatbot interface answering a clinical query"
                 className="rounded-xl shadow-lg border border-stone-200 w-full"
+                // Placeholder fallback
                 onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                   e.currentTarget.src = 'https://placehold.co/600x400/f5f5f4/78716c?text=AI+Chatbot';
                 }}
@@ -452,10 +519,10 @@ const MetrixAIHomePage = () => {
 
       {/* ========================== Technology / Models Section ========================== */}
       <section id="technology" className="py-16 md:py-24 bg-stone-100">
-        {/* Increased horizontal padding: px-16 */}
+        {/* Increased horizontal padding */}
         <div className="container mx-auto px-16">
           <motion.div
-            initial="hidden"
+            initial="hidden" // Use container variants for staggered animation
             whileInView="visible"
             variants={containerVariants}
             viewport={{ once: true }}
@@ -465,35 +532,39 @@ const MetrixAIHomePage = () => {
               Secure, Flexible, Clinician-Developed AI
             </h2>
             <div className="grid md:grid-cols-2 gap-12 items-center">
+              {/* Text Content */}
               <motion.div variants={itemVariants} className="space-y-4">
                 <p className="text-lg text-stone-700">
-                  Built by clinicians in NZ and the UK... **Benefit from transparent, auditable AI or leverage our high-performance, custom fine-tuned models...**
+                  Built by clinicians in NZ and the UK, Metrix AI understands the nuances of clinical practice. Benefit from transparent, auditable AI or leverage our high-performance, custom fine-tuned models for maximum accuracy and efficiency.
                 </p>
                 <p className="text-lg text-stone-700">
-                  Choose the deployment model that fits your needs: secure cloud or on-site hosting...
+                  Choose the deployment model that fits your needs: secure cloud or on-site hosting for complete data control. Our platform integrates seamlessly with existing EHR systems.
                 </p>
-                <ul className="list-disc list-inside space-y-2 text-stone-600 pt-2">
-                  <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>
-                    <ShieldCheck className="inline w-5 h-5 mr-2 text-[#2D4F6C]" /> Secure On-Site Deployment
-                  </motion.li>
-                  <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>
-                    <BadgeCheck className="inline w-5 h-5 mr-2 text-[#68A9A9]" /> Robust Secure Cloud Platform
-                  </motion.li>
-                  <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>
-                    <BrainCircuit className="inline w-5 h-5 mr-2 text-[#3D7F80]" /> Custom Fine-Tuned LLMs
-                  </motion.li>
-                  <motion.li whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>
-                    <Users className="inline w-5 h-5 mr-2 text-[#68A9A9]" /> Developed by NZ/UK Clinicians
-                  </motion.li>
+                {/* Feature List with Icons */}
+                <ul className="list-none space-y-3 text-stone-700 pt-2">
+                    <motion.li whileHover={{ scale: 1.05, x: 5 }} transition={{ type: 'spring', stiffness: 300 }} className="flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-[#2D4F6C]" /> Secure On-Site Deployment Option
+                    </motion.li>
+                    <motion.li whileHover={{ scale: 1.05, x: 5 }} transition={{ type: 'spring', stiffness: 300 }} className="flex items-center gap-2">
+                      <BadgeCheck className="w-5 h-5 text-[#68A9A9]" /> Robust Secure Cloud Platform
+                    </motion.li>
+                    <motion.li whileHover={{ scale: 1.05, x: 5 }} transition={{ type: 'spring', stiffness: 300 }} className="flex items-center gap-2">
+                      <BrainCircuit className="w-5 h-5 text-[#3D7F80]" /> Custom Fine-Tuned LLMs
+                    </motion.li>
+                    <motion.li whileHover={{ scale: 1.05, x: 5 }} transition={{ type: 'spring', stiffness: 300 }} className="flex items-center gap-2">
+                      <Users className="w-5 h-5 text-[#68A9A9]" /> Developed by NZ/UK Clinicians
+                    </motion.li>
                 </ul>
               </motion.div>
+              {/* Image */}
               <motion.div variants={itemVariants}>
                 <motion.img
                   src={TechImage}
                   alt="Diagram showing cloud vs on-site deployment options"
                   className="rounded-xl shadow-lg border border-stone-200 w-full"
-                  whileHover={{ scale: 1.03, rotate: -2 }}
+                  whileHover={{ scale: 1.03, rotate: -2 }} // Hover effect
                   transition={{ type: 'spring', stiffness: 100 }}
+                  // Placeholder fallback
                   onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                     e.currentTarget.src = 'https://placehold.co/600x400/ffffff/a8a29e?text=Deployment';
                   }}
@@ -506,27 +577,32 @@ const MetrixAIHomePage = () => {
 
       {/* ========================== See Features in Action Section ========================== */}
       <section id="demo-video" className="py-16 md:py-24 bg-white text-center">
-        {/* Increased horizontal padding: px-16 */}
+        {/* Increased horizontal padding */}
         <div className="container mx-auto px-16">
           <h2 className="text-3xl sm:text-4xl font-semibold text-stone-900 mb-6">
             See Metrix AI in Action
           </h2>
           <p className="text-lg text-stone-700 max-w-3xl mx-auto mb-8">
-            Watch this brief overview demonstrating how Metrix AI streamlines documentation... {/* Content shortened for brevity */}
+            Watch this brief overview demonstrating how Metrix AI streamlines documentation, provides predictive insights, and supports clinical decisions directly within your workflow.
           </p>
+          {/* Video Placeholder */}
           <motion.div
             className="relative max-w-4xl mx-auto aspect-video bg-stone-200 rounded-lg shadow-lg overflow-hidden cursor-pointer group border border-stone-300"
-            whileHover={{ scale: 1.03 }}
+            whileHover={{ scale: 1.03 }} // Hover effect
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+            // Add onClick handler here to open a modal or navigate to video
+            // onClick={() => console.log("Open video player")}
           >
             <img
               src={VideoPlaceholderImage}
               alt="Video placeholder thumbnail"
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" // Zoom effect on hover
+              // Placeholder fallback
               onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
                 e.currentTarget.src = 'https://placehold.co/1280x720/e5e7eb/a8a29e?text=Demo+Video';
               }}
             />
+            {/* Play Button Overlay */}
             <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
               <PlayCircle className="w-16 h-16 text-white/80 transition-all duration-300 group-hover:text-white group-hover:scale-110" />
             </div>
@@ -536,18 +612,20 @@ const MetrixAIHomePage = () => {
 
       {/* ========================== Testimonials Section ========================== */}
       <section className="py-16 md:py-24 bg-stone-100">
-        {/* Increased horizontal padding: px-16 */}
+        {/* Increased horizontal padding */}
         <div className="container mx-auto px-16">
           <h2 className="text-3xl sm:text-4xl font-semibold text-stone-900 text-center mb-12">
             Trusted by Clinicians & Administrators
           </h2>
+          {/* Grid for Testimonials */}
           <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-            variants={containerVariants}
+            variants={containerVariants} // Use container variants for staggered animation
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true }} // Animate only once
           >
+            {/* Map through testimonials data and render TestimonialCard */}
             {testimonials.map((testimonial, index) => (
               <TestimonialCard key={index} testimonial={testimonial} />
             ))}
@@ -557,92 +635,101 @@ const MetrixAIHomePage = () => {
 
       {/* ========================== Key Features Section ========================== */}
       <section id="features" className="py-16 md:py-24 bg-white" ref={featuresRef}>
-        {/* Increased horizontal padding: px-16 */}
+        {/* Increased horizontal padding */}
         <div className="container mx-auto px-16">
           <h2 className="text-3xl sm:text-4xl font-semibold text-stone-900 text-center mb-12">
             Comprehensive AI Clinical Toolkit
           </h2>
+          {/* AnimatePresence handles the appearance of features when 'showFeatures' becomes true */}
           <AnimatePresence>
             {showFeatures && (
               <motion.div
-                variants={containerVariants}
+                variants={containerVariants} // Staggered animation for cards
                 initial="hidden"
                 animate="visible"
-                exit="hidden"
+                exit="hidden" // Optional: define exit animation if needed
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
               >
+                {/* Feature Cards */}
                 <FeatureCard
                   title="AI Clinical Scribe"
-                  description="Real-time, accurate documentation..."
+                  description="Real-time, accurate documentation from patient encounters."
                   icon={<FileText className="w-10 h-10" />}
-                  iconColor="text-[#3D7F80]"
+                  iconColor="text-[#3D7F80]" // Medium Teal
                 />
                 <FeatureCard
                   title="ED Predictive Analytics"
-                  description="Forecast Length of Stay, admission..."
+                  description="Forecast Length of Stay, admission likelihood, and department load."
                   icon={<TrendingUp className="w-10 h-10" />}
-                  iconColor="text-[#2D4F6C]"
+                  iconColor="text-[#2D4F6C]" // Navy
                 />
                 <FeatureCard
                   title="AI Decision Support"
-                  description="Chatbot access to test/treatment info..."
+                  description="Chatbot access to test/treatment info, guidelines, scores."
                   icon={<Bot className="w-10 h-10" />}
-                  iconColor="text-[#3D7F80]"
+                  iconColor="text-[#3D7F80]" // Medium Teal
                 />
                 <FeatureCard
                   title="Flexible Deployment"
-                  description="Choose secure cloud hosting or on-site..."
+                  description="Choose secure cloud hosting or on-site for data control."
                   icon={<ShieldCheck className="w-10 h-10" />}
-                  iconColor="text-[#2D4F6C]"
+                  iconColor="text-[#2D4F6C]" // Navy
                 />
                 <FeatureCard
                   title="Seamless EHR Integration"
-                  description="Integrate effortlessly with popular EHRs."
+                  description="Integrate effortlessly with popular EHR systems."
                   icon={<BadgeCheck className="w-10 h-10" />}
-                  iconColor="text-[#68A9A9]"
+                  iconColor="text-[#68A9A9]" // Light Teal
                 />
                 <FeatureCard
                   title="Clinician-Developed"
-                  description="Designed by practicing clinicians (NZ/UK)."
+                  description="Designed by practicing clinicians (NZ/UK) for real-world use."
                   icon={<Users className="w-10 h-10" />}
-                  iconColor="text-[#68A9A9]"
+                  iconColor="text-[#68A9A9]" // Light Teal
                 />
               </motion.div>
             )}
-            {!showFeatures && <div className="text-center text-stone-500">Loading features...</div>}
           </AnimatePresence>
+          {/* Loading indicator (optional) */}
+          {!showFeatures && <div className="text-center text-stone-500">Loading features...</div>}
         </div>
       </section>
 
       {/* ========================== Funding Partners Section ========================== */}
       <section id="partners" className="py-12 bg-white">
-        {/* Increased horizontal padding: px-16 */}
+        {/* Increased horizontal padding */}
         <div className="container mx-auto px-16">
           <h3 className="text-center text-xl font-semibold text-stone-600 mb-8">
             Our Funding Partners & Supporters
           </h3>
+          {/* Container for scrolling animation */}
           <div className="w-full overflow-hidden relative">
+            {/* Flex container with doubled icons for seamless loop */}
             <div className="flex animate-scroll">
+              {/* Duplicate the icons array to ensure continuous scroll */}
               {[...partnerIcons, ...partnerIcons].map((partner, index) => (
                 <div
                   key={index}
-                  className="mx-10 flex-shrink-0 flex items-center justify-center"
-                  title={partner.name}
+                  className="mx-10 flex-shrink-0 flex items-center justify-center" // Spacing and alignment
+                  title={partner.name} // Tooltip for accessibility
                 >
+                  {/* Render the partner icon component */}
                   <partner.icon className="h-12 w-12 text-stone-400 hover:text-stone-600 transition-colors" />
                 </div>
               ))}
             </div>
-            <div className="absolute top-0 bottom-0 left-0 w-16 bg-gradient-to-r from-white to-transparent"></div>
-            <div className="absolute top-0 bottom-0 right-0 w-16 bg-gradient-to-l from-white to-transparent"></div>
+            {/* Fades on the edges for visual effect */}
+            <div className="absolute top-0 bottom-0 left-0 w-16 bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
+            <div className="absolute top-0 bottom-0 right-0 w-16 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
           </div>
         </div>
       </section>
 
       {/* ========================== Footer ========================== */}
       <footer className="py-8 bg-stone-100 border-t border-stone-200">
-        {/* Increased horizontal padding: px-16 */}
+        {/* Increased horizontal padding */}
         <div className="container mx-auto px-16 text-center text-stone-500 text-sm">
+          {/* Copyright and Links */}
           &copy; {new Date().getFullYear()} Metrix AI. All rights reserved. |{' '}
           <a href="/privacy" className="hover:text-stone-800 transition-colors">
             Privacy Policy
@@ -651,6 +738,7 @@ const MetrixAIHomePage = () => {
           <a href="/terms" className="hover:text-stone-800 transition-colors">
             Terms of Service
           </a>
+          {/* Collaboration Info */}
           <p className="mt-2 text-xs">
             Developed in collaboration between clinicians in New Zealand <MapPin className="inline h-3 w-3 mx-1" /> & the United Kingdom <MapPin className="inline h-3 w-3 mx-1" />.
           </p>
@@ -660,4 +748,5 @@ const MetrixAIHomePage = () => {
   );
 };
 
+// Export the component as default
 export default MetrixAIHomePage;
