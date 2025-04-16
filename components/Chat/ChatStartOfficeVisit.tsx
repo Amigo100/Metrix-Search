@@ -1,5 +1,9 @@
+// ============================================================
+// file: /components/Chat/ChatStartOfficeVisit.tsx - Add Export
+// ============================================================
 let RecordRTC_SOV: any; // Use separate variable
-const ChatStartOfficeVisit = ({ onSend }: { onSend: (message: Message, plugin: Plugin | null) => void }) => {
+// *** ADDED EXPORT HERE ***
+export const ChatStartOfficeVisit = ({ onSend }: { onSend: (message: Message, plugin: Plugin | null) => void }) => {
   const { t } = useTranslation('chat');
   const recordRTC_SOV_Ref = useRef<any>(null);
   const { state: { recording, transcribingAudio }, dispatch: homeDispatch } = useContext(HomeContext);
