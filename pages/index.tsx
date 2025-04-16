@@ -12,8 +12,11 @@ const Button = ({ children, className, variant, size, ...props }: any) => {
     : "bg-primary text-primary-foreground shadow hover:bg-primary/90";
   const sizeStyle = size === 'lg' ? "h-10 px-4 py-2" : "h-9 px-3 py-2"; // Simplified sizing
 
+  // Combine base, variant, size, and custom classes
+  const combinedClassName = [baseStyle, variantStyle, sizeStyle, className].filter(Boolean).join(' ');
+
   return (
-    <button className={cn(baseStyle, variantStyle, sizeStyle, className)} {...props}>
+    <button className={combinedClassName} {...props}>
       {children}
     </button>
   );
@@ -41,6 +44,7 @@ import {
   Landmark,     // Partner Icon Placeholder
   University,   // Partner Icon Placeholder
   HeartHandshake, // Partner Icon Placeholder
+  LogIn,        // Login Icon
 } from 'lucide-react';
 
 // Note: Assumes 'cn' utility function is available, likely from shadcn/ui or similar.
@@ -263,8 +267,25 @@ const MetrixAIHomePage = () => {
       {/* ========================== Hero Section ========================== */}
       <section className="relative py-16 md:py-24 bg-gradient-to-br from-white via-stone-50 to-stone-100 overflow-hidden">
         {/* Increased horizontal padding for wider layout */}
+        {/* Make container relative to position the login button */}
         <div className="relative z-10 container mx-auto px-16">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
+
+          {/* === Added Login Button - Top Right === */}
+          <div className="absolute top-4 right-16 z-20"> {/* Positioned top-right of the container */}
+            <a href="/login.tsx">
+              <Button
+                variant="outline"
+                className="text-stone-700 border-stone-300 hover:bg-stone-100 hover:text-stone-900 transition-colors duration-200 flex items-center gap-2"
+              >
+                <LogIn className="w-4 h-4" /> {/* Added Login Icon */}
+                Login
+              </Button>
+            </a>
+          </div>
+          {/* === End Login Button === */}
+
+
+          <div className="grid md:grid-cols-2 gap-8 items-center pt-12 md:pt-0"> {/* Added padding-top for spacing below login button on small screens */}
             {/* Left side: Text content */}
             <motion.div
               initial={{ opacity: 0, x: -50 }} // Initial animation state (off-screen left)
@@ -301,8 +322,8 @@ const MetrixAIHomePage = () => {
               </p>
               {/* Call to Action Buttons */}
               <div className="flex flex-wrap gap-4">
-                {/* === Updated Link for Start Free Trial === */}
-                <a href="/login.tsx"> {/* Link points to login.tsx */}
+                {/* Link points to login.tsx */}
+                <a href="/login.tsx">
                   <Button
                     size="lg"
                     className="bg-gradient-to-r from-[#2D4F6C] to-[#3D7F80] text-white hover:from-[#254058] hover:to-[#316667] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2 cursor-pointer"
