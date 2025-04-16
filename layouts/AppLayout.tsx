@@ -91,6 +91,9 @@ export default function AppLayout({
             <Link href="/diagnostic-assistance" className="text-sm font-medium text-gray-600 hover:text-teal-600 transitiob-colors">
               AI Medical Assistant
             </Link>
+            <Link href="/policy search" className="text-sm font-medium text-gray-600 hover:text-teal-600 transitiob-colors">
+              AI Medical Assistant
+            </Link>
           </nav>
         </div>
 
