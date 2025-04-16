@@ -1,114 +1,50 @@
-import { useEffect, useRef, useContext } from 'react';
+import React, { useEffect, useRef, useContext } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'next-i18next';
-
 import HomeContext from '@/pages/api/home/home.context'; // Adjust path as needed
 import { Message, Role } from '@/types/chat'; // Adjust path
 import { Plugin } from '@/types/plugin'; // Adjust path
 import { IconMicrophone, IconLoader2 } from '@tabler/icons-react'; // Using Tabler icons
 
 type RecordRTCInstance = any;
-let RecordRTC: any; // Needs to be loaded dynamically
+let RecordRTC_TTS: any; // Use separate variable to avoid potential naming conflicts
 
-interface Props {
-  onSend: (message: Message, plugin: Plugin | null) => void;
-}
-
-export const ChatTextToSpeech = ({ onSend }: Props) => {
+const ChatTextToSpeech = ({ onSend }: { onSend: (message: Message, plugin: Plugin | null) => void }) => {
   const { t } = useTranslation('chat');
-  const recordRTC = useRef<RecordRTCInstance | null>(null);
-
-  const {
-    state: { recording, transcribingAudio },
-    dispatch: homeDispatch,
-  } = useContext(HomeContext);
+  const recordRTC_TTS_Ref = useRef<RecordRTCInstance | null>(null);
+  const { state: { recording, transcribingAudio }, dispatch: homeDispatch } = useContext(HomeContext);
 
   // --- Logic (Preserved) ---
-  const handleStartRecording = () => {
-    console.log('[ChatTextToSpeech] Starting recording...');
-    if (typeof window !== 'undefined' && navigator.mediaDevices) {
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then((stream) => {
-          if (!RecordRTC) { console.error("RecordRTC not loaded yet"); return; }
-          recordRTC.current = RecordRTC(stream, { type: 'audio', mimeType: 'audio/webm' });
-          recordRTC.current?.startRecording();
-          homeDispatch({ type: 'change', field: 'recording', value: true });
-          console.log('[ChatTextToSpeech] Recording started.');
-        })
-        .catch((error) => { console.error('[ChatTextToSpeech] Error accessing mic:', error); });
-    } else { console.error('[ChatTextToSpeech] Audio recording not supported.'); }
-  };
-
-  const handleStopRecording = () => {
-    console.log('[ChatTextToSpeech] Stopping recording...');
-    homeDispatch({ type: 'change', field: 'recording', value: false });
-    if (recordRTC.current?.stopRecording) {
-      recordRTC.current.stopRecording(async () => {
-        console.log('[ChatTextToSpeech] RecordRTC stop callback fired.');
-        homeDispatch({ type: 'change', field: 'transcribingAudio', value: true });
-        if (recordRTC.current?.getBlob) {
-          const blob = recordRTC.current.getBlob();
-          const formData = new FormData();
-          formData.append('file', blob, 'audio.webm');
-          try {
-            console.log('[ChatTextToSpeech] Sending audio for transcription...');
-            const response = await axios.post( 'http://localhost:8000/rag/transcribe_audio', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-            homeDispatch({ type: 'change', field: 'transcribingAudio', value: false });
-            console.log('[ChatTextToSpeech] Transcription response:', response.data);
-            const transcribedText = response.data.text;
-            const userMessage: Message = { role: 'user' as Role, content: transcribedText };
-            console.log('[ChatTextToSpeech] Passing message to onSend:', userMessage);
-            onSend(userMessage, null);
-          } catch (error) {
-            console.error('[ChatTextToSpeech] Error fetching transcription:', error);
-            homeDispatch({ type: 'change', field: 'transcribingAudio', value: false });
-          }
-        } else {
-            homeDispatch({ type: 'change', field: 'transcribingAudio', value: false }); // Ensure state reset
-        }
-      });
-    } else {
-        homeDispatch({ type: 'change', field: 'transcribingAudio', value: false }); // Ensure state reset if stopRecording fails
-    }
-  };
-
-  useEffect(() => { import('recordrtc').then((R) => { RecordRTC = R.default || R; console.log('[ChatTextToSpeech] RecordRTC loaded'); }); }, []);
+  const handleStartRecording = () => { /* ... preserved logic ... */ if (typeof window !== 'undefined' && navigator.mediaDevices) { navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => { if (!RecordRTC_TTS) { console.error("RecordRTC (TTS) not loaded yet"); return; } recordRTC_TTS_Ref.current = RecordRTC_TTS(stream, { type: 'audio', mimeType: 'audio/webm' }); recordRTC_TTS_Ref.current?.startRecording(); homeDispatch({ type: 'change', field: 'recording', value: true }); }).catch((error) => { console.error('[TTS] Error accessing mic:', error); }); } };
+  const handleStopRecording = () => { /* ... preserved logic ... */ homeDispatch({ type: 'change', field: 'recording', value: false }); if (recordRTC_TTS_Ref.current?.stopRecording) { recordRTC_TTS_Ref.current.stopRecording(async () => { homeDispatch({ type: 'change', field: 'transcribingAudio', value: true }); if (recordRTC_TTS_Ref.current?.getBlob) { const blob = recordRTC_TTS_Ref.current.getBlob(); const formData = new FormData(); formData.append('file', blob, 'audio.webm'); try { const response = await axios.post( `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/rag/transcribe_audio`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }); homeDispatch({ type: 'change', field: 'transcribingAudio', value: false }); const transcribedText = response.data.text; const userMessage: Message = { role: 'user' as Role, content: transcribedText }; onSend(userMessage, null); } catch (error) { console.error('[TTS] Error fetching transcription:', error); homeDispatch({ type: 'change', field: 'transcribingAudio', value: false }); } } else { homeDispatch({ type: 'change', field: 'transcribingAudio', value: false }); } }); } else { homeDispatch({ type: 'change', field: 'transcribingAudio', value: false }); } };
+  useEffect(() => { import('recordrtc').then((R) => { RecordRTC_TTS = R.default || R; }); }, []);
 
   return (
-    // --- Updated Button Styling ---
+    // --- Redesigned Button Card ---
     <button
-      className={`
-        flex flex-col items-center justify-center w-full h-full min-h-[100px] p-4
-        rounded-lg border-2 transition-colors duration-200 ease-in-out
-        ${recording
-          ? 'border-red-500 bg-red-50 ring-2 ring-red-300 animate-pulse' // Recording state style
-          : transcribingAudio
-          ? 'border-gray-300 bg-gray-100 cursor-not-allowed' // Transcribing state style
-          : 'border-teal-500 bg-teal-50 hover:bg-teal-100 hover:border-teal-600' // Default state style
-        }
-      `}
+      className={` group flex flex-col items-center justify-center w-full h-full min-h-[200px] p-6 rounded-xl border-2 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 ${ recording ? 'border-red-400 bg-red-50 ring-2 ring-red-200 animate-pulse shadow-inner' : transcribingAudio ? 'border-gray-300 bg-gray-100 cursor-not-allowed shadow-inner' : 'border-teal-500 bg-teal-50 hover:bg-teal-100 hover:border-teal-600 hover:shadow-lg' } `}
       onClick={recording ? handleStopRecording : handleStartRecording}
-      disabled={transcribingAudio} // Disable button while transcribing
+      disabled={transcribingAudio}
       title={recording ? "Stop Recording" : transcribingAudio ? "Processing..." : "Start Dictation"}
     >
       {transcribingAudio ? (
-        // Updated Loading Indicator
         <div className="flex flex-col items-center text-center text-gray-600">
-           <IconLoader2 size={36} className="animate-spin text-teal-600" />
-           <span className="mt-2 text-sm font-medium">Transcribing...</span>
+          <IconLoader2 size={48} className="animate-spin text-teal-600" />
+          <span className="mt-4 text-base font-medium">Transcribing...</span>
         </div>
       ) : (
-        // Updated Content Layout
         <div className="flex flex-col items-center text-center">
-          <IconMicrophone size={36} className={recording ? "text-red-600" : "text-teal-600"} />
-          <h3 className={`text-sm font-semibold mt-2 ${recording ? 'text-red-700' : 'text-gray-800'}`}>
+          <div className={`p-4 rounded-full transition-colors duration-200 ${recording ? 'bg-red-100' : 'bg-teal-100 group-hover:bg-teal-200'}`}>
+             <IconMicrophone size={40} className={recording ? "text-red-600" : "text-teal-600"} />
+          </div>
+          <h3 className={`text-xl font-semibold mt-4 mb-1 ${recording ? 'text-red-700' : 'text-gray-900'}`}>
             {recording ? 'Recording...' : 'Dictation'}
           </h3>
           {!recording && (
-             <p className="text-xs text-gray-500 mt-1 px-2">
-                {t('Dictate clerking notes, SOAP notes, etc.')}
+             <p className="text-sm text-gray-500 group-hover:text-gray-600 px-2">
+                {t('Record quick notes, SOAP notes, or discharge summaries.')}
              </p>
-          )}
+           )}
         </div>
       )}
     </button>
