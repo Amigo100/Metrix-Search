@@ -64,7 +64,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, name, title, a
                     alt={`${name} avatar`}
                     width={40} // Add width
                     height={40} // Add height
-                    onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src = '/images/avatar-placeholder.png'; }} // Fallback image in /public/images
+                    onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src = '/avatar-placeholder.png'; }} // Fallback image in /public/images
                  />
                 <div> <p className="font-semibold text-gray-900">{name}</p> <p className="text-sm text-gray-500">{title}</p> </div>
             </div>
