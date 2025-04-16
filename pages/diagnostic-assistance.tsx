@@ -21,6 +21,7 @@ const secondaryButtonStyles = "inline-flex items-center justify-center px-4 py-2
 const ghostButtonStyles = "inline-flex items-center justify-center p-2 text-sm font-medium rounded-md text-gray-500 hover:text-teal-600 hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed";
 const formInputStyles = "block w-full rounded-full border border-gray-300 py-2 px-4 shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 focus:border-teal-500 placeholder-gray-400 text-base"; // Rounded-full for chat input
 
+// Main component function
 function DiagnosticAssistancePage() {
   const { t } = useTranslation('chat'); // Translation hook if needed
 
@@ -109,8 +110,9 @@ function DiagnosticAssistancePage() {
     const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user');
     if (lastUserMsg && !messageIsStreaming) {
         // Remove last assistant response before regenerating
-        setMessages(prev => prev.filter((m, index) => index < prev.length -1 || m.role === 'user'));
-        processMessage(messages.filter((m, index) => index < messages.length -1 || m.role === 'user'), lastUserMsg.content);
+        const historyWithoutLastAssistant = messages.filter((m, index) => index < messages.length -1 || m.role === 'user');
+        setMessages(historyWithoutLastAssistant); // Update state before sending
+        processMessage(historyWithoutLastAssistant, lastUserMsg.content);
     }
   };
 
@@ -118,7 +120,8 @@ function DiagnosticAssistancePage() {
     const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user');
     if (lastUserMsg) {
       // Remove last user message and last assistant message to allow editing
-      setMessages(prev => prev.filter((m, index) => index < prev.length - 2));
+      const historyWithoutLastTwo = messages.filter((m, index) => index < messages.length - 2);
+      setMessages(historyWithoutLastTwo);
       setUserInput(lastUserMsg.content);
       // Optionally focus the input field
       // document.getElementById('chat-input')?.focus();
@@ -153,6 +156,8 @@ function DiagnosticAssistancePage() {
         <img
             src="/images/metrix-logo.png" // Ensure path is correct
             alt="Metrix Logo"
+            width={stage === 1 ? 80 : 48} // Set explicit width/height
+            height={stage === 1 ? 80 : 48}
             className={`${logoSizeClass} mb-2 transition-all duration-300 ease-in-out`}
         />
          <h1 className={`font-bold text-gray-900 transition-all duration-300 ease-in-out ${stage === 1 ? 'text-3xl sm:text-4xl' : 'text-2xl'}`}>
@@ -266,7 +271,7 @@ function DiagnosticAssistancePage() {
 
               // --- Message Bubble ---
               return (
-                <div key={i} className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
+                <div key={i} className={`group flex flex-col ${isUser ? 'items-end' : 'items-start'}`}> {/* Added group for copy button hover */}
                   {/* Sender Info */}
                    <div className="flex items-center space-x-2 text-xs font-medium text-gray-500 mb-1">
                      {isUser ? (
@@ -291,7 +296,7 @@ function DiagnosticAssistancePage() {
                     {isAssistant && msg.content.trim() && (
                          <button
                             onClick={() => handleCopy(msg.content)}
-                            className="absolute -top-2 -right-2 p-1 bg-white border border-gray-200 rounded-full text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition opacity-0 group-hover:opacity-100"
+                            className="absolute -top-2 -right-2 p-1 bg-white border border-gray-200 rounded-full text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition opacity-0 group-hover:opacity-100 focus:opacity-100" // Show on focus too
                             title="Copy text"
                             style={{ isolation: 'isolate' }} // Ensure button is clickable over bubble
                           >
@@ -369,6 +374,6 @@ function DiagnosticAssistancePage() {
   );
 }
 
-// No need for export default if this is pages/diagnostic-assistance.tsx
-// export default DiagnosticAssistancePage; // Remove or keep based on file location
+// Add the default export line
+export default DiagnosticAssistancePage;
 
