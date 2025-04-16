@@ -68,7 +68,7 @@ const LoginPage = () => {
             {/* --- Link Fix 1: Removed legacyBehavior and inner <a> tag --- */}
             <Link href="/" className="flex items-center space-x-2 cursor-pointer">
                 <img
-                    src="/images/metrix-logo.png" // Ensure this path is correct
+                    src="/MetrixAI.png" // Ensure this path is correct
                     alt="Metrix Logo"
                     width={40} // Adjust size as needed
                     height={40}
