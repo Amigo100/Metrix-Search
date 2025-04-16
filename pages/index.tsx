@@ -270,9 +270,10 @@ const MetrixAIHomePage = () => {
         {/* Make container relative to position the login button */}
         <div className="relative z-10 container mx-auto px-16">
 
-          {/* === Added Login Button - Top Right === */}
+          {/* === Login Button - Top Right (Updated href) === */}
           <div className="absolute top-4 right-16 z-20"> {/* Positioned top-right of the container */}
-            <a href="/login.tsx">
+            {/* Updated href to /login (frameworks usually map this to login.tsx) */}
+            <a href="/login">
               <Button
                 variant="outline"
                 className="text-stone-700 border-stone-300 hover:bg-stone-100 hover:text-stone-900 transition-colors duration-200 flex items-center gap-2"
@@ -322,8 +323,9 @@ const MetrixAIHomePage = () => {
               </p>
               {/* Call to Action Buttons */}
               <div className="flex flex-wrap gap-4">
-                {/* Link points to login.tsx */}
-                <a href="/login.tsx">
+                {/* === Start Free Trial Button (Updated href) === */}
+                {/* Updated href to /login */}
+                <a href="/login">
                   <Button
                     size="lg"
                     className="bg-gradient-to-r from-[#2D4F6C] to-[#3D7F80] text-white hover:from-[#254058] hover:to-[#316667] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2 cursor-pointer"
