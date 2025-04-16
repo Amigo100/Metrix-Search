@@ -780,9 +780,11 @@ ${doc}
           onScrollDownClick={scrollToBottom}
           showScrollDownButton={
             !autoScrollEnabled &&
-            chatContainerRef.current &&
-            chatContainerRef.current.scrollHeight >
-              chatContainerRef.current.clientHeight
+            Boolean(
+              chatContainerRef.current &&
+                chatContainerRef.current.scrollHeight >
+                  chatContainerRef.current.clientHeight
+            )
           }
           isLoading={loading}
         />
