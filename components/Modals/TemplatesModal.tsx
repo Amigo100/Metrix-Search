@@ -1,7 +1,7 @@
 // /components/Modals/TemplatesModal.tsx
 
 import React, { useState, useContext, useEffect, useMemo, useCallback } from 'react';
-import { useTranslation } from 'next-i18next'; // Hook for internationalization
+import { useTranslation, DefaultTFuncReturn } from 'next-i18next'; // Hook for internationalization // Import DefaultTFuncReturn if needed, though casting works too
 import HomeContext from '@/pages/api/home/home.context'; // Context for global state
 // Assuming Prompt type exists - adding conceptual fields here for clarity
 // import { Prompt } from '@/types/prompt';
@@ -187,7 +187,8 @@ export const TemplatesModal = () => {
 
         // Basic validation (check if it's an array)
         if (!Array.isArray(imported)) {
-          throw new Error(t('Invalid file format: Expected an array of templates.'));
+          // FIX: Cast result of t() to string for Error constructor
+          throw new Error(t('Invalid file format: Expected an array of templates.') as string);
         }
 
         // More robust validation could check individual prompt structures
@@ -205,7 +206,9 @@ export const TemplatesModal = () => {
         setNotification({ type: 'success', message: t('{{count}} templates imported successfully!', { count: validImported.length }) });
       } catch (error: any) {
         console.error('Error importing templates:', error);
-        setNotification({ type: 'error', message: `${t('Error importing templates:')} ${error.message || t('Unknown error')}` });
+        // Ensure error message is string
+        const errorMessage = typeof error.message === 'string' ? error.message : t('Unknown error');
+        setNotification({ type: 'error', message: `${t('Error importing templates:')} ${errorMessage}` });
       } finally {
         setIsLoading(false);
       }
@@ -304,7 +307,7 @@ export const TemplatesModal = () => {
   };
 
   const handleDeleteTemplate = (tplId: string) => {
-    if (window.confirm(t('Are you sure you want to delete this template?'))) {
+    if (window.confirm(t('Are you sure you want to delete this template?') as string)) { // Cast confirmation message
       const filtered = allTemplates.filter((tpl) => tpl.id !== tplId);
       updateAllTemplates(filtered);
       if (expandedTemplateId === tplId) setExpandedTemplateId(null);
@@ -323,7 +326,7 @@ export const TemplatesModal = () => {
          setNotification({ type: 'info', message: t('No templates selected for deletion.') });
          return;
       }
-      if (window.confirm(t('Are you sure you want to delete {{count}} selected templates?', { count: selectedTemplateIds.size }))) {
+      if (window.confirm(t('Are you sure you want to delete {{count}} selected templates?', { count: selectedTemplateIds.size }) as string)) { // Cast confirmation message
          const filtered = allTemplates.filter((tpl) => !selectedTemplateIds.has(tpl.id));
          updateAllTemplates(filtered);
          setSelectedTemplateIds(new Set()); // Clear selection
