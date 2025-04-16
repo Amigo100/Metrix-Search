@@ -2,20 +2,23 @@
 
 import React, { useContext } from 'react';
 import Link from 'next/link';
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/pages/api/home/home.context'; // Adjust path as needed
 
-import Chatbar from '@/components/Chatbar/Chatbar';
-import Tasks from '@/components/Promptbar/Tasks';
+// Assuming these components exist and are styled appropriately or accept classes
+import Chatbar from '@/components/Chatbar/Chatbar'; // Adjust path
+import Tasks from '@/components/Promptbar/Tasks'; // Adjust path
 
-import { ProfileModal } from '@/components/Modals/ProfileModal';
-import { TemplatesModal } from '@/components/Modals/TemplatesModal';
-import { HelpModal } from '@/components/Modals/HelpModal';
-import { SettingsModal } from '@/components/Modals/SettingsModal';
+// Assuming Modal components exist
+import { ProfileModal } from '@/components/Modals/ProfileModal'; // Adjust path
+import { TemplatesModal } from '@/components/Modals/TemplatesModal'; // Adjust path
+import { HelpModal } from '@/components/Modals/HelpModal'; // Adjust path
+import { SettingsModal } from '@/components/Modals/SettingsModal'; // Adjust path
 
+// Assuming Sidebar button components exist and are styled appropriately
 import {
   OpenSidebarButton,
   CloseSidebarButton,
-} from '@/components/Sidebar/components/OpenCloseButton';
+} from '@/components/Sidebar/components/OpenCloseButton'; // Adjust path
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -24,15 +27,15 @@ interface AppLayoutProps {
 
 export default function AppLayout({
   children,
-  logoSize = 100, // default 128px
+  logoSize = 40, // Default logo size (adjust as needed, e.g., 40px for h-10)
 }: AppLayoutProps) {
   const { state, dispatch } = useContext(HomeContext);
   const { openModal, showSidePromptbar, showChatbar } = state;
 
-  // Keep header height at 80px, for example
-  const headerHeight = '80px';
+  // Keep header height consistent (e.g., 72px or 80px)
+  const headerHeight = '72px'; // Example height using Tailwind's h-18 would be 72px
 
-  // Toggle function for the right prompt bar
+  // Toggle function for the right prompt bar (Logic preserved)
   const handleTogglePromptbar = () => {
     dispatch({
       type: 'change',
@@ -42,54 +45,74 @@ export default function AppLayout({
     localStorage.setItem('showSidePromptbar', JSON.stringify(!showSidePromptbar));
   };
 
+  // Toggle function for the left chat bar (Assuming similar logic exists or can be added)
+   const handleToggleChatbar = () => {
+     dispatch({ type: 'change', field: 'showChatbar', value: !showChatbar });
+     localStorage.setItem('showChatbar', JSON.stringify(!showChatbar));
+   };
+
+
   return (
-    <div className="w-full h-screen flex flex-col bg-white dark:bg-[#343541] text-black dark:text-black">
-      {/* Header */}
+    // Updated main container background to light theme
+    <div className="w-full h-screen flex flex-col bg-gray-100 text-gray-900">
+      {/* Header - Updated Styling */}
       <header
-        className="sticky top-0 z-30 bg-neutral-50 text-black px-4 
-                   shadow-md border-b border-gray-400 
+        className="sticky top-0 z-30 bg-white text-gray-800 px-4 md:px-6
+                   shadow-md border-b border-gray-200
                    flex items-center justify-between overflow-hidden"
         style={{ height: headerHeight, minHeight: headerHeight }}
       >
-        {/* Branding */}
+        {/* Left side: Chatbar Toggle and Branding */}
         <div className="flex items-center space-x-3 flex-none">
-          <img
-            src="/MetrixAI.png"
-            alt="Metrix AI Logo"
-            style={{
-              width: `${logoSize * 0.5}px`,  // Reduced by 50%
-              height: `${logoSize * 0.5}px`, // Reduced by 50%
-              objectFit: 'contain',
-            }}
-          />
-          <h2 className="text-2xl font-semibold">Metrix</h2>
+           {/* Left Sidebar Toggle */}
+           {showChatbar ? (
+             <CloseSidebarButton side="left" onClick={handleToggleChatbar} />
+           ) : (
+             <OpenSidebarButton side="left" onClick={handleToggleChatbar} />
+           )}
+           {/* Branding */}
+           <Link href="/dashboard" legacyBehavior>
+             <a className="flex items-center space-x-2">
+                <img
+                    src="/images/metrix-logo.png" // Consistent logo path
+                    alt="Metrix Logo"
+                    style={{
+                      // Use height matching common Tailwind sizes or direct px
+                      height: `${logoSize}px`, // Use prop or default
+                      width: 'auto', // Maintain aspect ratio
+                    }}
+                    // Or use Tailwind classes if preferred: className="h-8 w-auto" or "h-10 w-auto"
+                />
+                <span className="text-xl md:text-2xl font-bold text-gray-800 hidden sm:inline">Metrix</span>
+             </a>
+           </Link>
         </div>
 
-        {/* Centered Navigation */}
+        {/* Centered Navigation - Updated Styling */}
         <div
-          className="flex-1 flex justify-center"
+          className="flex-1 flex justify-center transition-all duration-300 ease-in-out" // Use transition-all
           style={{
-            // Shift nav based on whether the sidebars are open
-            marginLeft: showChatbar ? '210px' : '0px',
-            marginRight: showSidePromptbar ? '250px' : '0px',
-            transition: 'margin 0.3s ease',
+            // Dynamic margins based on sidebar state (Logic preserved)
+            marginLeft: showChatbar ? '260px' : '0px', // Adjust based on Chatbar width
+            marginRight: showSidePromptbar ? '260px' : '0px', // Adjust based on Tasks width
           }}
         >
-          <nav className="flex items-center" style={{ gap: '2rem' }}>
-            <Link href="/dashboard" className="text-base hover:underline">
-              Home
+          {/* Navigation Links - Updated Styling */}
+          <nav className="flex items-center space-x-4 md:space-x-6 lg:space-x-8">
+            <Link href="/dashboard" legacyBehavior>
+              <a className="text-sm md:text-base text-gray-600 hover:text-teal-600 font-medium transition-colors">Home</a>
             </Link>
-            <Link href="/clinical-scribe" className="text-base hover:underline">
-              AI Scribe
+            <Link href="/clinical-scribe" legacyBehavior>
+              <a className="text-sm md:text-base text-gray-600 hover:text-teal-600 font-medium transition-colors">AI Scribe</a>
             </Link>
-            <Link href="/predictive-analytics" className="text-base hover:underline">
-              Predictive Insights
+            <Link href="/predictive-analytics" legacyBehavior>
+              <a className="text-sm md:text-base text-gray-600 hover:text-teal-600 font-medium transition-colors">Predictive Insights</a>
             </Link>
-            <Link href="/clinical-scoring-tools" className="text-base hover:underline">
-              Risk & Scoring
+            <Link href="/clinical-scoring-tools" legacyBehavior>
+              <a className="text-sm md:text-base text-gray-600 hover:text-teal-600 font-medium transition-colors">Risk & Scoring</a>
             </Link>
-            <Link href="/diagnostic-assistance" className="text-base hover:underline">
-              AI Medical Assistant
+            <Link href="/diagnostic-assistance" legacyBehavior>
+              <a className="text-sm md:text-base text-gray-600 hover:text-teal-600 font-medium transition-colors">AI Medical Assistant</a>
             </Link>
           </nav>
         </div>
@@ -106,35 +129,36 @@ export default function AppLayout({
 
       {/* Main Flex Row */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Chatbar */}
+        {/* Left Chatbar - Assuming it's styled consistently */}
+        {/* The Chatbar component itself controls its visibility via state.showChatbar */}
         <Chatbar />
 
         {/* Main Content (flex-1) */}
-        <main className="flex-1 flex flex-col overflow-y-auto relative">
+        {/* Ensure child pages have appropriate backgrounds if needed */}
+        <main className="flex-1 flex flex-col overflow-y-auto relative bg-gray-100">
           {children}
         </main>
 
-        {/* Right Tasks Sidebar */}
+        {/* Right Tasks Sidebar - Assuming it's styled consistently */}
+        {/* The Tasks component itself controls its visibility via state.showSidePromptbar */}
         <Tasks />
       </div>
 
-      {/* Footer */}
-      <footer className="bg-neutral-50 border-t border-gray-300 py-4 px-6 text-black text-sm">
+      {/* Footer - Updated Styling */}
+      {/* Removed Footer as it's typically not part of an App Layout like this */}
+      {/* If a footer is needed, uncomment and style similarly:
+      <footer className="bg-white border-t border-gray-200 py-3 px-6 text-gray-600 text-xs">
         <div className="flex justify-between items-center">
-          <div>© {new Date().getFullYear()} Metrix AI. All rights reserved.</div>
-          <div>
-            <Link href="https://www.metrixai.com/privacy" className="hover:underline">
-              Privacy Policy
-            </Link>
-            {' | '}
-            <Link href="https://www.metrixai.com/terms" className="hover:underline">
-              Terms of Service
-            </Link>
+          <div>© {new Date().getFullYear()} Metrix Health Ltd. All rights reserved.</div>
+          <div className="space-x-4">
+            <Link href="/privacy" legacyBehavior><a className="hover:text-teal-600 hover:underline">Privacy Policy</a></Link>
+            <Link href="/terms" legacyBehavior><a className="hover:text-teal-600 hover:underline">Terms of Service</a></Link>
           </div>
         </div>
       </footer>
+      */}
 
-      {/* Modals */}
+      {/* Modals - Assuming styled consistently */}
       {openModal === 'profile' && <ProfileModal />}
       {openModal === 'templates' && <TemplatesModal />}
       {openModal === 'help' && <HelpModal />}
