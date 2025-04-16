@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import Link from 'next/link'; // Import Link for the back button
+import { Button } from '@/components/ui/button'; // Assuming shadcn/ui Button
+import { Input } from '@/components/ui/input'; // Assuming shadcn/ui Input
+import { Label } from '@/components/ui/label'; // Assuming shadcn/ui Label
 import { motion } from 'framer-motion';
-import { Lock, User, KeyRound } from 'lucide-react';
-import { cn } from "@/lib/utils";
+import { Lock, User, KeyRound, ArrowLeft } from 'lucide-react'; // Added ArrowLeft
+import { cn } from "@/lib/utils"; // Assuming shadcn/ui utility
 
-// Placeholder image URL
-const LoginImage = '/scribe.png';
+// Define styles consistent with index page's form-input using Tailwind directly
+// In a real app, this might be a shared style or component
+const formInputStyles = "block w-full rounded-lg border border-gray-300 py-3 px-4 shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 focus:border-teal-500 placeholder-gray-400";
+const formInputWithIconStyles = `${formInputStyles} pl-10`; // Add padding for icon
 
 const LoginPage = () => {
   const router = useRouter();
@@ -36,9 +39,10 @@ const LoginPage = () => {
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       // For demonstration: "test@example.com" with password "password" logs in
+      // Using the credentials from the original code snippet
       if (email === 'alexdeighton@metrixai.com' && password === 'Alexander') {
         // Redirect to the dashboard
-        router.push('/dashboard');
+        router.push('/dashboard'); // Assuming a dashboard route
         return;
       } else {
         setError('Invalid credentials. Please try again.');
@@ -51,20 +55,42 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    // Updated background to light theme
+    <div className="min-h-screen bg-gradient-to-b from-white via-teal-50 to-white text-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        {/* Metrix Logo */}
+        <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex justify-center"
+        >
+            <Link href="/" legacyBehavior>
+                <a className="flex items-center space-x-2 cursor-pointer">
+                    <img
+                        src="/images/metrix-logo.png" // Ensure this path is correct
+                        alt="Metrix Logo"
+                        width={40} // Adjust size as needed
+                        height={40}
+                        className="h-10 w-10"
+                    />
+                     <span className="font-bold text-3xl text-gray-800">Metrix</span>
+                </a>
+            </Link>
+        </motion.div>
+
         <div>
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.1 }} // Stagger animation
             className="text-center"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">
-              Metrix AI Login
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900"> {/* Updated text color */}
+              Sign in to Metrix
             </h2>
-            <p className="mt-2 text-sm text-gray-400">
-              Welcome back! Please enter your credentials to access your account.
+            <p className="mt-2 text-sm text-gray-600"> {/* Updated text color */}
+              Welcome back! Please enter your credentials.
             </p>
           </motion.div>
         </div>
@@ -72,16 +98,18 @@ const LoginPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700"
+          // Updated card style to light theme
+          className="bg-white rounded-xl shadow-2xl p-8 border border-gray-100"
         >
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="rounded-md shadow-sm space-y-4">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* Removed rounded-md shadow-sm wrapper */}
+            <div className="space-y-4">
               <div>
                 <Label htmlFor="email-address" className="sr-only">
                   Email address
                 </Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" /> {/* Adjusted icon color */}
                   <Input
                     id="email-address"
                     name="email"
@@ -90,12 +118,10 @@ const LoginPage = () => {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    // Applied updated input styles
                     className={cn(
-                      "appearance-none rounded-md relative block w-full px-10 py-3 text-gray-100",
-                      "border border-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2",
-                      "focus:ring-purple-500 focus:border-transparent focus:z-10 sm:text-sm",
-                      "bg-gray-900", 
-                      error && "border-red-500 focus:ring-red-500"
+                      formInputWithIconStyles, // Use defined style
+                      error && "border-red-500 focus:ring-red-500 focus:border-red-500" // Error state
                     )}
                     placeholder="Email address"
                   />
@@ -106,7 +132,7 @@ const LoginPage = () => {
                   Password
                 </Label>
                 <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" /> {/* Adjusted icon color */}
                   <Input
                     id="password"
                     name="password"
@@ -115,12 +141,10 @@ const LoginPage = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                     // Applied updated input styles
                     className={cn(
-                      "appearance-none rounded-md relative block w-full px-10 py-3 text-gray-100",
-                      "border border-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2",
-                      "focus:ring-purple-500 focus:border-transparent focus:z-10 sm:text-sm",
-                      "bg-gray-900", 
-                      error && "border-red-500 focus:ring-red-500"
+                      formInputWithIconStyles, // Use defined style
+                      error && "border-red-500 focus:ring-red-500 focus:border-red-500" // Error state
                     )}
                     placeholder="Password"
                   />
@@ -129,7 +153,7 @@ const LoginPage = () => {
             </div>
 
             {error && (
-              <div className="text-red-500 text-sm mt-2" role="alert">
+              <div className="text-red-600 text-sm text-center" role="alert"> {/* Adjusted error text color */}
                 {error}
               </div>
             )}
@@ -140,17 +164,19 @@ const LoginPage = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 rounded border-gray-600 text-purple-500 focus:ring-purple-500 bg-gray-900"
+                  // Updated checkbox style
+                  className="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
                 />
-                <Label htmlFor="remember-me" className="ml-2 block text-sm text-gray-300">
+                <Label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700"> {/* Updated label color */}
                   Remember me
                 </Label>
               </div>
 
               <div className="text-sm">
                 <a
-                  href="#"
-                  className="font-medium text-purple-400 hover:text-purple-300 hover:underline"
+                  href="#" // Add password reset link if available
+                  // Updated link style
+                  className="font-medium text-teal-600 hover:text-teal-500 hover:underline"
                 >
                   Forgot your password?
                 </a>
@@ -160,34 +186,43 @@ const LoginPage = () => {
             <div>
               <Button
                 type="submit"
+                // Updated button style to match landing page
                 className={cn(
-                  "group relative w-full flex justify-center py-3 px-4 text-sm font-medium rounded-md text-white",
-                  "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-300",
+                  "group relative w-full flex justify-center py-3 px-4 text-sm font-semibold rounded-lg text-white",
+                  "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-300 ease-in-out",
                   loading
-                    ? "bg-gray-700 text-gray-300 cursor-not-allowed"
-                    : "bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600",
-                  "disabled:opacity-50 disabled:cursor-not-allowed"
+                    ? "bg-gray-400 cursor-not-allowed" // Adjusted loading style
+                    : "bg-gradient-to-r from-teal-600 to-teal-800 hover:from-teal-500 hover:to-teal-700", // Teal gradient
+                  "disabled:opacity-70 disabled:cursor-not-allowed"
                 )}
                 disabled={loading}
               >
                 <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                  <Lock className="h-5 w-5 text-purple-300 group-hover:text-purple-200" aria-hidden="true" />
+                  {/* Adjusted icon color */}
+                  <Lock className="h-5 w-5 text-teal-300 group-hover:text-teal-100" aria-hidden="true" />
                 </span>
-                {loading ? 'Loading...' : 'Sign in'}
+                {loading ? 'Signing in...' : 'Sign in'}
               </Button>
             </div>
           </form>
         </motion.div>
         <div className="text-center">
-          <p className="text-sm text-gray-400">
-            Don&apos;t have an account?{' '}
-            <a
-              href="#"
-              className="font-medium text-purple-400 hover:text-purple-300 hover:underline"
-            >
-              Sign up
-            </a>
+          <p className="text-sm text-gray-600"> {/* Updated text color */}
+            Need access?{' '}
+            <Link href="/#contact" legacyBehavior> {/* Link to contact section on landing page */}
+                <a className="font-medium text-teal-600 hover:text-teal-500 hover:underline">
+                    Request Demo
+                </a>
+            </Link>
           </p>
+           <div className="mt-4">
+                <Link href="/" legacyBehavior>
+                    <a className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-teal-600 group">
+                        <ArrowLeft className="h-4 w-4 mr-1 transition-transform duration-200 ease-in-out group-hover:-translate-x-1" />
+                        Back to Home
+                    </a>
+                </Link>
+            </div>
         </div>
       </div>
     </div>
