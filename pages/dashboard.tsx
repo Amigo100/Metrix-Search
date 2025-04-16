@@ -15,13 +15,11 @@ import {
     CheckCircle2, // Completed Tasks
     AlertCircle, // Expired/Alert Tasks
     ArrowRight, // Links
-    BarChart3, // Stats/Analytics Icon (Can still use for general stats)
     Server, // System Status Icon
     Clock, // Added for LOS/Wait Time
     LogIn // Added for Admission Risk
 } from 'lucide-react';
-// *** REMOVED Recharts import ***
-// import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+// Removed Recharts import
 
 // --- Placeholder Data (Replace with actual data fetching) ---
 const userName = "Dr. Evans"; // Fetch actual user name
@@ -37,7 +35,6 @@ const upcomingTasks = [
     { id: 't1', text: "Review Patient X's blood results", due: "in 15m", urgent: true },
     { id: 't2', text: "Check Patient Y's response to diuretics", due: "in 1h", urgent: false },
 ];
-// Updated placeholder data for text display
 const predictiveSnippet = {
     waitTimeMetric: "Est. ED Wait Time",
     waitTimeValue: "~45 min",
@@ -46,57 +43,51 @@ const predictiveSnippet = {
     admissionValue: "Moderate", // Example value
     admissionTrend: "up",
 };
+const pendingAlerts = overdueTaskCount; // Example: Alerts = Overdue Tasks
 
-// *** REMOVED waitTimeData constant ***
-
-// --- Core Tool Links ---
+// --- Core Tool Links (Removed color/bgColor props) ---
 const coreTools = [
-  { title: 'AI Clinical Scribe', description: 'Generate notes from conversations.', href: '/clinical-scribe', icon: FileText, color: 'text-blue-600', bgColor: 'bg-blue-50' },
-  { title: 'AI Assistant Chat', description: 'Ask clinical questions.', href: '/diagnostic-assistance', icon: BrainCircuit, color: 'text-purple-600', bgColor: 'bg-purple-50' },
-  { title: 'Risk & Scoring Tools', description: 'Calculate clinical scores.', href: '/clinical-scoring-tools', icon: Calculator, color: 'text-green-600', bgColor: 'bg-green-50' },
-  { title: 'Guideline Search', description: 'Find local protocols.', href: '/guideline-search', icon: Search, color: 'text-orange-600', bgColor: 'bg-orange-50' }, // Add this page if it exists
-  { title: 'Predictive Insights', description: 'View ED forecasts.', href: '/predictive-analytics', icon: TrendingUp, color: 'text-red-600', bgColor: 'bg-red-50' },
-  { title: 'Patient Tracker', description: 'Manage tasks & timers.', href: '/#tasks', // Link to open task sidebar? Or a dedicated page?
-    icon: ClipboardCheck, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
+  { title: 'AI Clinical Scribe', description: 'Generate notes from conversations.', href: '/clinical-scribe', icon: FileText },
+  { title: 'AI Assistant Chat', description: 'Ask clinical questions.', href: '/diagnostic-assistance', icon: BrainCircuit },
+  { title: 'Risk & Scoring Tools', description: 'Calculate clinical scores.', href: '/clinical-scoring-tools', icon: Calculator },
+  { title: 'Guideline Search', description: 'Find local protocols.', href: '/guideline-search', icon: Search }, // Add this page if it exists
+  { title: 'Predictive Insights', description: 'View ED forecasts.', href: '/predictive-analytics', icon: TrendingUp },
+//   { title: 'Patient Tracker', description: 'Manage tasks & timers.', href: '/#tasks', icon: ClipboardCheck }, // Example if linking to sidebar toggle needed
 ];
 
 
-// --- Reusable Quick Access Card Component ---
+// --- Reusable Quick Access Card Component (Updated Styling) ---
 interface QuickAccessCardProps {
   title: string;
   description: string;
   href: string;
   icon: React.ElementType; // Pass icon component directly
-  color: string; // Tailwind color class for icon bg/text (e.g., 'text-teal-600', 'bg-teal-50')
-  bgColor: string;
 }
 
-const QuickAccessCard: React.FC<QuickAccessCardProps> = ({ title, description, href, icon: Icon, color, bgColor }) => {
-  // Define color variants - adjust as needed (using passed props now)
-  // Example: color="text-teal-600", bgColor="bg-teal-50"
-  const hoverBorderColor = color.replace('text-', 'hover:border-').replace('600', '300'); // Generate hover border color
-
+const QuickAccessCard: React.FC<QuickAccessCardProps> = ({ title, description, href, icon: Icon }) => {
   return (
     <Link
       href={href}
-      className={`group relative flex flex-col justify-between p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl ${hoverBorderColor} hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 ${bgColor} overflow-hidden`} // Use specific bg color
+      // Updated card styling: bg-white, teal icon/link, subtle teal border on hover
+      className={`group relative flex flex-col justify-between p-6 rounded-xl shadow-lg bg-white border border-gray-100 hover:shadow-xl hover:border-teal-200 hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 overflow-hidden`}
     >
         <div>
-            {/* Use opacity variation for icon background */}
-            <div className={`mb-3 inline-flex items-center justify-center h-10 w-10 rounded-lg ${bgColor.replace('bg-', 'bg-opacity-50')} ${color}`}>
+            {/* Icon with consistent teal background */}
+            <div className={`mb-3 inline-flex items-center justify-center h-10 w-10 rounded-lg bg-teal-50 text-teal-600`}>
                 <Icon size={20} aria-hidden="true" />
             </div>
-            {/* Use opacity variation for text colors */}
-            <h3 className={`text-lg font-semibold mb-1 ${color.replace('text-', 'text-opacity-90')}`}>{title}</h3>
-            <p className={`text-sm ${color.replace('600', '700').replace('text-', 'text-opacity-80')}`}>{description}</p>
+            {/* Standard text colors */}
+            <h3 className={`text-lg font-semibold mb-1 text-gray-900`}>{title}</h3>
+            <p className={`text-sm text-gray-600`}>{description}</p>
         </div>
         <div className="mt-4">
-            <span className={`text-sm font-medium ${color} group-hover:underline inline-flex items-center`}>
+             {/* Teal link */}
+            <span className={`text-sm font-medium text-teal-600 group-hover:text-teal-700 group-hover:underline inline-flex items-center`}>
                 Open Tool <ArrowRight size={16} className="ml-1 transition-transform duration-200 group-hover:translate-x-1"/>
             </span>
         </div>
-         {/* Optional: Subtle background pattern or gradient */}
-         <div className={`absolute bottom-0 right-0 h-16 w-16 ${color} opacity-10 rounded-full -mr-4 -mb-4`}></div>
+         {/* Optional: Subtle background pattern or gradient using theme color */}
+         <div className={`absolute bottom-0 right-0 h-16 w-16 text-teal-600 opacity-5 rounded-full -mr-4 -mb-4`}></div>
     </Link>
   );
 };
@@ -104,11 +95,11 @@ const QuickAccessCard: React.FC<QuickAccessCardProps> = ({ title, description, h
 
 // --- Dashboard Page Component ---
 export default function DashboardPage() {
-  // Helper to get trend indicator color
+  // Helper to get trend indicator color (Kept functional colors)
   const getTrendColor = (trend: string) => {
     switch (trend) {
-        case 'up': return 'text-red-600';
-        case 'down': return 'text-green-600';
+        case 'up': return 'text-red-600'; // Assuming 'up' trend is negative/warning
+        case 'down': return 'text-green-600'; // Assuming 'down' trend is positive
         default: return 'text-gray-500';
     }
   };
@@ -127,13 +118,22 @@ export default function DashboardPage() {
 
         {/* 1. Greeting and Quick Stats Row */}
         <section className="animate-fadeInUp"> {/* Assuming animate-fadeInUp is defined globally */}
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-            Welcome back, {userName}!
-          </h1>
+           {/* Greeting and Alert Button */}
+           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                    Welcome back, <span className="text-teal-700">{userName}</span>!
+                </h1>
+                <button className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white transition-colors duration-200 ${pendingAlerts > 0 ? 'bg-red-600 hover:bg-red-700 animate-pulse' : 'bg-teal-600 hover:bg-teal-700'}`}>
+                    <Bell size={16} className="mr-2" />
+                    {pendingAlerts > 0 ? `${pendingAlerts} Pending Alert${pendingAlerts > 1 ? 's' : ''}` : 'No Pending Alerts'}
+                </button>
+           </div>
+
+          {/* Stat Cards - Updated Styling */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Example Stat Cards - Replace with real data */}
+            {/* Overdue Tasks */}
             <div className="bg-white p-4 rounded-xl shadow-md border border-gray-100 flex items-center space-x-3">
-              <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-yellow-100 text-yellow-600 flex items-center justify-center">
+              <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-gray-100 text-yellow-600 flex items-center justify-center">
                 <AlertCircle size={20} />
               </div>
               <div>
@@ -141,8 +141,9 @@ export default function DashboardPage() {
                 <p className="text-lg font-semibold text-gray-900">{overdueTaskCount}</p>
               </div>
             </div>
+             {/* Pending Tasks */}
              <div className="bg-white p-4 rounded-xl shadow-md border border-gray-100 flex items-center space-x-3">
-              <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+              <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-gray-100 text-blue-600 flex items-center justify-center">
                 <ClipboardCheck size={20} />
               </div>
               <div>
@@ -150,8 +151,9 @@ export default function DashboardPage() {
                 <p className="text-lg font-semibold text-gray-900">{pendingTaskCount}</p>
               </div>
             </div>
+             {/* System Status */}
              <div className="bg-white p-4 rounded-xl shadow-md border border-gray-100 flex items-center space-x-3">
-              <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
+              <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-gray-100 text-green-600 flex items-center justify-center">
                  <Server size={20} />
               </div>
               <div>
@@ -161,22 +163,25 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
+             {/* Placeholder Stat */}
              <div className="bg-white p-4 rounded-xl shadow-md border border-gray-100 flex items-center space-x-3">
-              <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
-                <Bell size={20} />
+              <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-gray-100 text-indigo-600 flex items-center justify-center">
+                 {/* Example: Could show number of active users or recent searches */}
+                 <Activity size={20} />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Notifications</p>
-                <p className="text-lg font-semibold text-gray-900">0 New</p> {/* Placeholder */}
+                <p className="text-sm text-gray-500">Active Metric</p>
+                <p className="text-lg font-semibold text-gray-900">--</p> {/* Placeholder */}
               </div>
             </div>
           </div>
         </section>
 
-        {/* 2. Quick Access Tools Grid */}
-        <section className="animate-fadeInUp delay-100"> {/* Assuming animate-fadeInUp is defined globally */}
+        {/* 2. Quick Access Tools Grid - Updated to use themed cards */}
+        <section className="animate-fadeInUp delay-100"> {/* Stagger animation */}
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Access Tools</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          {/* Adjusted grid columns for potentially fewer core tools shown prominently */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {coreTools.map((tool) => (
                 <QuickAccessCard
                     key={tool.title}
@@ -184,15 +189,15 @@ export default function DashboardPage() {
                     description={tool.description}
                     href={tool.href}
                     icon={tool.icon}
-                    color={tool.color}
-                    bgColor={tool.bgColor}
+                    // Pass a base color name, component handles variants
+                    color={tool.color?.split('-')[0] || 'teal'} // Extract base color, default to teal
                 />
             ))}
           </div>
         </section>
 
         {/* 3. Task & Activity Columns */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fadeInUp delay-200"> {/* Assuming animate-fadeInUp is defined globally */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fadeInUp delay-200"> {/* Stagger animation */}
           {/* Upcoming Tasks */}
           <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Upcoming Tasks</h2>
@@ -209,7 +214,6 @@ export default function DashboardPage() {
                 <p className="text-sm text-gray-500 italic">No upcoming tasks due soon.</p>
             )}
             <div className="mt-4 text-right">
-                {/* Link to open Task sidebar or dedicated page */}
                 {/* TODO: Implement actual sidebar toggle or link to task page */}
                 <button className="text-sm font-medium text-teal-600 hover:text-teal-500 hover:underline">View All Tasks &rarr;</button>
             </div>
@@ -223,9 +227,9 @@ export default function DashboardPage() {
                     {recentActivities.map(activity => (
                         <li key={activity.id} className="flex items-center justify-between pb-2 border-b border-gray-100 last:border-b-0">
                            <Link href={activity.href} legacyBehavior>
-                             <a className="text-sm text-gray-700 hover:text-teal-600 flex-1 mr-2">{activity.text}</a>
+                             <a className="text-sm text-gray-700 hover:text-teal-600 flex-1 mr-2 truncate">{activity.text}</a> {/* Added truncate */}
                            </Link>
-                            <span className="text-xs text-gray-400 flex-shrink-0">{activity.time}</span>
+                            <span className="text-xs text-gray-400 flex-shrink-0 whitespace-nowrap">{activity.time}</span> {/* Added whitespace-nowrap */}
                         </li>
                     ))}
                 </ul>
@@ -241,33 +245,33 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* 4. Predictive Insights Snapshot - Updated without Chart */}
-        <section className="animate-fadeInUp delay-300"> {/* Assuming animate-fadeInUp is defined globally */}
+        {/* 4. Predictive Insights Snapshot - Updated Styling */}
+        <section className="animate-fadeInUp delay-300"> {/* Stagger animation */}
              <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">Predictive Insights Snapshot</h2>
-                {/* Display metrics textually */}
+                {/* Display metrics textually - Updated Styling */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gradient-to-r from-teal-50 to-blue-50 p-6 rounded-lg">
                     {/* Wait Time Metric */}
-                    <div className="flex items-center justify-between p-3 bg-emerald-100 rounded-lg border border-emerald-200">
+                    <div className="flex items-center justify-between p-4 bg-white/60 rounded-lg border border-gray-200 shadow-sm">
                         <div>
-                            <p className="text-xs text-emerald-700 font-medium uppercase tracking-wider">{predictiveSnippet.waitTimeMetric}</p>
-                            <p className="text-xl font-semibold text-emerald-900">{predictiveSnippet.waitTimeValue}</p>
+                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{predictiveSnippet.waitTimeMetric}</p>
+                            <p className="text-2xl font-bold text-teal-700 mt-1">{predictiveSnippet.waitTimeValue}</p>
                             <p className={`text-xs mt-1 font-medium ${getTrendColor(predictiveSnippet.waitTimeTrend)}`}>
                                 Trend: {predictiveSnippet.waitTimeTrend} {getTrendIndicator(predictiveSnippet.waitTimeTrend)}
                             </p>
                         </div>
-                        <Clock size={28} className="text-emerald-500 flex-shrink-0"/>
+                        <Clock size={28} className="text-teal-500 flex-shrink-0 opacity-70"/>
                     </div>
                     {/* Admission Risk Metric */}
-                    <div className="flex items-center justify-between p-3 bg-amber-100 rounded-lg border border-amber-200">
+                    <div className="flex items-center justify-between p-4 bg-white/60 rounded-lg border border-gray-200 shadow-sm">
                         <div>
-                            <p className="text-xs text-amber-700 font-medium uppercase tracking-wider">{predictiveSnippet.admissionMetric}</p>
-                            <p className="text-xl font-semibold text-amber-900">{predictiveSnippet.admissionValue}</p>
+                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">{predictiveSnippet.admissionMetric}</p>
+                            <p className="text-2xl font-bold text-indigo-700 mt-1">{predictiveSnippet.admissionValue}</p>
                              <p className={`text-xs mt-1 font-medium ${getTrendColor(predictiveSnippet.admissionTrend)}`}>
                                 Trend: {predictiveSnippet.admissionTrend} {getTrendIndicator(predictiveSnippet.admissionTrend)}
                             </p>
                         </div>
-                        <LogIn size={28} className="text-amber-500 flex-shrink-0"/>
+                        <LogIn size={28} className="text-indigo-500 flex-shrink-0 opacity-70"/>
                     </div>
                 </div>
                  <div className="mt-4 text-right">
@@ -282,5 +286,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-// Removed the duplicate export default line from the previous fix
