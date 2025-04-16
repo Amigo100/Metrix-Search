@@ -18,6 +18,7 @@ import {
     BarChart3, // Stats/Analytics Icon
     Server // System Status Icon
 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'; // Example chart library
 
 // --- Placeholder Data (Replace with actual data fetching) ---
 const userName = "Dr. Evans"; // Fetch actual user name
@@ -39,6 +40,17 @@ const predictiveSnippet = {
     trend: "stable", // 'up', 'down', 'stable'
 };
 
+// Example data for wait time trend chart
+const waitTimeData = [
+  { time: '10:00', wait: 30 },
+  { time: '11:00', wait: 35 },
+  { time: '12:00', wait: 50 },
+  { time: '13:00', wait: 45 },
+  { time: '14:00', wait: 55 },
+  { time: '15:00', wait: 60 },
+  { time: '16:00', wait: 45 },
+];
+
 // --- Core Tool Links ---
 const coreTools = [
   { title: 'AI Clinical Scribe', description: 'Generate notes from conversations.', href: '/clinical-scribe', icon: FileText, color: 'text-blue-600', bgColor: 'bg-blue-50' },
@@ -50,7 +62,49 @@ const coreTools = [
     icon: ClipboardCheck, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
 ];
 
+// --- Reusable Quick Access Card Component ---
+interface QuickAccessCardProps {
+  title: string;
+  description: string;
+  href: string;
+  icon: React.ElementType; // Pass icon component directly
+  color: string; // Tailwind color class for icon bg/text (e.g., 'text-teal-600', 'bg-teal-50')
+  bgColor: string;
+}
 
+const QuickAccessCard: React.FC<QuickAccessCardProps> = ({ title, description, href, icon: Icon, color, bgColor }) => {
+  // Define color variants - adjust as needed (using passed props now)
+  // Example: color="text-teal-600", bgColor="bg-teal-50"
+  const hoverBorderColor = color.replace('text-', 'hover:border-').replace('600', '300'); // Generate hover border color
+
+  return (
+    <Link
+      href={href}
+      className={`group relative flex flex-col justify-between p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl ${hoverBorderColor} hover:-translate-y-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 ${bgColor} overflow-hidden`} // Use specific bg color
+    >
+        <div>
+            {/* Use opacity variation for icon background */}
+            <div className={`mb-3 inline-flex items-center justify-center h-10 w-10 rounded-lg ${bgColor.replace('bg-', 'bg-opacity-50')} ${color}`}>
+                <Icon size={20} aria-hidden="true" />
+            </div>
+            {/* Use opacity variation for text colors */}
+            <h3 className={`text-lg font-semibold mb-1 ${color.replace('text-', 'text-opacity-90')}`}>{title}</h3>
+            <p className={`text-sm ${color.replace('600', '700').replace('text-', 'text-opacity-80')}`}>{description}</p>
+        </div>
+        <div className="mt-4">
+            <span className={`text-sm font-medium ${color} group-hover:underline inline-flex items-center`}>
+                Open Tool <ArrowRight size={16} className="ml-1 transition-transform duration-200 group-hover:translate-x-1"/>
+            </span>
+        </div>
+         {/* Optional: Subtle background pattern or gradient */}
+         <div className={`absolute bottom-0 right-0 h-16 w-16 ${color} opacity-10 rounded-full -mr-4 -mb-4`}></div>
+    </Link>
+  );
+};
+
+
+// --- Dashboard Page Component ---
+// Added default export directly to the function definition
 export default function DashboardPage() {
   return (
     // Main container with consistent padding and background
@@ -58,7 +112,7 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* 1. Greeting and Quick Stats Row */}
-        <section className="animate-fadeInUp">
+        <section className="animate-fadeInUp"> {/* Assuming animate-fadeInUp is defined globally */}
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
             Welcome back, {userName}!
           </h1>
@@ -106,39 +160,25 @@ export default function DashboardPage() {
         </section>
 
         {/* 2. Quick Access Tools Grid */}
-        <section className="animate-fadeInUp delay-100">
+        <section className="animate-fadeInUp delay-100"> {/* Assuming animate-fadeInUp is defined globally */}
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Access Tools</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {coreTools.map((tool) => {
-              const Icon = tool.icon;
-              return (
-                <Link
-                  key={tool.title}
-                  href={tool.href}
-                  className={`group relative flex flex-col justify-between p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 ${tool.bgColor} overflow-hidden`} // Use specific bg color
-                >
-                    <div>
-                        <div className={`mb-3 inline-flex items-center justify-center h-10 w-10 rounded-lg ${tool.bgColor.replace('bg-', 'bg-opacity-50')} ${tool.color}`}>
-                            <Icon size={20} aria-hidden="true" />
-                        </div>
-                        <h3 className={`text-lg font-semibold mb-1 ${tool.color.replace('text-', 'text-opacity-90')}`}>{tool.title}</h3>
-                        <p className={`text-sm ${tool.color.replace('600', '700').replace('text-', 'text-opacity-80')}`}>{tool.description}</p>
-                    </div>
-                    <div className="mt-4">
-                        <span className={`text-sm font-medium ${tool.color} group-hover:underline inline-flex items-center`}>
-                            Open Tool <ArrowRight size={16} className="ml-1 transition-transform duration-200 group-hover:translate-x-1"/>
-                        </span>
-                    </div>
-                     {/* Optional: Subtle background pattern or gradient */}
-                     <div className={`absolute bottom-0 right-0 h-16 w-16 ${tool.color} opacity-10 rounded-full -mr-4 -mb-4`}></div>
-                </Link>
-              );
-            })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            {coreTools.map((tool) => (
+                <QuickAccessCard
+                    key={tool.title}
+                    title={tool.title}
+                    description={tool.description}
+                    href={tool.href}
+                    icon={tool.icon}
+                    color={tool.color}
+                    bgColor={tool.bgColor}
+                />
+            ))}
           </div>
         </section>
 
         {/* 3. Task & Activity Columns */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fadeInUp delay-200">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fadeInUp delay-200"> {/* Assuming animate-fadeInUp is defined globally */}
           {/* Upcoming Tasks */}
           <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Upcoming Tasks</h2>
@@ -156,6 +196,7 @@ export default function DashboardPage() {
             )}
             <div className="mt-4 text-right">
                 {/* Link to open Task sidebar or dedicated page */}
+                {/* TODO: Implement actual sidebar toggle or link to task page */}
                 <button className="text-sm font-medium text-teal-600 hover:text-teal-500 hover:underline">View All Tasks &rarr;</button>
             </div>
           </div>
@@ -187,20 +228,42 @@ export default function DashboardPage() {
         </section>
 
         {/* 4. (Optional) Predictive Insights Snippet */}
-        <section className="animate-fadeInUp delay-300">
+        <section className="animate-fadeInUp delay-300"> {/* Assuming animate-fadeInUp is defined globally */}
              <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">Predictive Insights Snapshot</h2>
-                <div className="flex items-center justify-center space-x-6 bg-gradient-to-r from-teal-50 to-blue-50 p-6 rounded-lg">
-                    <div className="text-center">
-                        <p className="text-sm text-gray-500">{predictiveSnippet.metric}</p>
-                        <p className="text-3xl font-bold text-teal-700 mt-1">{predictiveSnippet.value}</p>
-                        <p className={`text-xs mt-1 ${predictiveSnippet.trend === 'up' ? 'text-red-600' : predictiveSnippet.trend === 'down' ? 'text-green-600' : 'text-gray-500'}`}>
-                            Trend: {predictiveSnippet.trend}
-                        </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-gradient-to-r from-teal-50 to-blue-50 p-6 rounded-lg">
+                    {/* Metrics */}
+                    <div className="md:col-span-1 flex flex-col space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-emerald-100 rounded-lg border border-emerald-200">
+                            <div>
+                                <p className="text-xs text-emerald-700 font-medium uppercase tracking-wider">Est. Wait Time</p>
+                                <p className="text-xl font-semibold text-emerald-900">{edWaitTime}</p>
+                            </div>
+                            <Clock size={24} className="text-emerald-500"/>
+                        </div>
+                         <div className="flex items-center justify-between p-3 bg-amber-100 rounded-lg border border-amber-200">
+                            <div>
+                                <p className="text-xs text-amber-700 font-medium uppercase tracking-wider">Avg. Admission Risk</p>
+                                <p className="text-xl font-semibold text-amber-900">{admissionLikelihood}</p>
+                            </div>
+                            <LogIn size={24} className="text-amber-500"/>
+                        </div>
                     </div>
-                    {/* Placeholder for a mini chart */}
-                    <div className="text-gray-300">
-                        <BarChart3 size={48} />
+                    {/* Chart */}
+                    <div className="md:col-span-2 h-48 w-full"> {/* Adjusted height */}
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={waitTimeData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}> {/* Adjusted margins */}
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                <XAxis dataKey="time" fontSize={10} tickLine={false} axisLine={false} />
+                                <YAxis fontSize={10} tickLine={false} axisLine={false} unit="m" width={30}/> {/* Added width */}
+                                <Tooltip
+                                    cursor={{ fill: '#f0fdfa' }}
+                                    contentStyle={{ backgroundColor: 'white', borderRadius: '8px', borderColor: '#e5e7eb', fontSize: '12px', padding: '8px' }}
+                                    labelStyle={{ color: '#111827', fontWeight: '600' }}
+                                />
+                                <Bar dataKey="wait" name="Wait (min)" fill="#2dd4bf" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
                  <div className="mt-4 text-right">
@@ -216,6 +279,5 @@ export default function DashboardPage() {
   );
 }
 
-// Add the default export line
-export default DashboardPage;
-
+// *** REMOVED REDUNDANT DEFAULT EXPORT LINE ***
+// export default DashboardPage;
