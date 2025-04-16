@@ -1,12 +1,10 @@
-// /components/Modals/TemplatesModal.tsx
-
 import { useState, useContext } from 'react';
 import { useTranslation } from 'next-i18next'; // Hook for internationalization
 import HomeContext from '@/pages/api/home/home.context'; // Context for global state
 import { Prompt } from '@/types/prompt'; // Type definition for a prompt/template
 import { v4 as uuidv4 } from 'uuid'; // Library for generating unique IDs
 
-// PDFMake library for generating PDFs client-side 
+// PDFMake library for generating PDFs client-side
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 pdfMake.vfs = pdfFonts.pdfMake.vfs; // Assign virtual file system for fonts
@@ -98,19 +96,19 @@ export const TemplatesModal = () => {
       name: t('New Template'), // Default name (translatable)
       description: '', // Default empty description
       content: '', // Default empty content
-      model: { // Default model info (consider making this configurable)
-        id: state.defaultModelId || 'gpt-4', // Use default model from state or fallback
-        name: 'GPT-4', // Placeholder name, could fetch dynamically
-        maxLength: 24000, // Example value
-        tokenLimit: 8000, // Example value
+      model: {
+        id: state.defaultModelId || 'gpt-4',
+        name: 'GPT-4',
+        maxLength: 24000,
+        tokenLimit: 8000,
       },
-      folderId: null, // Default no folder
+      folderId: null,
     };
 
-    const updated = [...templates, newTemplate]; // Add the new template to the list
-    updateTemplates(updated); // Update state and localStorage
+    const updated = [...templates, newTemplate];
+    updateTemplates(updated);
 
-    // Immediately expand and start editing the new template for better UX
+    // Immediately expand and start editing the new template
     setExpandedTemplateId(newTemplate.id);
     setEditingTemplateId(newTemplate.id);
     setEditName(newTemplate.name);
@@ -133,39 +131,39 @@ export const TemplatesModal = () => {
       setExpandedTemplateId(tplId);
       // Ensure editing stops if a different template was being edited
       if (editingTemplateId && editingTemplateId !== tplId) {
-         setEditingTemplateId(null);
+        setEditingTemplateId(null);
       }
     }
   };
 
   // Handler function to initiate editing for a specific template
   const handleStartEdit = (tpl: Prompt) => {
-    setEditingTemplateId(tpl.id); // Set the ID of the template being edited
-    setEditName(tpl.name); // Populate edit fields with current values
+    setEditingTemplateId(tpl.id);
+    setEditName(tpl.name);
     setEditContent(tpl.content);
-    setExpandedTemplateId(tpl.id); // Ensure it's expanded when editing starts
+    setExpandedTemplateId(tpl.id);
   };
 
   // Handler function to save changes made to a template
   const handleSaveTemplate = (tplId: string) => {
     const updated = templates.map((tpl) =>
       tpl.id === tplId
-        ? { ...tpl, name: editName.trim(), content: editContent } // Update name and content
+        ? { ...tpl, name: editName.trim(), content: editContent }
         : tpl
     );
-    updateTemplates(updated); // Update state and localStorage
-    setEditingTemplateId(null); // Exit editing mode
-    alert(t('Template saved!')); // User feedback
+    updateTemplates(updated);
+    setEditingTemplateId(null);
+    alert(t('Template saved!'));
     console.log('Template saved with id:', tplId);
   };
 
   // Handler function to delete a template
   const handleDeleteTemplate = (tplId: string) => {
-    // Optional: Add a confirmation dialog here
+    // Optional: Add a confirmation dialog
     // if (!confirm(t('Are you sure you want to delete this template?'))) return;
 
-    const filtered = templates.filter((tpl) => tpl.id !== tplId); // Filter out the template
-    updateTemplates(filtered); // Update state and localStorage
+    const filtered = templates.filter((tpl) => tpl.id !== tplId);
+    updateTemplates(filtered);
     // Reset UI state if the deleted template was expanded or being edited
     if (expandedTemplateId === tplId) setExpandedTemplateId(null);
     if (editingTemplateId === tplId) setEditingTemplateId(null);
@@ -175,10 +173,9 @@ export const TemplatesModal = () => {
   // Handler function to export a single template as a PDF
   const handleExportAsPDF = (tpl: Prompt) => {
     const now = new Date();
-    // Create a timestamp string for the filename
     const timeStamp = [
       now.getFullYear(),
-      String(now.getMonth() + 1).padStart(2, '0'), // Month is 0-indexed
+      String(now.getMonth() + 1).padStart(2, '0'),
       String(now.getDate()).padStart(2, '0'),
       '_',
       String(now.getHours()).padStart(2, '0'),
@@ -186,48 +183,46 @@ export const TemplatesModal = () => {
       String(now.getSeconds()).padStart(2, '0'),
     ].join('');
 
-    // Define the PDF document structure for pdfMake
-    const pdfDefinition: any = { // Use 'any' or define a specific type for pdfMake doc definition
+    const pdfDefinition: any = {
       content: [
-        { text: tpl.name, style: 'header' }, // Template name as header
-        { text: tpl.content, margin: [0, 5, 0, 15] }, // Template content with margin
+        { text: tpl.name, style: 'header' },
+        { text: tpl.content, margin: [0, 5, 0, 15] },
       ],
       styles: {
-        header: { fontSize: 14, bold: true, color: '#2D4F6C' }, // Style for the header with new color
+        header: { fontSize: 14, bold: true, color: '#2D4F6C' },
       },
-       defaultStyle: {
-         color: '#333' // Default text color for PDF
-       }
+      defaultStyle: {
+        color: '#333',
+      },
     };
 
-    // Generate and download the PDF
-    pdfMake.createPdf(pdfDefinition).download(`${timeStamp}_${tpl.name.replace(/[^a-z0-9]/gi, '_')}.pdf`); // Sanitize filename
+    pdfMake
+      .createPdf(pdfDefinition)
+      .download(`${timeStamp}_${tpl.name.replace(/[^a-z0-9]/gi, '_')}.pdf`);
     console.log('Exported template as PDF:', tpl.id);
   };
 
-  // Filter templates based on the search term (case-insensitive)
+  // Filter templates based on the search term
   const filteredTemplates = templates.filter((tpl) =>
     tpl.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tpl.content.toLowerCase().includes(searchTerm.toLowerCase()) // Optionally search content too
+    tpl.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // JSX for the modal structure and elements
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 p-4">
       {/* Modal Container */}
       <div
         className="w-full max-w-3xl max-h-[90vh] rounded-lg shadow-xl
                    bg-white dark:bg-[#1a2b3c] text-gray-900 dark:text-white
-                   border border-gray-200 dark:border-[#3D7F80] p-6 flex flex-col" // Use flex-col for structure
+                   border border-gray-200 dark:border-[#3D7F80] p-6 flex flex-col"
       >
         {/* Modal Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 pb-4 border-b border-gray-200 dark:border-[#3D7F80] flex-shrink-0">
           <h2 className="text-xl font-semibold text-[#2D4F6C] dark:text-white mb-4 sm:mb-0">
-            {t('Templates')} {/* Translated title */}
+            {t('Templates')}
           </h2>
-          {/* Header Action Buttons */}
           <div className="flex flex-wrap gap-2">
-             <button
+            <button
               onClick={handleNewTemplate}
               className="rounded-md bg-[#2D4F6C] px-3 py-1.5 text-sm font-semibold text-white hover:bg-[#25415a] transition-colors duration-200"
             >
@@ -294,22 +289,22 @@ export const TemplatesModal = () => {
                   {/* Clickable Title to Expand/Collapse */}
                   <button
                     onClick={() => handleToggleExpand(tpl.id)}
-                    className="text-left flex-grow min-w-0 group" // Allow button to take space but prevent overflow issues
+                    className="text-left flex-grow min-w-0 group"
                   >
-                    <h3 className="text-sm font-semibold text-[#2D4F6C] dark:text-gray-100 truncate group-hover:text-[#3D7F80] dark:group-hover:text-[#68A9A9]"> {/* Truncate long names */}
+                    <h3 className="text-sm font-semibold text-[#2D4F6C] dark:text-gray-100 truncate group-hover:text-[#3D7F80] dark:group-hover:text-[#68A9A9]">
                       {tpl.name}
                     </h3>
                   </button>
-                  {/* Action Icons/Buttons for each template */}
                   <div className="flex items-center gap-3 flex-shrink-0">
                     {/* Expand/Collapse Button */}
-                     <button
-                        className="text-xs font-medium text-[#3D7F80] hover:text-[#2D4F6C] dark:text-[#68A9A9] dark:hover:text-white"
-                        onClick={() => handleToggleExpand(tpl.id)}
-                        title={isExpanded ? t('Collapse') : t('Expand')}
-                      >
-                        {isExpanded ? t('Collapse') : t('Expand')}
-                      </button>
+                    <button
+                      className="text-xs font-medium text-[#3D7F80] hover:text-[#2D4F6C] dark:text-[#68A9A9] dark:hover:text-white"
+                      onClick={() => handleToggleExpand(tpl.id)}
+                      // ---- FIX APPLIED HERE: fallback ensures a valid string
+                      title={isExpanded ? t('Collapse') || '' : t('Expand') || ''}
+                    >
+                      {isExpanded ? t('Collapse') : t('Expand')}
+                    </button>
                     {/* Delete Button */}
                     <button
                       className="text-xs font-medium text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
@@ -324,7 +319,6 @@ export const TemplatesModal = () => {
                 {/* Expanded Content Area */}
                 {isExpanded && (
                   <div className="mt-3 pt-3 border-t border-gray-200 dark:border-[#3D7F80]/50 text-sm">
-                    {/* Editing View */}
                     {isEditing ? (
                       <>
                         {/* Edit Name Input */}
@@ -345,50 +339,51 @@ export const TemplatesModal = () => {
                         <textarea
                           className="w-full h-32 mb-2 px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-[#3D7F80]
                                      bg-white dark:bg-[#1a2b3c] text-gray-900 dark:text-white
-                                     focus:outline-none focus:ring-1 focus:ring-[#68A9A9] font-mono" // Added font-mono for code-like content
+                                     focus:outline-none focus:ring-1 focus:ring-[#68A9A9] font-mono"
                           value={editContent}
                           onChange={(e) => setEditContent(e.target.value)}
-                          rows={6} // Suggest number of rows
+                          rows={6}
                         />
                         {/* Save/Cancel Buttons for Editing */}
                         <div className="flex justify-end gap-2 mt-2">
                           <button
                             className="rounded-md bg-[#68A9A9] px-3 py-1 text-xs font-medium text-[#1a2b3c]
                                        hover:bg-[#5a9a9a]"
-                            onClick={() => setEditingTemplateId(null)} // Cancel editing
+                            onClick={() => setEditingTemplateId(null)}
                           >
                             {t('Cancel')}
                           </button>
                           <button
                             className="rounded-md bg-green-600 px-3 py-1 text-xs font-medium text-white
-                                       hover:bg-green-700" // Keep green for save confirmation
-                            onClick={() => handleSaveTemplate(tpl.id)} // Save changes
+                                       hover:bg-green-700"
+                            onClick={() => handleSaveTemplate(tpl.id)}
                           >
                             {t('Save')}
                           </button>
                         </div>
                       </>
                     ) : (
-                      /* Read-Only View */
                       <>
-                        {/* Display Content */}
                         <div
-                           className="p-2 border border-gray-200 dark:border-[#3D7F80]/30 rounded-md bg-white dark:bg-[#1a2b3c]
-                                      text-gray-800 dark:text-gray-200 mb-2 whitespace-pre-wrap text-xs leading-relaxed font-mono" // Added font-mono
+                          className="p-2 border border-gray-200 dark:border-[#3D7F80]/30 rounded-md bg-white dark:bg-[#1a2b3c]
+                                     text-gray-800 dark:text-gray-200 mb-2 whitespace-pre-wrap text-xs leading-relaxed font-mono"
                         >
-                          {tpl.content || <span className="italic text-gray-400 dark:text-gray-500">{t('No content')}</span>}
+                          {tpl.content || (
+                            <span className="italic text-gray-400 dark:text-gray-500">
+                              {t('No content')}
+                            </span>
+                          )}
                         </div>
-                        {/* Edit/Export Buttons for Read-Only View */}
                         <div className="flex justify-end gap-3">
                           <button
                             className="text-xs font-medium text-[#3D7F80] hover:text-[#2D4F6C] dark:text-[#68A9A9] dark:hover:text-white"
-                            onClick={() => handleStartEdit(tpl)} // Start editing this template
+                            onClick={() => handleStartEdit(tpl)}
                           >
                             {t('Edit')}
                           </button>
                           <button
                             className="text-xs font-medium text-[#3D7F80] hover:text-[#2D4F6C] dark:text-[#68A9A9] dark:hover:text-white"
-                            onClick={() => handleExportAsPDF(tpl)} // Export this template as PDF
+                            onClick={() => handleExportAsPDF(tpl)}
                           >
                             {t('Export as PDF')}
                           </button>
@@ -400,11 +395,10 @@ export const TemplatesModal = () => {
               </div>
             );
           })}
-        </div> {/* End Templates List */}
-      </div> {/* End Modal Container */}
-    </div> /* End Modal Backdrop */
+        </div>
+      </div>
+    </div>
   );
 };
 
-// Export the component as default
 export default TemplatesModal;
