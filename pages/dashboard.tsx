@@ -15,10 +15,13 @@ import {
     CheckCircle2, // Completed Tasks
     AlertCircle, // Expired/Alert Tasks
     ArrowRight, // Links
-    BarChart3, // Stats/Analytics Icon
-    Server // System Status Icon
+    BarChart3, // Stats/Analytics Icon (Can still use for general stats)
+    Server, // System Status Icon
+    Clock, // Added for LOS/Wait Time
+    LogIn // Added for Admission Risk
 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'; // Example chart library
+// *** REMOVED Recharts import ***
+// import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 // --- Placeholder Data (Replace with actual data fetching) ---
 const userName = "Dr. Evans"; // Fetch actual user name
@@ -34,22 +37,17 @@ const upcomingTasks = [
     { id: 't1', text: "Review Patient X's blood results", due: "in 15m", urgent: true },
     { id: 't2', text: "Check Patient Y's response to diuretics", due: "in 1h", urgent: false },
 ];
+// Updated placeholder data for text display
 const predictiveSnippet = {
-    metric: "Avg. ED Wait Time",
-    value: "~45 min",
-    trend: "stable", // 'up', 'down', 'stable'
+    waitTimeMetric: "Est. ED Wait Time",
+    waitTimeValue: "~45 min",
+    waitTimeTrend: "stable", // 'up', 'down', 'stable'
+    admissionMetric: "Avg. Admission Risk",
+    admissionValue: "Moderate", // Example value
+    admissionTrend: "up",
 };
 
-// Example data for wait time trend chart
-const waitTimeData = [
-  { time: '10:00', wait: 30 },
-  { time: '11:00', wait: 35 },
-  { time: '12:00', wait: 50 },
-  { time: '13:00', wait: 45 },
-  { time: '14:00', wait: 55 },
-  { time: '15:00', wait: 60 },
-  { time: '16:00', wait: 45 },
-];
+// *** REMOVED waitTimeData constant ***
 
 // --- Core Tool Links ---
 const coreTools = [
@@ -61,6 +59,7 @@ const coreTools = [
   { title: 'Patient Tracker', description: 'Manage tasks & timers.', href: '/#tasks', // Link to open task sidebar? Or a dedicated page?
     icon: ClipboardCheck, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
 ];
+
 
 // --- Reusable Quick Access Card Component ---
 interface QuickAccessCardProps {
@@ -104,8 +103,23 @@ const QuickAccessCard: React.FC<QuickAccessCardProps> = ({ title, description, h
 
 
 // --- Dashboard Page Component ---
-// Added default export directly to the function definition
 export default function DashboardPage() {
+  // Helper to get trend indicator color
+  const getTrendColor = (trend: string) => {
+    switch (trend) {
+        case 'up': return 'text-red-600';
+        case 'down': return 'text-green-600';
+        default: return 'text-gray-500';
+    }
+  };
+  const getTrendIndicator = (trend: string) => {
+     switch (trend) {
+        case 'up': return '↑';
+        case 'down': return '↓';
+        default: return '→'; // For stable
+    }
+  }
+
   return (
     // Main container with consistent padding and background
     <div className="w-full min-h-[calc(100vh-72px)] overflow-y-auto p-6 md:p-8 bg-gradient-to-b from-white via-teal-50 to-gray-50">
@@ -227,43 +241,33 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* 4. (Optional) Predictive Insights Snippet */}
+        {/* 4. Predictive Insights Snapshot - Updated without Chart */}
         <section className="animate-fadeInUp delay-300"> {/* Assuming animate-fadeInUp is defined globally */}
              <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">Predictive Insights Snapshot</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-gradient-to-r from-teal-50 to-blue-50 p-6 rounded-lg">
-                    {/* Metrics */}
-                    <div className="md:col-span-1 flex flex-col space-y-4">
-                        <div className="flex items-center justify-between p-3 bg-emerald-100 rounded-lg border border-emerald-200">
-                            <div>
-                                <p className="text-xs text-emerald-700 font-medium uppercase tracking-wider">Est. Wait Time</p>
-                                <p className="text-xl font-semibold text-emerald-900">{edWaitTime}</p>
-                            </div>
-                            <Clock size={24} className="text-emerald-500"/>
+                {/* Display metrics textually */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gradient-to-r from-teal-50 to-blue-50 p-6 rounded-lg">
+                    {/* Wait Time Metric */}
+                    <div className="flex items-center justify-between p-3 bg-emerald-100 rounded-lg border border-emerald-200">
+                        <div>
+                            <p className="text-xs text-emerald-700 font-medium uppercase tracking-wider">{predictiveSnippet.waitTimeMetric}</p>
+                            <p className="text-xl font-semibold text-emerald-900">{predictiveSnippet.waitTimeValue}</p>
+                            <p className={`text-xs mt-1 font-medium ${getTrendColor(predictiveSnippet.waitTimeTrend)}`}>
+                                Trend: {predictiveSnippet.waitTimeTrend} {getTrendIndicator(predictiveSnippet.waitTimeTrend)}
+                            </p>
                         </div>
-                         <div className="flex items-center justify-between p-3 bg-amber-100 rounded-lg border border-amber-200">
-                            <div>
-                                <p className="text-xs text-amber-700 font-medium uppercase tracking-wider">Avg. Admission Risk</p>
-                                <p className="text-xl font-semibold text-amber-900">{admissionLikelihood}</p>
-                            </div>
-                            <LogIn size={24} className="text-amber-500"/>
-                        </div>
+                        <Clock size={28} className="text-emerald-500 flex-shrink-0"/>
                     </div>
-                    {/* Chart */}
-                    <div className="md:col-span-2 h-48 w-full"> {/* Adjusted height */}
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={waitTimeData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}> {/* Adjusted margins */}
-                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                <XAxis dataKey="time" fontSize={10} tickLine={false} axisLine={false} />
-                                <YAxis fontSize={10} tickLine={false} axisLine={false} unit="m" width={30}/> {/* Added width */}
-                                <Tooltip
-                                    cursor={{ fill: '#f0fdfa' }}
-                                    contentStyle={{ backgroundColor: 'white', borderRadius: '8px', borderColor: '#e5e7eb', fontSize: '12px', padding: '8px' }}
-                                    labelStyle={{ color: '#111827', fontWeight: '600' }}
-                                />
-                                <Bar dataKey="wait" name="Wait (min)" fill="#2dd4bf" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                    {/* Admission Risk Metric */}
+                    <div className="flex items-center justify-between p-3 bg-amber-100 rounded-lg border border-amber-200">
+                        <div>
+                            <p className="text-xs text-amber-700 font-medium uppercase tracking-wider">{predictiveSnippet.admissionMetric}</p>
+                            <p className="text-xl font-semibold text-amber-900">{predictiveSnippet.admissionValue}</p>
+                             <p className={`text-xs mt-1 font-medium ${getTrendColor(predictiveSnippet.admissionTrend)}`}>
+                                Trend: {predictiveSnippet.admissionTrend} {getTrendIndicator(predictiveSnippet.admissionTrend)}
+                            </p>
+                        </div>
+                        <LogIn size={28} className="text-amber-500 flex-shrink-0"/>
                     </div>
                 </div>
                  <div className="mt-4 text-right">
@@ -279,5 +283,4 @@ export default function DashboardPage() {
   );
 }
 
-// *** REMOVED REDUNDANT DEFAULT EXPORT LINE ***
-// export default DashboardPage;
+// Removed the duplicate export default line from the previous fix
