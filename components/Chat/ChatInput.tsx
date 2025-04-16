@@ -1,5 +1,3 @@
-### 3️⃣  **/components/Chat/ChatInput.tsx**
-```tsx
 import React, {
   MutableRefObject,
   useCallback,
