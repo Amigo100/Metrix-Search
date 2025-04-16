@@ -82,7 +82,6 @@ const Header: React.FC = () => {
         {/* Logo */}
         <Link href="/" legacyBehavior>
             <a className="flex items-center space-x-2 animate-fadeInLeft cursor-pointer">
-              < xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 60 60" fill="none">
               <img
                 src="/MetrixAI.png" // Or metrix-logo.svg
                 alt="Metrix Logo"
