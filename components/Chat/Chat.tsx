@@ -1,5 +1,3 @@
-### 4️⃣  **/components/Chat/Chat.tsx**
-```tsx
 import React, {
   memo,
   useContext,
