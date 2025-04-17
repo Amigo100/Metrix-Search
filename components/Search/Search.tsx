@@ -26,7 +26,7 @@ const Search: FC<Props> = ({ placeholder, searchTerm, onSearch }) => {
           w-full rounded-md border border-gray-400 
           hover:bg-teal-50 hover:border-teal-400 hover:text-teal-700 
           py-2 px-4 pr-10
-          text-sm text-black
+          text-sm text-black hover:text-teal-700 
           placeholder-black hover:text-teal-700 
           focus:outline-none
         "
