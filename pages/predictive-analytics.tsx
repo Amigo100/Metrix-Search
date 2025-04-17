@@ -1,5 +1,4 @@
-// file: pages/predictive-analytics.tsx
-
+// file: pages/predictive‑analytics.tsx
 import {
   useState,
   useEffect,
@@ -34,14 +33,18 @@ import {
   setMilliseconds,
 } from 'date-fns';
 
-// === ENV‑DRIVEN BACKEND URL ===
+// ─────────────────────────────────────────────────────────────
+//  ENV‑DRIVEN BACKEND URL
+// ─────────────────────────────────────────────────────────────
 const PREDICTIVE_API_URL =
   process.env.NEXT_PUBLIC_PREDICTIVE_API_URL ??
   (process.env.NODE_ENV === 'development'
     ? 'http://localhost:8000/predictive/api/predict'
     : 'https://fastapiplatformclean-10.onrender.com/predictive/api/predict');
 
-// =============== Type Definitions ===============
+// ─────────────────────────────────────────────────────────────
+//  Type Definitions
+// ─────────────────────────────────────────────────────────────
 interface PredictionResult {
   wait3h: number;
   wait4h: number;
@@ -70,7 +73,9 @@ interface ApiPredictionInput {
   occupancy: string;
 }
 
-// =============== Helper: Age Encoding ===============
+// ─────────────────────────────────────────────────────────────
+//  Helper: Age Encoding
+// ─────────────────────────────────────────────────────────────
 const encodeAgeOrdinal = (rawAge: number): number => {
   if (rawAge >= 1 && rawAge <= 5) return 1;
   if (rawAge >= 6 && rawAge <= 12) return 2;
@@ -82,11 +87,13 @@ const encodeAgeOrdinal = (rawAge: number): number => {
   return 0;
 };
 
-// =============== UI Primitives ===============
-function cn(...classes: (string | undefined | null | false)[]): string {
-  return classes.filter(Boolean).join(' ');
-}
+// ─────────────────────────────────────────────────────────────
+//  UI Primitives
+// ─────────────────────────────────────────────────────────────
+const cn = (...classes: (string | undefined | null | false)[]) =>
+  classes.filter(Boolean).join(' ');
 
+/* ── Button ───────────────────────────── */
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'default' | 'outline';
   size?: 'sm';
@@ -99,9 +106,9 @@ const Button: FC<ButtonProps> = ({
   className = '',
   ...props
 }) => {
-  const baseClasses =
+  const base =
     'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50';
-  const sizeClasses = size === 'sm' ? 'h-9 px-3' : 'h-10 px-4 py-2';
+  const sizeCls = size === 'sm' ? 'h-9 px-3' : 'h-10 px-4 py-2';
   const variants = {
     default:
       'bg-gradient-to-r from-[#2D4F6C] to-[#3D7F80] text-white hover:from-[#254058] hover:to-[#316667]',
@@ -109,17 +116,17 @@ const Button: FC<ButtonProps> = ({
       'border border-[#3D7F80] bg-white text-stone-700 hover:bg-stone-100',
   };
   return (
-    <button
-      className={cn(baseClasses, sizeClasses, variants[variant], className)}
-      {...props}
-    >
+    <button className={cn(base, sizeCls, variants[variant], className)} {...props}>
       {children}
     </button>
   );
 };
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
-const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => (
+/* ── Input ─────────────────────────────── */
+const Input = forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>((props, ref) => (
   <input
     ref={ref}
     className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-[#3D7F80]"
@@ -128,16 +135,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => (
 ));
 Input.displayName = 'Input';
 
-interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
-  children: ReactNode;
-}
-const Label: FC<LabelProps> = (props) => (
+/* ── Label ─────────────────────────────── */
+const Label: FC<React.LabelHTMLAttributes<HTMLLabelElement>> = (props) => (
   <label className="block text-sm font-medium text-stone-700 mb-1" {...props} />
 );
 
+/* ── Select & SelectItem ───────────────── */
 interface SelectProps {
   value: string;
-  onValueChange: (value: string) => void;
+  onValueChange: (v: string) => void;
   placeholder?: string;
   required?: boolean;
   id?: string;
@@ -155,9 +161,10 @@ const Select: FC<SelectProps> = ({
     (c): c is ReactElement => isValidElement(c)
   );
   const sel = opts.find((o) => o.props.value === value);
-  const display = sel
-    ? Children.toArray(sel.props.children).join('')
-    : placeholder;
+  const display =
+    sel && typeof sel.props.children === 'string'
+      ? sel.props.children
+      : placeholder ?? '';
   return (
     <div className="relative">
       <select
@@ -179,15 +186,12 @@ const Select: FC<SelectProps> = ({
     </div>
   );
 };
+const SelectItem: FC<React.OptionHTMLAttributes<HTMLOptionElement>> = ({
+  children,
+  ...props
+}) => <option {...props}>{children}</option>;
 
-interface SelectItemProps
-  extends React.OptionHTMLAttributes<HTMLOptionElement> {
-  children: ReactNode;
-}
-const SelectItem: FC<SelectItemProps> = ({ children, ...props }) => (
-  <option {...props}>{children}</option>
-);
-
+/* ── Card ──────────────────────────────── */
 interface CardProps {
   children: ReactNode;
   className?: string;
@@ -197,52 +201,32 @@ const Card: FC<CardProps> = ({ children, className }) => (
     {children}
   </div>
 );
-
-interface CardHeaderProps {
-  children: ReactNode;
-  className?: string;
-}
-const CardHeader: FC<CardHeaderProps> = ({ children, className }) => (
+const CardHeader: FC<CardProps> = ({ children, className }) => (
   <div className={cn('flex items-center justify-between p-5', className)}>
     {children}
   </div>
 );
-
-interface CardTitleProps {
-  children: ReactNode;
-}
-const CardTitle: FC<CardTitleProps> = ({ children }) => (
+const CardTitle: FC<CardProps> = ({ children }) => (
   <h3 className="text-base font-semibold">{children}</h3>
 );
-
-interface CardContentProps {
-  children: ReactNode;
-  className?: string;
-}
-const CardContent: FC<CardContentProps> = ({ children, className }) => (
+const CardContent: FC<CardProps> = ({ children, className }) => (
   <div className={cn('p-5 pt-0', className)}>{children}</div>
 );
 
+/* ── Popover ───────────────────────────── */
 interface PopoverProps {
   children: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 const Popover: FC<PopoverProps> = ({ children }) => (
   <div className="relative">{children}</div>
 );
-
-interface PopoverTriggerProps {
-  onClick?: () => void;
-  children: ReactNode;
-}
-const PopoverTrigger: FC<PopoverTriggerProps> = ({ onClick, children }) => (
-  <div onClick={onClick}>{children}</div>
-);
-
-interface PopoverContentProps {
-  children: ReactNode;
-  className?: string;
-}
-const PopoverContent: FC<PopoverContentProps> = ({
+const PopoverTrigger: FC<{ onClick?: () => void; children: ReactNode }> = ({
+  onClick,
+  children,
+}) => <div onClick={onClick}>{children}</div>;
+const PopoverContent: FC<{ children: ReactNode; className?: string }> = ({
   children,
   className,
 }) => (
@@ -256,11 +240,11 @@ const PopoverContent: FC<PopoverContentProps> = ({
   </div>
 );
 
-interface ProgressProps {
-  value?: number | null;
-  colorClass?: string;
-}
-const Progress: FC<ProgressProps> = ({ value, colorClass = 'bg-[#3D7F80]' }) => (
+/* ── Progress ──────────────────────────── */
+const Progress: FC<{ value?: number | null; colorClass?: string }> = ({
+  value,
+  colorClass = 'bg-[#3D7F80]',
+}) => (
   <div className="relative h-2 w-full bg-stone-200 rounded-full overflow-hidden">
     <div
       className={`${colorClass} h-full transition-transform ease-out duration-500`}
@@ -269,6 +253,7 @@ const Progress: FC<ProgressProps> = ({ value, colorClass = 'bg-[#3D7F80]' }) => 
   </div>
 );
 
+/* ── Switch (mock) ─────────────────────── */
 interface SwitchProps {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
@@ -279,8 +264,8 @@ const SwitchMock: FC<SwitchProps> = ({
   onCheckedChange,
   'aria-label': ariaLabel,
 }) => {
-  const bgColor = checked ? 'bg-[#3D7F80]' : 'bg-stone-300';
-  const togglePosition = checked ? 'translate-x-5' : 'translate-x-0';
+  const bg = checked ? 'bg-[#3D7F80]' : 'bg-stone-300';
+  const pos = checked ? 'translate-x-5' : 'translate-x-0';
   return (
     <button
       type="button"
@@ -290,64 +275,62 @@ const SwitchMock: FC<SwitchProps> = ({
       onClick={() => onCheckedChange(!checked)}
       className={cn(
         'relative inline-flex h-6 w-11 rounded-full transition-colors focus:ring-2 focus:ring-[#3D7F80]',
-        bgColor
+        bg
       )}
     >
       <span
         aria-hidden="true"
         className={cn(
           'inline-block h-5 w-5 transform rounded-full bg-white transition-transform',
-          togglePosition
+          pos
         )}
       />
     </button>
   );
 };
 
-// =============== Main Component ===============
+// ─────────────────────────────────────────────────────────────
+//  Main Component
+// ─────────────────────────────────────────────────────────────
 const PredictiveAnalyticsPage: FC = () => {
-  // --- State Variables ---
-  const [age, setAge] = useState<string>('');
-  const [dateTime, setDateTime] = useState<Date>(new Date());
-  const [gender, setGender] = useState<string>('');
-  const [occupancy, setOccupancy] = useState<string>('');
-  const [referralSource, setReferralSource] = useState<string>('');
-  const [triageCode, setTriageCode] = useState<string>('');
-  const [patientsAhead, setPatientsAhead] = useState<string>('');
-  const [patientsInED, setPatientsInED] = useState<string>('');
-  const [alteredMentalStatus, setAlteredMentalStatus] =
-    useState<boolean>(false);
-  const [isAccident, setIsAccident] = useState<boolean>(false);
-  const [hasFever, setHasFever] = useState<boolean>(false);
+  /* ── State ─────────────────────────── */
+  const [age, setAge] = useState('');
+  const [dateTime, setDateTime] = useState(new Date());
+  const [gender, setGender] = useState('');
+  const [occupancy, setOccupancy] = useState('');
+  const [referralSource, setReferralSource] = useState('');
+  const [triageCode, setTriageCode] = useState('');
+  const [patientsAhead, setPatientsAhead] = useState('');
+  const [patientsInED, setPatientsInED] = useState('');
+  const [alteredMentalStatus, setAlteredMentalStatus] = useState(false);
+  const [isAccident, setIsAccident] = useState(false);
+  const [hasFever, setHasFever] = useState(false);
 
-  const [predictions, setPredictions] =
-    useState<PredictionResult | null>(null);
-  const [recommendations, setRecommendations] = useState<string[] | null>(
-    null
-  );
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [predictions, setPredictions] = useState<PredictionResult | null>(null);
+  const [recommendations, setRecommendations] = useState<string[] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  // --- Format likelihood helper ---
-  const formatLikelihood = (percentage: number): LikelihoodFormat => {
-    if (percentage > 75)
+  /* ── Format likelihood ─────────────── */
+  const formatLikelihood = (p: number): LikelihoodFormat => {
+    if (p > 75)
       return {
         text: 'Very High',
         color: 'text-red-700',
         bgColor: 'bg-red-500',
         Icon: AlertCircle,
       };
-    if (percentage > 50)
+    if (p > 50)
       return {
         text: 'High',
         color: 'text-orange-700',
         bgColor: 'bg-orange-500',
         Icon: AlertCircle,
       };
-    if (percentage > 25)
+    if (p > 25)
       return {
         text: 'Medium',
         color: 'text-yellow-700',
@@ -362,89 +345,76 @@ const PredictiveAnalyticsPage: FC = () => {
     };
   };
 
-  // --- Generate recommendations helper ---
-  const generateRecommendations = (results: PredictionResult) => {
+  /* ── Recommendations helper ────────── */
+  const generateRecommendations = (r: PredictionResult) => {
     const recs: string[] = [];
-    const avgLikelihood =
-      (results.wait3h +
-        results.wait4h +
-        results.wait5h +
-        results.wait6h) /
-      4;
+    const avg = (r.wait3h + r.wait4h + r.wait5h + r.wait6h) / 4;
 
-    if (results.wait6h > 70 || results.wait5h > 80) {
-      recs.push('High risk of extended wait (>5-6h). Consider senior staff alert.');
-    } else if (avgLikelihood > 50) {
+    if (r.wait6h > 70 || r.wait5h > 80)
+      recs.push('High risk of extended wait (>5‑6 h). Consider senior staff alert.');
+    else if (avg > 50)
       recs.push('Moderate to high likelihood of long wait. Review ED flow.');
-    }
-
-    if (avgLikelihood > 40) {
+    if (avg > 40)
       recs.push('Inform patient/family about potential significant wait.');
-    }
 
-    const currentTriageCode = parseInt(triageCode, 10);
-    if (!isNaN(currentTriageCode) && (currentTriageCode === 1 || currentTriageCode === 2)) {
-      recs.push(
-        `High triage acuity (Code ${currentTriageCode}). Ensure prompt assessment.`
-      );
-    }
+    const tc = parseInt(triageCode, 10);
+    if (!isNaN(tc) && (tc === 1 || tc === 2))
+      recs.push(`High triage acuity (Code ${tc}). Ensure prompt assessment.`);
 
-    if (occupancy === 'critical' || occupancy === 'high') {
+    if (occupancy === 'critical' || occupancy === 'high')
       recs.push(`ED occupancy is ${occupancy}. Expedite discharges.`);
-    }
 
-    if (alteredMentalStatus) {
-      recs.push('Note: Altered mental status present.');
-    }
-    if (hasFever) {
-      recs.push('Note: Fever present.');
-    }
+    if (alteredMentalStatus) recs.push('Note: Altered mental status present.');
+    if (hasFever) recs.push('Note: Fever present.');
 
-    if (results.admissionLikelihood > 70) {
+    if (r.admissionLikelihood > 70)
+      recs.push('High admission likelihood. Consider early inpatient notification.');
+    if (r.predictedWaitMinutes > 240)
       recs.push(
-        'High admission likelihood. Consider early inpatient notification.'
+        `Predicted wait ≈ ${Math.round(r.predictedWaitMinutes / 60)} h. Ensure comfort/re‑assessment.`
       );
-    }
 
-    if (results.predictedWaitMinutes > 240) {
-      recs.push(
-        `Predicted wait ~${Math.round(
-          results.predictedWaitMinutes / 60
-        )} hours. Ensure patient comfort/reassessment.`
-      );
-    }
-
-    if (recs.length === 0) {
-      recs.push(
-        'Predicted wait times appear manageable. Continue standard monitoring.'
-      );
-    }
+    if (recs.length === 0)
+      recs.push('Predicted wait times appear manageable. Continue standard monitoring.');
 
     setRecommendations(recs);
   };
 
-  // --- API call handler ---
-  const handlePredict = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  /* ── Predict handler ───────────────── */
+  const handlePredict = async (e: FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
     setError(null);
     setPredictions(null);
     setRecommendations(null);
 
-    const parsedAge = parseInt(age, 10);
-    const parsedTriage = parseInt(triageCode, 10);
-    const parsedPatientsAhead = parseInt(patientsAhead, 10);
-    const parsedPatientsInED = parseInt(patientsInED, 10);
+    const pa = parseInt(age, 10);
+    const pt = parseInt(triageCode, 10);
+    const pahead = parseInt(patientsAhead, 10);
+    const pined = parseInt(patientsInED, 10);
 
-    // ... your existing validation logic (unchanged) ...
+    // Basic validation (minimal – you can extend)
+    if (
+      isNaN(pa) ||
+      isNaN(pt) ||
+      isNaN(pahead) ||
+      isNaN(pined) ||
+      !gender ||
+      !occupancy ||
+      !referralSource
+    ) {
+      setError('Please fill all required fields with valid values.');
+      setIsLoading(false);
+      return;
+    }
 
     const apiInput: ApiPredictionInput = {
-      age: encodeAgeOrdinal(parsedAge),
+      age: encodeAgeOrdinal(pa),
       gender,
-      patientsInED: parsedPatientsInED,
-      patientsAhead: parsedPatientsAhead,
+      patientsInED: pined,
+      patientsAhead: pahead,
       dateTime: dateTime.toISOString(),
-      triageCode: parsedTriage,
+      triageCode: pt,
       referralSource,
       isAccident,
       hasFever,
@@ -453,38 +423,35 @@ const PredictiveAnalyticsPage: FC = () => {
     };
 
     try {
-      const response = await fetch(PREDICTIVE_API_URL, {
+      const resp = await fetch(PREDICTIVE_API_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(apiInput),
       });
 
-      if (!response.ok) {
-        let errorDetail = `API Error: ${response.status} ${response.statusText}`;
+      if (!resp.ok) {
+        let msg = `API Error: ${resp.status} ${resp.statusText}`;
         try {
-          const errorData = await response.json();
-          errorDetail = errorData.error || errorData.detail || errorDetail;
+          const j = await resp.json();
+          msg = j.error || j.detail || msg;
         } catch {
           /* ignore parse errors */
         }
-        throw new Error(errorDetail);
+        throw new Error(msg);
       }
 
-      const results: PredictionResult = await response.json();
+      const results: PredictionResult = await resp.json();
       setPredictions(results);
       generateRecommendations(results);
     } catch (err) {
       console.error('API call failed:', err);
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+      setError(err instanceof Error ? err.message : 'Unexpected error');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // --- Reset handler ---
+  /* ── Reset handler ─────────────────── */
   const handleReset = () => {
     setAge('');
     setDateTime(new Date());
@@ -504,27 +471,17 @@ const PredictiveAnalyticsPage: FC = () => {
     setIsCalendarOpen(false);
   };
 
-  // --- Popover outside‑click logic ---
+  /* ── Click‑outside for popover ─────── */
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        popoverRef.current &&
-        !popoverRef.current.contains(event.target as Node)
-      ) {
+    const outside = (e: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node))
         setIsCalendarOpen(false);
-      }
     };
-    if (isCalendarOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    if (isCalendarOpen) document.addEventListener('mousedown', outside);
+    return () => document.removeEventListener('mousedown', outside);
   }, [isCalendarOpen]);
 
-  // --- Simple handlers ---
+  /* ── Simple change handlers ─────────── */
   const handleAgeChange = (e: ChangeEvent<HTMLInputElement>) =>
     setAge(e.target.value);
   const handlePatientsAheadChange = (e: ChangeEvent<HTMLInputElement>) =>
@@ -533,45 +490,36 @@ const PredictiveAnalyticsPage: FC = () => {
     setPatientsInED(e.target.value);
 
   const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const dateValue = e.target.value;
-    const newDate = parse(dateValue, 'yyyy-MM-dd', dateTime || new Date());
-    if (isValid(newDate)) {
-      const currentTime = dateTime || new Date();
+    const d = parse(e.target.value, 'yyyy-MM-dd', dateTime);
+    if (isValid(d)) {
+      const cur = dateTime;
       const updated = setMilliseconds(
-        setSeconds(
-          setMinutes(setHours(newDate, currentTime.getHours()), currentTime.getMinutes()),
-          currentTime.getSeconds()
-        ),
-        currentTime.getMilliseconds()
+        setSeconds(setMinutes(setHours(d, cur.getHours()), cur.getMinutes()), cur.getSeconds()),
+        cur.getMilliseconds()
       );
       setDateTime(updated);
     }
   };
-
   const handleTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const [hoursStr, minutesStr] = e.target.value.split(':');
-    const hours = parseInt(hoursStr, 10);
-    const minutes = parseInt(minutesStr, 10);
-    if (!isNaN(hours) && !isNaN(minutes)) {
-      setDateTime(setMinutes(setHours(dateTime, hours), minutes));
-    }
+    const [h, m] = e.target.value.split(':').map((v) => parseInt(v, 10));
+    if (!isNaN(h) && !isNaN(m)) setDateTime(setMinutes(setHours(dateTime, h), m));
   };
 
-  const handleGenderChange = (value: string) => setGender(value);
-  const handleOccupancyChange = (value: string) => setOccupancy(value);
-  const handleReferralChange = (value: string) => setReferralSource(value);
-  const handleTriageChange = (value: string) => setTriageCode(value);
-  const toggleCalendar = () => setIsCalendarOpen(!isCalendarOpen);
-  const handleAlteredMentalChange = (checked: boolean) =>
-    setAlteredMentalStatus(checked);
-  const handleAccidentChange = (checked: boolean) =>
-    setIsAccident(checked);
-  const handleFeverChange = (checked: boolean) => setHasFever(checked);
+  const handleGenderChange = (v: string) => setGender(v);
+  const handleOccupancyChange = (v: string) => setOccupancy(v);
+  const handleReferralChange = (v: string) => setReferralSource(v);
+  const handleTriageChange = (v: string) => setTriageCode(v);
+  const toggleCalendar = () => setIsCalendarOpen((o) => !o);
+  const handleAlteredMentalChange = (c: boolean) => setAlteredMentalStatus(c);
+  const handleAccidentChange = (c: boolean) => setIsAccident(c);
+  const handleFeverChange = (c: boolean) => setHasFever(c);
 
-  // =============== JSX Rendering ===============
+  // ─────────────────────────────────────
+  //  JSX Render
+  // ─────────────────────────────────────
   return (
     <div className="p-4 md:p-6 w-full bg-stone-50 text-stone-900">
-      {/* Header + Logo + Disclaimer */}
+      {/* Header */}
       <div className="pt-8 flex flex-col items-center">
         <div className="flex items-center justify-center gap-4">
           <img src="/MetrixAI.png" alt="MetrixAI" className="h-10" />
@@ -584,19 +532,20 @@ const PredictiveAnalyticsPage: FC = () => {
         </p>
       </div>
 
+      {/* Error banner */}
       {error && (
         <div
-          className="mb-4 p-3 border border-red-300 bg-red-100 rounded-md flex items-center text-sm text-red-700"
           role="alert"
+          className="mb-4 p-3 border border-red-300 bg-red-100 rounded-md flex items-center text-sm text-red-700"
         >
-          <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
+          <AlertCircle className="w-5 h-5 mr-2 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       <div className="flex flex-col lg:flex-row gap-8 mt-6">
-        {/* Left Column: The Form Card */}
-        <div className="w-full lg:w-2/5 flex-shrink-0">
+        {/* ── Left column – Form ─────────────── */}
+        <div className="w-full lg:w-2/5 shrink-0">
           <Card>
             <CardHeader>
               <CardTitle>Enter Patient Details</CardTitle>
@@ -609,18 +558,17 @@ const PredictiveAnalyticsPage: FC = () => {
                   <Input
                     id="age"
                     type="number"
-                    placeholder="e.g., 52"
+                    min="0"
+                    placeholder="e.g. 52"
                     value={age}
                     onChange={handleAgeChange}
                     required
                   />
                 </div>
 
-                {/* Date & Time */}
+                {/* Date & Time */}
                 <div ref={popoverRef}>
-                  <Label htmlFor="datetime-trigger">
-                    Date &amp; Time of Arrival
-                  </Label>
+                  <Label htmlFor="datetime-trigger">Date & Time of Arrival</Label>
                   <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger onClick={toggleCalendar}>
                       <Button
@@ -630,31 +578,28 @@ const PredictiveAnalyticsPage: FC = () => {
                         aria-haspopup="dialog"
                         aria-expanded={isCalendarOpen}
                       >
-                        <Clock className="mr-2 h-4 w-4 text-stone-500 flex-shrink-0" />
+                        <Clock className="mr-2 h-4 w-4 text-stone-500 shrink-0" />
                         <span className="flex-grow">
                           {dateTime && isValid(dateTime) ? (
                             <span className="text-stone-900">
                               {format(dateTime, 'PPP HH:mm')}
                             </span>
                           ) : (
-                            <span>Pick date &amp; time</span>
+                            'Pick date & time'
                           )}
                         </span>
                       </Button>
                     </PopoverTrigger>
                     {isCalendarOpen && (
-                      <PopoverContent className="w-auto p-4 bg-white border-stone-200 space-y-3">
+                      <PopoverContent className="space-y-3">
                         <div>
-                          <Label
-                            htmlFor="date-input"
-                            className="text-xs font-medium text-stone-600"
-                          >
+                          <Label htmlFor="date-input" className="text-xs font-medium">
                             Date
                           </Label>
                           <Input
                             id="date-input"
                             type="date"
-                            className="h-9 text-sm bg-white border-stone-300"
+                            className="h-9 text-sm"
                             value={
                               dateTime && isValid(dateTime)
                                 ? format(dateTime, 'yyyy-MM-dd')
@@ -664,16 +609,13 @@ const PredictiveAnalyticsPage: FC = () => {
                           />
                         </div>
                         <div>
-                          <Label
-                            htmlFor="time-input"
-                            className="text-xs font-medium text-stone-600"
-                          >
+                          <Label htmlFor="time-input" className="text-xs font-medium">
                             Time
                           </Label>
                           <Input
                             id="time-input"
                             type="time"
-                            className="h-9 text-sm bg-white border-stone-300"
+                            className="h-9 text-sm"
                             value={
                               dateTime && isValid(dateTime)
                                 ? format(dateTime, 'HH:mm')
@@ -686,7 +628,7 @@ const PredictiveAnalyticsPage: FC = () => {
                           size="sm"
                           variant="outline"
                           onClick={() => setIsCalendarOpen(false)}
-                          className="w-full h-8 text-xs border-stone-300"
+                          className="w-full h-8 text-xs"
                         >
                           Done
                         </Button>
@@ -729,7 +671,7 @@ const PredictiveAnalyticsPage: FC = () => {
                   </Select>
                 </div>
 
-                {/* Referral Source */}
+                {/* Referral source */}
                 <div>
                   <Label htmlFor="referral">Source of Referral</Label>
                   <Select
@@ -740,117 +682,107 @@ const PredictiveAnalyticsPage: FC = () => {
                     required
                   >
                     <SelectItem value="gp">GP</SelectItem>
-                    <SelectItem value="self">Self-referral</SelectItem>
+                    <SelectItem value="self">Self‑referral</SelectItem>
                     <SelectItem value="ambulance">Ambulance</SelectItem>
                     <SelectItem value="clinic">Other Clinic</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
                   </Select>
                 </div>
 
-                {/* Triage Code */}
+                {/* Triage */}
                 <div>
                   <Label htmlFor="triage">Triage Code</Label>
                   <Select
                     id="triage"
                     value={triageCode}
                     onValueChange={handleTriageChange}
-                    placeholder="Select triage code"
+                    placeholder="Select triage"
                     required
                   >
-                    <SelectItem value="1">
-                      1 - Immediate threat (Immediate)
-                    </SelectItem>
-                    <SelectItem value="2">
-                      2 - Imminent threat (10-mins)
-                    </SelectItem>
-                    <SelectItem value="3">
-                      3 - Potentially life-threatening (30-mins)
-                    </SelectItem>
-                    <SelectItem value="4">
-                      4 - Potentially serious (60-mins)
-                    </SelectItem>
-                    <SelectItem value="5">
-                      5 - Less urgent (120-mins)
-                    </SelectItem>
+                    <SelectItem value="1">1 – Immediate threat</SelectItem>
+                    <SelectItem value="2">2 – 10 mins</SelectItem>
+                    <SelectItem value="3">3 – 30 mins</SelectItem>
+                    <SelectItem value="4">4 – 60 mins</SelectItem>
+                    <SelectItem value="5">5 – 120 mins</SelectItem>
                   </Select>
                 </div>
 
                 {/* Patient counts */}
                 <div>
-                  <Label htmlFor="patientsInED">Patients Currently in ED</Label>
+                  <Label htmlFor="patientsInED">Patients Currently in ED</Label>
                   <Input
                     id="patientsInED"
                     type="number"
-                    placeholder="e.g., 25"
+                    min="0"
+                    placeholder="e.g. 25"
                     value={patientsInED}
                     onChange={handlePatientsInEDChange}
-                    min="0"
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="patientsAhead">Patients Ahead in Queue</Label>
+                  <Label htmlFor="patientsAhead">Patients Ahead in Queue</Label>
                   <Input
                     id="patientsAhead"
                     type="number"
-                    placeholder="e.g., 5"
+                    min="0"
+                    placeholder="e.g. 5"
                     value={patientsAhead}
                     onChange={handlePatientsAheadChange}
-                    min="0"
                     required
                   />
                 </div>
 
                 {/* Flags */}
                 <div className="flex items-center justify-between pt-2">
-                  <Label htmlFor="alteredMentalStatus" className="mb-0 mr-4">
+                  <Label htmlFor="alteredMentalStatus" className="mb-0">
                     Altered Mental Status
                   </Label>
                   <SwitchMock
                     id="alteredMentalStatus"
                     checked={alteredMentalStatus}
                     onCheckedChange={handleAlteredMentalChange}
-                    aria-label="Altered Mental Status"
+                    aria-label="Altered mental status"
                   />
                 </div>
                 <div className="flex items-center justify-between pt-2">
-                  <Label htmlFor="isAccident" className="mb-0 mr-4">
+                  <Label htmlFor="isAccident" className="mb-0">
                     Accident Related
                   </Label>
                   <SwitchMock
                     id="isAccident"
                     checked={isAccident}
                     onCheckedChange={handleAccidentChange}
-                    aria-label="Accident Related"
+                    aria-label="Accident related"
                   />
                 </div>
                 <div className="flex items-center justify-between pt-2">
-                  <Label htmlFor="hasFever" className="mb-0 mr-4">
+                  <Label htmlFor="hasFever" className="mb-0">
                     Fever Present
                   </Label>
                   <SwitchMock
                     id="hasFever"
                     checked={hasFever}
                     onCheckedChange={handleFeverChange}
-                    aria-label="Fever Present"
+                    aria-label="Fever present"
                   />
                 </div>
 
                 {/* Buttons */}
-                <div className="flex items-center justify-start space-x-3 pt-4">
+                <div className="flex items-center gap-3 pt-4">
                   <Button type="submit" disabled={isLoading}>
                     {isLoading ? (
                       <>
                         <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
-                        Predicting...
+                        Predicting…
                       </>
                     ) : (
                       'Predict Wait Time'
                     )}
                   </Button>
                   <Button
-                    type="button"
                     variant="outline"
+                    type="button"
                     onClick={handleReset}
                     disabled={isLoading}
                   >
@@ -863,36 +795,231 @@ const PredictiveAnalyticsPage: FC = () => {
           </Card>
         </div>
 
-        {/* Right Column: Results */}
+        {/* ── Right column – Results ────────── */}
         <div className="flex-1 lg:pl-8">
+          {/* Loading skeletons */}
           {isLoading && (
             <div className="mt-6 space-y-6" aria-live="polite" aria-busy="true">
-              {/* Skeleton loaders… (unchanged) */}
+              {/* Headline skeleton */}
+              <div className="h-5 bg-stone-300 rounded w-48 mb-4 animate-pulse" />
+              {/* Two big cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                {[...Array(2)].map((_, i) => (
+                  <Card key={`skel-main-${i}`} className="animate-pulse">
+                    <CardHeader>
+                      <div className="h-4 bg-stone-300 rounded w-1/2" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-8 bg-stone-300 rounded w-1/4" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              {/* Breach headline */}
+              <div className="h-5 bg-stone-300 rounded w-40 mb-4 animate-pulse" />
+              {/* Four breach cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                {[...Array(4)].map((_, i) => (
+                  <Card key={`skel-breach-${i}`} className="animate-pulse">
+                    <CardHeader>
+                      <div className="h-4 bg-stone-300 rounded w-3/4" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-6 bg-stone-300 rounded w-1/3 mb-2" />
+                      <div className="h-2 bg-stone-300 rounded w-full" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              {/* Recommendations headline */}
+              <div className="h-5 bg-stone-300 rounded w-32 mb-4 animate-pulse" />
+              {/* Recommendations card */}
+              <Card className="animate-pulse">
+                <CardHeader>
+                  <div className="h-4 bg-stone-300 rounded w-1/4" />
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="h-3 bg-stone-300 rounded w-full" />
+                  <div className="h-3 bg-stone-300 rounded w-5/6" />
+                  <div className="h-3 bg-stone-300 rounded w-3/4" />
+                </CardContent>
+              </Card>
             </div>
           )}
 
+          {/* Results */}
           {!isLoading && predictions && (
             <div className="mt-6 lg:mt-0 space-y-8" aria-live="polite">
-              {/* Prediction Results UI… (unchanged) */}
+              {/* Top results */}
+              <div>
+                <h2 className="text-lg font-semibold text-stone-700 mb-4">
+                  Prediction Results
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                  {/* Admission */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span>Admission Likelihood</span>
+                        <LogIn className="h-5 w-5 text-[#2D4F6C]" />
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-3xl font-semibold text-stone-800">
+                        {predictions.admissionLikelihood.toFixed(1)}%
+                      </p>
+                    </CardContent>
+                  </Card>
+                  {/* Wait time */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span>Predicted Wait Time</span>
+                        <Hourglass className="h-5 w-5 text-[#68A9A9]" />
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-3xl font-semibold text-stone-800">
+                        ≈ {predictions.predictedWaitMinutes}{' '}
+                        <span className="text-lg font-medium text-stone-500">
+                          mins
+                        </span>
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Breach likelihood */}
+              <div>
+                <h3 className="text-md font-semibold text-stone-700 mb-3 mt-6">
+                  Breach Likelihood
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[
+                    { hours: 3, likelihood: predictions.wait3h },
+                    { hours: 4, likelihood: predictions.wait4h },
+                    { hours: 5, likelihood: predictions.wait5h },
+                    { hours: 6, likelihood: predictions.wait6h },
+                  ].map((pred) => {
+                    const { text, color, bgColor, Icon } = formatLikelihood(
+                      pred.likelihood
+                    );
+                    return (
+                      <Card key={pred.hours}>
+                        <CardHeader>
+                          <CardTitle className="flex items-center justify-between">
+                            <span>&gt; {pred.hours} h Wait</span>
+                            <Icon className={cn('h-5 w-5', color)} />
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          <div className="flex justify-between items-baseline mb-1">
+                            <span className={cn('text-xl font-semibold', color)}>
+                              {text}
+                            </span>
+                            <span className="text-base font-medium text-stone-500">
+                              {pred.likelihood.toFixed(1)}%
+                            </span>
+                          </div>
+                          <Progress value={pred.likelihood} colorClass={bgColor} />
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Recommendations */}
+              {recommendations && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Lightbulb className="h-5 w-5 mr-2 text-[#3D7F80]" />
+                      Recommendations
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="list-disc space-y-1.5 pl-5 text-sm text-stone-600">
+                      {recommendations.map((rec, i) => (
+                        <li key={i}>{rec}</li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
 
+          {/* Empty state */}
           {!isLoading && !predictions && !error && (
             <Card className="mt-6 lg:mt-0">
               <CardHeader>
-                <CardTitle className="text-center">
-                  Prediction Results Area
-                </CardTitle>
+                <CardTitle className="text-center">Prediction Results Area</CardTitle>
               </CardHeader>
               <CardContent className="text-center text-stone-500 space-y-6 px-5 pb-5">
-                <ClipboardList
-                  className="mx-auto h-16 w-16 text-stone-300"
-                  strokeWidth={1}
-                />
+                <ClipboardList className="mx-auto h-16 w-16 text-stone-300" />
                 <p className="text-sm">
-                  Fill in the patient details on the left and click 'Predict Wait Time' to see the results displayed here.
+                  Fill the form on the left and click &ldquo;Predict Wait Time&rdquo; to
+                  display results here.
                 </p>
-                {/* Example format card… (unchanged) */}
+
+                {/* Example output */}
+                <div className="space-y-4 opacity-60 px-6 pb-4 pt-2 border-t border-stone-100">
+                  <h3 className="text-sm font-semibold text-stone-600 mt-4">
+                    Example Output Format
+                  </h3>
+                  {/* Admission + Wait skeleton */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    {['Admission Likelihood', 'Predicted Wait Time'].map((t) => (
+                      <Card
+                        key={t}
+                        className="bg-stone-50 border border-[#3D7F80] shadow-none"
+                      >
+                        <CardHeader>
+                          <CardTitle className="text-sm text-stone-600 flex items-center justify-between">
+                            <span>{t}</span>
+                            {t === 'Admission Likelihood' ? (
+                              <LogIn className="h-4 w-4 text-stone-400" />
+                            ) : (
+                              <Hourglass className="h-4 w-4 text-stone-400" />
+                            )}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-2xl font-semibold text-stone-400">-- %</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                  {/* Breach skeletons */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {['> 4 h Wait', '> 6 h Wait'].map((t) => (
+                      <Card
+                        key={t}
+                        className="bg-stone-50 border border-[#3D7F80] shadow-none"
+                      >
+                        <CardHeader>
+                          <CardTitle className="text-sm text-stone-600 flex items-center justify-between">
+                            <span>{t}</span>
+                            <Clock className="h-4 w-4 text-stone-400" />
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          <div className="flex justify-between items-baseline mb-1">
+                            <span className="text-lg font-semibold text-stone-400">
+                              --
+                            </span>
+                            <span className="text-sm font-medium text-stone-400">
+                              -- %
+                            </span>
+                          </div>
+                          <Progress value={0} colorClass="bg-stone-300" />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
