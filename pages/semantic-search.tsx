@@ -29,7 +29,7 @@ const logger = {
 
 // --- Style Constants (Consistent with Metrix Theme) ---
 const primaryButtonStyles = "inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold rounded-full text-white bg-gradient-to-r from-teal-600 to-teal-800 hover:from-teal-500 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-300 ease-in-out shadow-md disabled:opacity-70 disabled:cursor-not-allowed";
-const formInputStyles = "flex-grow block w-full rounded-full border border-gray-300 py-2.5 px-5 shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 focus:border-teal-500 placeholder-gray-400 text-base"; // Rounded-full
+const formInputStyles = "flex-grow block w-full rounded-full border border-gray-300 bg-white py-2.5 px-5 shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 focus:border-teal-500 placeholder-gray-400 text-base"; // Rounded-full, added bg-white explicitly
 const errorAlertStyles = "bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-4 flex items-center gap-2 shadow-sm"; // Yellow for system/error messages
 const linkStyles = "text-teal-600 hover:text-teal-700 hover:underline text-sm";
 
@@ -100,12 +100,15 @@ function PolicySearchPage() { // Renamed component to follow convention
   // --- Render Component ---
   return (
     // Apply the background gradient to the entire page container
-    <div className="min-h-screen bg-gradient-to-b from-white via-teal-50 to-white p-4 md:p-8 font-sans">
-      {/* Main content card - Apply Metrix styling */}
-      <div className="max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg"> {/* Increased max-width, padding, rounded-xl, shadow-lg */}
+    // Added more top/bottom padding (pt-12 pb-16) for better spacing without the card
+    <div className="min-h-screen bg-gradient-to-b from-white via-teal-50 to-white p-4 md:p-8 pt-12 pb-16 font-sans">
+      {/* Main content wrapper - REMOVED bg-white, rounded-xl, shadow-lg */}
+      {/* Kept max-width, centering, and padding to maintain structure */}
+      <div className="max-w-4xl mx-auto p-0"> {/* Removed padding here, handled by elements below or main container */}
 
         {/* Brand Header Section */}
-        <header className="flex flex-col items-center justify-center text-center mb-8"> {/* Increased bottom margin */}
+        {/* Added width constraint and centering directly */}
+        <header className="flex flex-col items-center justify-center text-center mb-8 max-w-3xl mx-auto">
           <img
               src="/MetrixAI.png" // Ensure path is correct relative to public folder
               alt="Metrix Logo"
@@ -120,9 +123,10 @@ function PolicySearchPage() { // Renamed component to follow convention
          </header>
 
         {/* Search Form */}
-        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center gap-3 mb-6"> {/* Use gap-3 */}
+        {/* Added width constraint and centering directly */}
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center gap-3 mb-6 max-w-3xl mx-auto">
           <div className="relative flex-grow w-full sm:w-auto"> {/* Ensure input takes available space */}
-             <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+             <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 z-10"> {/* Ensure icon is above input bg */}
                  <SearchIcon size={18} />
              </span>
              <input
@@ -130,7 +134,7 @@ function PolicySearchPage() { // Renamed component to follow convention
                value={query}
                onChange={(e) => setQuery(e.target.value)}
                placeholder="Enter your search query..."
-               // Apply the Metrix form input style
+               // Apply the Metrix form input style (added explicit bg-white)
                className={`${formInputStyles} pl-10`} // Add left padding for icon
                aria-label="Search query"
                disabled={isLoading}
@@ -151,85 +155,91 @@ function PolicySearchPage() { // Renamed component to follow convention
           </button>
         </form>
 
-        {/* Loading State Indicator - Themed */}
-        {isLoading && (
-          <div className="text-center text-teal-600 font-medium py-4 flex items-center justify-center gap-2">
-            <Loader2 size={16} className="animate-spin" />
-            <span>Loading results...</span>
-          </div>
-        )}
-
-        {/* Error Display Area - Themed */}
-        {error && (
-          <div className={errorAlertStyles} role="alert">
-             <AlertTriangle size={18} className="text-yellow-600 flex-shrink-0"/> {/* Error Icon */}
-            <div>
-               <strong className="font-semibold">Error: </strong>
-               <span>{error}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Results Display Area - Themed */}
-        {results && !isLoading && (
-          <div className="mt-8 space-y-6"> {/* Increased margin-top and spacing */}
-            {/* Display Answer */}
-            <div>
-              <h2 className="text-xl font-semibold mb-3 text-gray-800">Answer:</h2> {/* Use darker gray */}
-              {/* Use lighter background, rounded, consistent padding */}
-              <div className="bg-gray-50 p-4 rounded-lg text-gray-800 whitespace-pre-wrap border border-gray-200">
-                {results.answer || <span className="text-gray-500 italic">No answer generated.</span>}
-              </div>
-            </div>
-
-            {/* Display Citations */}
-            {results.citations && results.citations.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold mb-3 text-gray-800">Sources:</h3>
-                <ul className="list-none space-y-3 pl-0">
-                  {results.citations.map((citation) => (
-                    // Style citation items with border, padding, rounded corners
-                    <li key={citation.qdrant_id || citation.source_id} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm transition-shadow hover:shadow-md">
-                      <div className="font-medium text-gray-900 mb-1"> {/* Darker text */}
-                        [{citation.source_id}] {citation.document_title || 'Unknown Document'}
-                      </div>
-                      <div className="text-sm text-gray-600 block mb-1">
-                        {citation.page_number ? `Page: ${citation.page_number} | ` : ''}
-                        Heading: {citation.heading || 'N/A'} |
-                        Score: {citation.score.toFixed(3)}
-                      </div>
-                      {/* Conditionally render the link with Teal styling */}
-                      {citation.url && (
-                        <a
-                          href={`${API_BASE_URL}${citation.url}`} // Construct full URL
-                          target="_blank" // Open in new tab
-                          rel="noopener noreferrer" // Security measure
-                          // Apply the Metrix link style
-                          className={linkStyles}
-                        >
-                          Click here to view source document {/* Changed text slightly */}
-                        </a>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+        {/* Container for Loading, Error, Results - Added width constraint and centering */}
+        <div className="max-w-4xl mx-auto mt-8"> {/* Added margin-top */}
+            {/* Loading State Indicator - Themed */}
+            {isLoading && (
+              <div className="text-center text-teal-600 font-medium py-4 flex items-center justify-center gap-2">
+                <Loader2 size={16} className="animate-spin" />
+                <span>Loading results...</span>
               </div>
             )}
-            {/* Handle case with answer but no citations */}
-             {results.citations && results.citations.length === 0 && (
-                 <div>
-                    <h3 className="text-lg font-semibold mb-2 text-gray-700">Sources:</h3>
-                    <p className="text-gray-500 italic">No specific sources were cited for this answer.</p>
+
+            {/* Error Display Area - Themed */}
+            {error && !isLoading && ( // Ensure error doesn't show during loading
+              <div className={errorAlertStyles} role="alert">
+                 <AlertTriangle size={18} className="text-yellow-600 flex-shrink-0"/> {/* Error Icon */}
+                <div>
+                   <strong className="font-semibold">Error: </strong>
+                   <span>{error}</span>
                 </div>
-             )}
-          </div>
-        )}
-      </div>
-       {/* Optional Footer */}
-       <footer className="text-center mt-8 text-xs text-gray-500">
+              </div>
+            )}
+
+            {/* Results Display Area - Themed */}
+            {results && !isLoading && (
+              <div className="space-y-6"> {/* Spacing between Answer and Sources */}
+                {/* Display Answer */}
+                <div>
+                  <h2 className="text-xl font-semibold mb-3 text-gray-800">Answer:</h2>
+                  {/* Use lighter background, rounded, consistent padding */}
+                  <div className="bg-gray-50/70 backdrop-blur-sm p-4 rounded-lg text-gray-800 whitespace-pre-wrap border border-gray-200/80 shadow-sm"> {/* Added slight transparency/blur */}
+                    {results.answer || <span className="text-gray-500 italic">No answer generated.</span>}
+                  </div>
+                </div>
+
+                {/* Display Citations */}
+                {results.citations && results.citations.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-gray-800">Sources:</h3>
+                    <ul className="list-none space-y-3 pl-0">
+                      {results.citations.map((citation) => (
+                        // Style citation items with border, padding, rounded corners
+                        // Added slight transparency/blur
+                        <li key={citation.qdrant_id || citation.source_id} className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-gray-200/80 shadow-sm transition-shadow hover:shadow-md">
+                          <div className="font-medium text-gray-900 mb-1">
+                            [{citation.source_id}] {citation.document_title || 'Unknown Document'}
+                          </div>
+                          <div className="text-sm text-gray-600 block mb-1">
+                            {citation.page_number ? `Page: ${citation.page_number} | ` : ''}
+                            Heading: {citation.heading || 'N/A'} |
+                            Score: {citation.score.toFixed(3)}
+                          </div>
+                          {/* Conditionally render the link with Teal styling */}
+                          {citation.url && (
+                            <a
+                              href={`${API_BASE_URL}${citation.url}`} // Construct full URL
+                              target="_blank" // Open in new tab
+                              rel="noopener noreferrer" // Security measure
+                              // Apply the Metrix link style
+                              className={linkStyles}
+                            >
+                              Click here to view source document
+                            </a>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {/* Handle case with answer but no citations */}
+                 {results.citations && results.citations.length === 0 && (
+                     <div>
+                        <h3 className="text-lg font-semibold mb-2 text-gray-700">Sources:</h3>
+                        <p className="text-gray-500 italic">No specific sources were cited for this answer.</p>
+                    </div>
+                 )}
+              </div>
+            )}
+        </div> {/* End of Loading/Error/Results container */}
+
+      </div> {/* End of main content wrapper */}
+
+       {/* Footer remains outside the main content wrapper but respects page padding */}
+       <footer className="text-center mt-12 text-xs text-gray-500">
             Metrix AI Policy Search | © {new Date().getFullYear()}
        </footer>
-    </div>
+    </div> // End of page container
   );
 }
 
