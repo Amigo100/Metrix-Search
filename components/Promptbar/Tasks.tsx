@@ -36,7 +36,6 @@ import React, {
  } from 'date-fns';
  
  import HomeContext from '@/pages/api/home/home.context'; // Adjust path as needed
- import HomeContext from '@/pages/api/home/home.context';
  
  // --- Types (Preserved) ---
  type TaskCompletionStatus = 'incomplete' | 'in-progress' | 'complete';
