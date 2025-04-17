@@ -8,26 +8,24 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
-// --- IMPROVEMENT: Import icons directly from the installed library ---
 import {
   PlusIcon,
-  ArrowDownTrayIcon, // Icon for Import
-  ArrowUpTrayIcon,   // Icon for Export All
-  XMarkIcon,         // Icon for Close / Cancel
+  ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
+  XMarkIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   TrashIcon,
-  PencilSquareIcon,  // Icon for Edit
-  CheckIcon,         // Icon for Save
-  DocumentArrowDownIcon // Icon for Export PDF
-} from '@heroicons/react/24/outline'; // Using Outline style, 24px size
-// --------------------------------------------------------------
+  PencilSquareIcon,
+  CheckIcon,
+  DocumentArrowDownIcon
+} from '@heroicons/react/24/outline';
 
 /**
  * TemplatesModal Component
  * Displays a modal for managing prompt templates. Allows users to view, create,
  * edit, delete, import (JSON), and export (JSON, PDF) templates.
- * IMPROVEMENT: Updated with new color scheme and UI elements using Heroicons.
+ * IMPROVEMENT: Adjusted overlay opacity.
  */
 export const TemplatesModal = () => {
   const { t } = useTranslation();
@@ -44,6 +42,7 @@ export const TemplatesModal = () => {
   const [editContent, setEditContent] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // ... (rest of the handler functions remain exactly the same) ...
   const updateTemplates = (newTemplates: Prompt[]) => {
     dispatch({ type: 'change', field: 'prompts', value: newTemplates });
     localStorage.setItem('prompts', JSON.stringify(newTemplates));
@@ -190,13 +189,16 @@ export const TemplatesModal = () => {
     console.log('Exported template as PDF:', tpl.id);
   };
 
+
   const filteredTemplates = templates.filter((tpl) =>
     tpl.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     tpl.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+    // --- RECTIFICATION: Changed overlay background opacity from /70 to /50 ---
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+    {/* Alternative syntax: <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm"> */}
       <div
         className="w-full max-w-3xl max-h-[90vh] rounded-lg shadow-xl
                    bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
@@ -207,7 +209,6 @@ export const TemplatesModal = () => {
           <h2 className="text-xl font-semibold text-teal-800 dark:text-teal-300 mb-4 sm:mb-0">
             {t('Manage Templates')}
           </h2>
-          {/* IMPROVEMENT: Use imported Heroicons */}
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={handleNewTemplate}
@@ -258,7 +259,7 @@ export const TemplatesModal = () => {
               className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               title={t('Clear search') || ''}
             >
-              <XMarkIcon className="w-5 h-5" /> {/* Use imported Icon */}
+              <XMarkIcon className="w-5 h-5" />
             </button>
           )}
         </div>
@@ -296,7 +297,6 @@ export const TemplatesModal = () => {
                     {isEditing && <PencilSquareIcon className="ml-2 h-3 w-3 text-teal-500 flex-shrink-0"/>}
                   </button>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    {/* IMPROVEMENT: Use imported Heroicons */}
                     <button
                         className="p-1 text-gray-500 hover:text-teal-600 dark:text-gray-400 dark:hover:text-teal-300"
                         onClick={() => handleToggleExpand(tpl.id)}
@@ -340,7 +340,6 @@ export const TemplatesModal = () => {
                           onChange={(e) => setEditContent(e.target.value)}
                           rows={8}
                         />
-                        {/* Save/Cancel Buttons - IMPROVEMENT: Use imported Heroicons */}
                         <div className="flex justify-end gap-2 mt-2">
                           <button
                             className="inline-flex items-center rounded-md bg-gray-200 dark:bg-gray-600 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-100 shadow-sm hover:bg-gray-300 dark:hover:bg-gray-500"
@@ -360,7 +359,6 @@ export const TemplatesModal = () => {
                       </>
                     ) : (
                       <>
-                        {/* Display Content */}
                         <div
                           className="p-3 border border-gray-200 dark:border-teal-800/30 rounded-md bg-white dark:bg-gray-800
                                      text-gray-800 dark:text-gray-200 mb-3 whitespace-pre-wrap text-xs leading-relaxed font-mono"
@@ -371,7 +369,6 @@ export const TemplatesModal = () => {
                             </span>
                           )}
                         </div>
-                        {/* Action Buttons - IMPROVEMENT: Use imported Heroicons */}
                         <div className="flex justify-end gap-3">
                           <button
                             className="inline-flex items-center text-xs font-medium text-teal-600 hover:text-teal-800 dark:text-teal-300 dark:hover:text-teal-200"
