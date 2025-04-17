@@ -4,16 +4,17 @@ from typing import List, Dict, Any, Optional
 
 from my_rag_app.openai_client import client  # singleton OpenAI(>=1.0)
 
+
 class ResponseGenerator:
     """
     Uses the Chat Completions API to turn retrieved context + history into
-    a Markdown answer. Returns {response, sources, confidence}.
+    a Markdown answer.  Returns {"response", "sources", "confidence"}.
     """
 
     def __init__(self, config, model_name: str):
         self.logger = logging.getLogger(__name__)
         self.cfg = config
-        self.model = model_name  # e.g. "gpt-3.5-turbo"
+        self.model = model_name                       # e.g. "gpt-3.5-turbo"
 
         self.include_sources: bool = getattr(config.rag, "include_sources", True)
         self.max_context: int = getattr(config.rag, "max_context_length", 3_000)
@@ -30,12 +31,12 @@ class ResponseGenerator:
     def generate_response(
         self,
         query: str,
-        retrieved: List[Dict[str, Any]],
+        retrieved_docs: List[Dict[str, Any]],          # ← name restored
         chat_history: List[Dict[str, str]],
         mode: str = "chat",
         template_name: Optional[str] = None,
     ) -> Dict[str, Any]:
-        context_text = self._format_context(retrieved)
+        context_text = self._format_context(retrieved_docs)
         system_msg = self._build_system_prompt(
             query, context_text, chat_history, mode, template_name
         )
@@ -53,8 +54,8 @@ class ResponseGenerator:
 
         return {
             "response": answer,
-            "sources": self._extract_sources(retrieved) if self.include_sources else [],
-            "confidence": self._confidence(retrieved),
+            "sources": self._extract_sources(retrieved_docs) if self.include_sources else [],
+            "confidence": self._confidence(retrieved_docs),
         }
 
     # ───────────────────────── Helpers ─────────────────────────────
