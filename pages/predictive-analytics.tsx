@@ -20,8 +20,8 @@ import {
   RotateCcw,
   LogIn,
   Hourglass,
-  ClipboardList,
-  ChevronDown, // Added for select dropdown indicator
+  ClipboardList, // Icon is imported but no longer used in the empty state
+  ChevronDown,
 } from 'lucide-react';
 import {
   format,
@@ -36,11 +36,18 @@ import {
 // ─────────────────────────────────────────────
 //  ENV-DRIVEN BACKEND URL
 // ─────────────────────────────────────────────
-const PREDICTIVE_API_URL =
-  process.env.NEXT_PUBLIC_PREDICTIVE_API_URL ??
-  (process.env.NODE_ENV === 'development'
-    ? 'http://localhost:8000/predictive/api/predict'
-    : 'https://fastapiplatformclean-10.onrender.com/predictive/api/predict');
+// Removed process.env access for browser compatibility in preview.
+// Hardcoding to the likely production URL.
+// In a real Next.js app, process.env would work correctly.
+const PREDICTIVE_API_URL = 'https://fastapiplatformclean-10.onrender.com/predictive/api/predict';
+
+// Original code using process.env (commented out):
+// const PREDICTIVE_API_URL =
+//   process.env.NEXT_PUBLIC_PREDICTIVE_API_URL ??
+//   (process.env.NODE_ENV === 'development'
+//     ? 'http://localhost:8000/predictive/api/predict'
+//     : 'https://fastapiplatformclean-10.onrender.com/predictive/api/predict');
+
 
 // ─────────────────────────────────────────────
 //  Type Definitions
@@ -474,7 +481,7 @@ const PredictiveAnalyticsPage: FC = () => {
     // --- API Call ---
     try {
       console.log("Sending to API:", apiInput); // Log input for debugging
-      const resp = await fetch(PREDICTIVE_API_URL, {
+      const resp = await fetch(PREDICTIVE_API_URL, { // Uses the hardcoded URL
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(apiInput),
@@ -573,34 +580,29 @@ const PredictiveAnalyticsPage: FC = () => {
   // ─────────────────────────────────────
   return (
     // Apply the themed background gradient and base text color
-    <div className="p-4 md:p-8 lg:p-12 min-h-screen w-full bg-gradient-to-b from-white via-teal-50 to-white text-gray-900">
+    // Added pb-16 to ensure space for the disclaimer at the bottom
+    <div className="p-4 md:p-8 lg:p-12 min-h-screen w-full bg-gradient-to-b from-white via-teal-50 to-white text-gray-900 pb-16">
 
-      {/* Header - Centered Logo and Title - UPDATED STYLES */}
+      {/* Header - Centered Logo and Title */}
       <div className="mb-8 flex flex-col items-center text-center">
         <img
           src="/MetrixAI.png" // Ensure this path is correct
           alt="Metrix Logo"
           width={64} // Set explicit width
           height={64} // Set explicit height
-          // Match logo dimensions from Diagnostic Assistance page (Stage 1)
           className="h-16 w-16 sm:h-20 sm:w-20 mb-3" // Tailwind classes control visual size
         />
         <h1
-          // Match title size/font/color from Diagnostic Assistance page (Stage 1)
           className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2"
         >
           Predictive Insights
         </h1>
          <p
-           // Match subtitle size/font/color from Diagnostic Assistance page (Stage 1)
            className="text-lg text-gray-700 max-w-xl text-center mt-2"
          >
            Estimate ED wait times and admission likelihood based on patient details.
          </p>
-        {/* Disclaimer - Styling remains consistent */}
-        <p className="text-center mt-4 text-xs text-gray-500 max-w-lg leading-relaxed">
-          <strong>Disclaimer:</strong> Whilst this has been trained algorithmically on real data specific to NZ hospitals, this should not replace clinical judgement and must be used cautiously.
-        </p>
+        {/* Disclaimer Removed From Header */}
       </div>
 
       {/* Error banner - Standard red alert style */}
@@ -1021,8 +1023,9 @@ const PredictiveAnalyticsPage: FC = () => {
               <CardHeader>
                 <CardTitle className="mx-auto">Prediction Results Area</CardTitle> {/* Center title */}
               </CardHeader>
-              <CardContent className="flex flex-col items-center space-y-6 px-5 pb-8 pt-6"> {/* Added padding */}
-                <ClipboardList className="mx-auto h-16 w-16 text-gray-300" /> {/* Gray icon */}
+              {/* Adjusted padding and removed icon */}
+              <CardContent className="flex flex-col items-center space-y-6 px-5 pb-8 pt-6">
+                {/* Icon Removed */}
                 <p className="text-sm text-gray-500 max-w-xs">
                   Fill the form on the left and click &ldquo;Predict Wait Time&rdquo; to
                   display estimated wait times and recommendations here.
@@ -1071,6 +1074,12 @@ const PredictiveAnalyticsPage: FC = () => {
           )}
         </div> {/* End Right Column */}
       </div> {/* End Main Content Area */}
+
+      {/* Disclaimer at Page Bottom - MOVED AND UPDATED */}
+      <p className="text-center text-xs text-gray-500 max-w-lg mx-auto leading-relaxed pt-12 pb-4">
+        <strong>Disclaimer:</strong> Whilst these predictions are derived from meticulously validated machine learning models trained on real patient data, these insights should not replace clinical judgement and all tools should be used with a degree of caution.
+      </p>
+
     </div> // End Page Container
   );
 };
