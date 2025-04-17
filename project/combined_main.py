@@ -1,4 +1,5 @@
-# combined_main.py
+# file: project/combined_main.py
+
 import logging
 import os
 from fastapi import FastAPI
@@ -17,29 +18,23 @@ combined_app = FastAPI(
     version="1.0.0",
 )
 
-##############################################################################
-# 1. Use a regex to match ephemeral Vercel subdomains (e.g. myapp-xxxxx.vercel.app)
-#    plus localhost for dev. The pattern below matches:
-#     - http://localhost:3000
-#     - https://localhost:3000
-#     - https://<anything>.vercel.app
-#
-#    If you also need to allow ephemeral Render URLs, adjust the regex
-#    or add them separately.
-##############################################################################
-allow_origin_pattern = r"https?://(localhost:3000|.*\.vercel\.app)"
-logger.info(f"Using allow_origin_regex = {allow_origin_pattern}")
+# List explicit origins + a regex for any .vercel.app subdomain
+allowed_origins = [
+    "http://localhost:3000",
+    "https://fast-api-platform-clean-ozlq.vercel.app",
+    # add any other known Vercel preview URLs here if needed
+]
 
-# 2. Configure CORS with the regex
 combined_app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=allow_origin_pattern,
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https?://.*\.vercel\.app$",  # any vercel.app subdomain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 3. Mount the sub-apps
+# Mount the sub-apps
 combined_app.mount("/rag", rag_app)
 combined_app.mount("/predictive", predictive_app)
 
@@ -48,5 +43,5 @@ def root_check():
     logger.info("[/] Root check endpoint called.")
     return {
         "message": "Unified service for RAG + Predictive Analytics",
-        "cors_regex": allow_origin_pattern,
+        "allowed_origins": allowed_origins,
     }
