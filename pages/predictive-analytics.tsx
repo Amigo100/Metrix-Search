@@ -1,4 +1,4 @@
-// file: pages/predictive‑analytics.tsx
+// file: pages/predictive-analytics.tsx
 import {
   useState,
   useEffect,
@@ -33,18 +33,18 @@ import {
   setMilliseconds,
 } from 'date-fns';
 
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 //  ENV‑DRIVEN BACKEND URL
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 const PREDICTIVE_API_URL =
   process.env.NEXT_PUBLIC_PREDICTIVE_API_URL ??
   (process.env.NODE_ENV === 'development'
     ? 'http://localhost:8000/predictive/api/predict'
     : 'https://fastapiplatformclean-10.onrender.com/predictive/api/predict');
 
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 //  Type Definitions
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 interface PredictionResult {
   wait3h: number;
   wait4h: number;
@@ -73,9 +73,9 @@ interface ApiPredictionInput {
   occupancy: string;
 }
 
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 //  Helper: Age Encoding
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 const encodeAgeOrdinal = (rawAge: number): number => {
   if (rawAge >= 1 && rawAge <= 5) return 1;
   if (rawAge >= 6 && rawAge <= 12) return 2;
@@ -87,9 +87,9 @@ const encodeAgeOrdinal = (rawAge: number): number => {
   return 0;
 };
 
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 //  UI Primitives
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 const cn = (...classes: (string | undefined | null | false)[]) =>
   classes.filter(Boolean).join(' ');
 
@@ -255,11 +255,13 @@ const Progress: FC<{ value?: number | null; colorClass?: string }> = ({
 
 /* ── Switch (mock) ─────────────────────── */
 interface SwitchProps {
+  id?: string;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
   'aria-label'?: string;
 }
 const SwitchMock: FC<SwitchProps> = ({
+  id,
   checked,
   onCheckedChange,
   'aria-label': ariaLabel,
@@ -268,6 +270,7 @@ const SwitchMock: FC<SwitchProps> = ({
   const pos = checked ? 'translate-x-5' : 'translate-x-0';
   return (
     <button
+      id={id}
       type="button"
       role="switch"
       aria-checked={checked}
@@ -289,9 +292,9 @@ const SwitchMock: FC<SwitchProps> = ({
   );
 };
 
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 //  Main Component
-// ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
 const PredictiveAnalyticsPage: FC = () => {
   /* ── State ─────────────────────────── */
   const [age, setAge] = useState('');
@@ -393,7 +396,6 @@ const PredictiveAnalyticsPage: FC = () => {
     const pahead = parseInt(patientsAhead, 10);
     const pined = parseInt(patientsInED, 10);
 
-    // Basic validation (minimal – you can extend)
     if (
       isNaN(pa) ||
       isNaN(pt) ||
@@ -434,9 +436,7 @@ const PredictiveAnalyticsPage: FC = () => {
         try {
           const j = await resp.json();
           msg = j.error || j.detail || msg;
-        } catch {
-          /* ignore parse errors */
-        }
+        } catch {}
         throw new Error(msg);
       }
 
