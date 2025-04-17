@@ -1,5 +1,3 @@
-// file: /pages/diagnostic-assistance.tsx (or similar path)
-
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios'; // Using axios as in previous examples
 import ReactMarkdown from 'react-markdown'; // Use react-markdown component
@@ -148,26 +146,29 @@ function DiagnosticAssistancePage() {
 
   // --- Rendering Functions for Stages ---
 
-  // Brand Header (Used in Stage 1 & 2) - Updated Styling
+  // *** MODIFIED: Standardized Brand Header Function ***
   function renderBrandHeader() {
-    const logoSizeClass = stage === 1 ? 'w-16 h-16 sm:w-20 sm:h-20' : 'w-12 h-12'; // Smaller logo in stage 2
+    // Removed dynamic logoSizeClass and text size logic
     return (
-      <header className="flex flex-col items-center justify-center text-center mb-6">
+      // Applied standard header classes (mb-8, max-w-3xl, mx-auto)
+      <header className="flex flex-col items-center justify-center text-center mb-8 max-w-3xl mx-auto">
         <img
             src="/MetrixAI.png" // Ensure path is correct
             alt="Metrix Logo"
-            width={64} // Set explicit width/height
-            height={64}
-            className={`${logoSizeClass} mb-2 transition-all duration-300 ease-in-out`}
+            width={64} // Standard size
+            height={64} // Standard size
+            className="mb-3" // Standard bottom margin (was mb-2, removed dynamic class)
         />
-         <h1 className={`font-bold text-gray-900 transition-all duration-300 ease-in-out ${stage === 1 ? 'text-3xl sm:text-4xl' : 'text-2xl'}`}>
-             Metrix AI Assistant
-         </h1>
+        {/* Standard Title Style (was dynamic based on stage) */}
+        <h1 className="text-3xl font-bold text-gray-900">
+            Metrix AI Assistant
+        </h1>
+        {/* Standard subtitle <p> is omitted as per instructions */}
       </header>
     );
   }
 
-  // Disclaimer - Updated Styling
+  // Disclaimer - Updated Styling (No changes needed here)
   function renderDisclaimer(centered = false) {
     return (
       <div className={`mt-8 max-w-2xl mx-auto ${ centered ? 'text-center' : 'text-left' } text-xs text-gray-500 leading-relaxed`}>
@@ -185,9 +186,11 @@ function DiagnosticAssistancePage() {
     ];
 
     return (
+      // *** MODIFIED: Ensured pt-12 is present ***
       <div className="flex flex-col items-center pt-12 pb-16 px-4 h-full overflow-y-auto">
-        {renderBrandHeader()}
-        <p className="text-lg text-gray-700 mt-2 mb-8 max-w-xl text-center">
+        {renderBrandHeader()} {/* Calls the standardized header */}
+        {/* This text remains separate from the header as it's stage-specific intro */}
+        <p className="text-lg text-gray-700 -mt-2 mb-8 max-w-xl text-center"> {/* Adjusted margin slightly due to header mb-8 */}
            Select a request type or ask anything below.
         </p>
 
@@ -195,13 +198,13 @@ function DiagnosticAssistancePage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 w-full max-w-3xl">
           {requestTypes.map(({ type, label, icon: Icon, examples }) => (
              <button
-                key={type}
-                onClick={() => { setRequestType(type); setExampleQueries(examples); setStage(2); }}
-                className="flex flex-col items-center justify-center p-6 border border-gray-200 rounded-xl bg-white text-gray-700 font-medium hover:shadow-lg hover:border-teal-300 hover:bg-teal-50 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
-              >
-                <Icon className="w-8 h-8 mb-3 text-teal-600" />
-                <span>{label}</span>
-              </button>
+               key={type}
+               onClick={() => { setRequestType(type); setExampleQueries(examples); setStage(2); }}
+               className="flex flex-col items-center justify-center p-6 border border-gray-200 rounded-xl bg-white text-gray-700 font-medium hover:shadow-lg hover:border-teal-300 hover:bg-teal-50 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+             >
+               <Icon className="w-8 h-8 mb-3 text-teal-600" />
+               <span>{label}</span>
+             </button>
           ))}
         </div>
         {renderDisclaimer(true)}
@@ -217,9 +220,10 @@ function DiagnosticAssistancePage() {
     else if (requestType === 'drug') heading = 'Suggest a drug regimen for a:';
 
     return (
-      <div className="flex flex-col items-center pt-8 pb-12 px-4 h-full overflow-y-auto">
-        {renderBrandHeader()}
-        <div className="mt-6 w-full max-w-3xl text-center">
+      // *** MODIFIED: Changed pt-8 to pt-12 ***
+      <div className="flex flex-col items-center pt-12 pb-12 px-4 h-full overflow-y-auto">
+        {renderBrandHeader()} {/* Calls the standardized header */}
+        <div className="-mt-2 w-full max-w-3xl text-center"> {/* Adjusted margin slightly */}
           <h2 className="text-xl font-semibold mb-2 text-gray-800">Try an example:</h2>
           <p className="mb-5 text-gray-600">{heading}</p>
           {/* Updated Example Query Styling */}
@@ -241,7 +245,7 @@ function DiagnosticAssistancePage() {
     );
   }
 
-  // Stage 3: Chat Screen - Updated Styling
+  // Stage 3: Chat Screen - Updated Styling (No header changes needed here)
   function renderChatScreen() {
     return (
       <div className="flex flex-col h-full bg-gradient-to-b from-white via-teal-50 to-white"> {/* Light background for chat area */}
@@ -284,23 +288,23 @@ function DiagnosticAssistancePage() {
                   {/* Bubble Content */}
                   <div className={`relative rounded-xl px-4 py-3 shadow-md max-w-[85%] sm:max-w-[75%] ${ isUser ? 'bg-teal-600 text-white rounded-br-none' : isSystem ? 'bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-bl-none' : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none' }`}>
                     {/* Use react-markdown for assistant/system messages */}
-                     {(isAssistant || isSystem) ? (
-                        <ReactMarkdown className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0 prose-a:text-teal-600 hover:prose-a:text-teal-700 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm">
-                            {msg.content}
-                        </ReactMarkdown>
-                     ) : (
-                        <span className="whitespace-pre-wrap">{msg.content}</span> // Render user text directly
-                     )}
+                    {(isAssistant || isSystem) ? (
+                       <ReactMarkdown className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0 prose-a:text-teal-600 hover:prose-a:text-teal-700 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm">
+                           {msg.content}
+                       </ReactMarkdown>
+                    ) : (
+                       <span className="whitespace-pre-wrap">{msg.content}</span> // Render user text directly
+                    )}
 
                     {/* Copy Button for Assistant */}
                     {isAssistant && msg.content.trim() && (
                          <button
-                            onClick={() => handleCopy(msg.content)}
-                            className="absolute -top-2 -right-2 p-1 bg-white border border-gray-200 rounded-full text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition opacity-0 group-hover:opacity-100 focus:opacity-100" // Show on focus too
-                            title="Copy text"
-                            style={{ isolation: 'isolate' }} // Ensure button is clickable over bubble
-                          >
-                           <Copy size={12} />
+                           onClick={() => handleCopy(msg.content)}
+                           className="absolute -top-2 -right-2 p-1 bg-white border border-gray-200 rounded-full text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition opacity-0 group-hover:opacity-100 focus:opacity-100" // Show on focus too
+                           title="Copy text"
+                           style={{ isolation: 'isolate' }} // Ensure button is clickable over bubble
+                         >
+                          <Copy size={12} />
                          </button>
                     )}
                   </div>
@@ -376,4 +380,3 @@ function DiagnosticAssistancePage() {
 
 // Add the default export line
 export default DiagnosticAssistancePage;
-
