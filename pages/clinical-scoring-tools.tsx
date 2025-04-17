@@ -1,5 +1,3 @@
-// file: /pages/clinical-scoring-tools.tsx (or similar path)
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronDown, ChevronUp, Calculator, HelpCircle, FileText } from 'lucide-react'; // Using Lucide icons
 import { Label } from '@/components/ui/label'; // *** ADDED IMPORT FOR LABEL *** Adjust path if needed
@@ -115,33 +113,35 @@ export default function ClinicalScoringToolsPage() {
 
   return (
     // --- Updated Page Layout & Styling ---
-    <div className="w-full min-h-screen bg-gradient-to-b from-white via-teal-50 to-white p-6 md:p-8 flex flex-col items-center">
-      {/* Page Header */}
-      <div className="w-full max-w-4xl mx-auto flex flex-col items-center pt-8 pb-10 px-4 text-center">
-         {/* Logo can be smaller here */}
-         <img
-            src="/MetrixAI.png" // Ensure path is correct
-            alt="Metrix Logo"
-            width={64} // Example size
-            height={64}
-            className="mb-4"
+    // *** MODIFIED: Applied standard pt-12, adjusted other padding ***
+    <div className="w-full min-h-screen bg-gradient-to-b from-white via-teal-50 to-white px-6 md:px-8 pb-16 pt-12 flex flex-col items-center">
+      {/* *** MODIFIED: Standardized Page Header *** */}
+      <header className="flex flex-col items-center justify-center text-center mb-8 max-w-3xl mx-auto">
+          <img
+              src="/MetrixAI.png" // Ensure path is correct
+              alt="Metrix Logo"
+              width={64} // Standard size
+              height={64} // Standard size
+              className="mb-3" // Standard bottom margin
           />
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-          Clinical Risk & Scoring Tools
-        </h1>
-        <p className="text-gray-600 text-base leading-relaxed max-w-2xl">
-          Access a wide range of validated scoring systems and calculators to aid in clinical decision-making. Select a tool below or search by name.
-        </p>
-      </div>
+          {/* Standard Title Style */}
+          <h1 className="text-3xl font-bold text-gray-900">
+            Clinical Risk & Scoring Tools
+          </h1>
+          {/* Standard Subtitle Style */}
+          <p className="text-gray-600 mt-1">
+            Access a wide range of validated scoring systems and calculators to aid in clinical decision-making. Select a tool below or search by name.
+          </p>
+      </header>
 
-      {/* Main Content Area */}
+      {/* Main Content Area (No changes below this line in this section) */}
       <div className="w-full max-w-3xl mx-auto space-y-8">
         {/* Filter and Search Section */}
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100 space-y-4">
-           {/* Type Filter Buttons - Updated Styling */}
-           <div>
-             <Label className="block text-sm font-medium text-gray-700 mb-2 text-center sm:text-left">Filter by Type:</Label> {/* Use imported Label */}
-             <div className="flex gap-2 flex-wrap justify-center">
+            {/* Type Filter Buttons - Updated Styling */}
+            <div>
+              <Label className="block text-sm font-medium text-gray-700 mb-2 text-center sm:text-left">Filter by Type:</Label> {/* Use imported Label */}
+              <div className="flex gap-2 flex-wrap justify-center">
                 {calcTypeOptions.map((option) => (
                   <button
                     key={option}
@@ -152,7 +152,7 @@ export default function ClinicalScoringToolsPage() {
                   </button>
                 ))}
               </div>
-           </div>
+            </div>
 
           {/* Combined Search & Dropdown - Updated Styling */}
           <div className="relative" ref={dropdownRef}>
@@ -289,11 +289,11 @@ export default function ClinicalScoringToolsPage() {
                            ))}
                          </select>
                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
-                            <ChevronDown size={16} />
+                           <ChevronDown size={16} />
                          </div>
                        </div>
                      </div>
-                  );
+                   );
                 }
                 return null;
               })}
@@ -322,8 +322,8 @@ export default function ClinicalScoringToolsPage() {
             {/* Next Steps / Evidence Section - Updated Styling */}
             {(selectedTool.nextSteps || selectedTool.evidence) && (
               <div className="mt-8 pt-6 border-t border-gray-200 space-y-4">
-                 {/* Buttons to toggle sections */}
-                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  {/* Buttons to toggle sections */}
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     {selectedTool.nextSteps && (
                       <button onClick={() => setShowNextSteps((prev) => !prev)} className={secondaryButtonStyles} >
                         {showNextSteps ? 'Hide Next Steps' : 'Show Next Steps'}
@@ -332,19 +332,19 @@ export default function ClinicalScoringToolsPage() {
                     )}
                     {selectedTool.evidence && (
                       <button onClick={() => setShowEvidence((prev) => !prev)} className={secondaryButtonStyles} >
-                         {showEvidence ? 'Hide Evidence' : 'Show Evidence'}
-                         {showEvidence ? <ChevronUp size={16} className="ml-1"/> : <ChevronDown size={16} className="ml-1"/>}
+                        {showEvidence ? 'Hide Evidence' : 'Show Evidence'}
+                        {showEvidence ? <ChevronUp size={16} className="ml-1"/> : <ChevronDown size={16} className="ml-1"/>}
                       </button>
                     )}
-                 </div>
+                  </div>
 
-                 {/* Collapsible Sections */}
-                 {showNextSteps && selectedTool.nextSteps && (
-                   <div className="mt-4 p-4 border rounded-lg bg-gray-50 border-gray-200 animate-fadeInUp delay-100">
-                     <h4 className="text-md font-semibold text-teal-700 mb-3 flex items-center">
+                  {/* Collapsible Sections */}
+                  {showNextSteps && selectedTool.nextSteps && (
+                    <div className="mt-4 p-4 border rounded-lg bg-gray-50 border-gray-200 animate-fadeInUp delay-100">
+                      <h4 className="text-md font-semibold text-teal-700 mb-3 flex items-center">
                         <HelpCircle size={18} className="mr-2"/> Next Steps
-                     </h4>
-                     <div className="space-y-3 text-sm">
+                      </h4>
+                      <div className="space-y-3 text-sm">
                         {selectedTool.nextSteps.management && (
                             <div>
                                 <p className="font-medium text-gray-800 underline mb-1">Management:</p>
@@ -357,21 +357,21 @@ export default function ClinicalScoringToolsPage() {
                                 <p className="text-gray-700 whitespace-pre-line">{selectedTool.nextSteps.criticalActions}</p>
                             </div>
                          )}
-                     </div>
-                   </div>
-                 )}
+                      </div>
+                    </div>
+                  )}
 
-                 {showEvidence && selectedTool.evidence && (
-                   <div className="mt-4 p-4 border rounded-lg bg-gray-50 border-gray-200 animate-fadeInUp delay-100">
-                     <h4 className="text-md font-semibold text-teal-700 mb-3 flex items-center">
+                  {showEvidence && selectedTool.evidence && (
+                    <div className="mt-4 p-4 border rounded-lg bg-gray-50 border-gray-200 animate-fadeInUp delay-100">
+                      <h4 className="text-md font-semibold text-teal-700 mb-3 flex items-center">
                         <FileText size={18} className="mr-2"/> Evidence & References
-                     </h4>
-                     {selectedTool.evidence.commentary && ( <p className="text-sm text-gray-700 mb-3 whitespace-pre-line">{selectedTool.evidence.commentary}</p> )}
-                     <ul className="list-disc list-inside text-gray-700 space-y-1 text-sm">
-                       {selectedTool.evidence.references.map((ref, index) => ( <li key={index}>{ref}</li> ))}
-                     </ul>
-                   </div>
-                 )}
+                      </h4>
+                      {selectedTool.evidence.commentary && ( <p className="text-sm text-gray-700 mb-3 whitespace-pre-line">{selectedTool.evidence.commentary}</p> )}
+                      <ul className="list-disc list-inside text-gray-700 space-y-1 text-sm">
+                        {selectedTool.evidence.references.map((ref, index) => ( <li key={index}>{ref}</li> ))}
+                      </ul>
+                    </div>
+                  )}
               </div>
             )}
           </div>
