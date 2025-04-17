@@ -12,8 +12,8 @@ export default function Document(props: Props) {
   return (
     <Html lang={currentLocale}>
       <Head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="Caduceus"></meta>
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-title" content="Metrix"></meta>
       </Head>
       <body>
         <Main />
