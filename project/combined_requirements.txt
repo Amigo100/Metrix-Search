@@ -27,3 +27,5 @@ joblib==1.4.2
 # Also, force the same numpy version if needed:
 numpy==1.26.3
 python-dotenv==1.0.1
+pdfplumber         # optional, sometimes required by unstructured
+python-magic-bin   # mimetype detection on Alpine images
