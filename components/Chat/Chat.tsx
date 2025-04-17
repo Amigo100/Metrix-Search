@@ -1,122 +1,384 @@
-// /pages/predictive-insights.tsx
-import React, {
-  useState,
-  useEffect,
-  ChangeEvent,
-  FormEvent,
-  forwardRef,
-  ReactNode,
-  useRef,
-  Children,
-  isValidElement,
-  FC,
-  ReactElement,
-} from 'react';
-import {
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Loader2,
-  Lightbulb,
-  RotateCcw,
-  LogIn,
-  Hourglass,
-  ChevronDown,
-} from 'lucide-react';
+// file: /pages/api/home/home.tsx
 
-import PageHeader from '@/components/PageHeader';          // ⭐ canonical header
+import { useEffect, useRef, useState } from 'react';
+import { useQuery } from 'react-query';
+
+import { GetServerSideProps } from 'next';
+import Script from 'next/script';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import Head from 'next/head';
+
+import { useCreateReducer } from '@/hooks/useCreateReducer';
+
+import useErrorService from '@/services/errorService';
+import useApiService from '@/services/useApiService';
 
 import {
-  format,
-  isValid,
-  parse,
-  setHours,
-  setMinutes,
-} from 'date-fns';
+  cleanConversationHistory,
+  cleanSelectedConversation,
+} from '@/utils/app/clean';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  DEFAULT_TEMPERATURE,
+} from '@/utils/app/const';
+import {
+  saveConversation,
+  saveConversations,
+  updateConversation,
+} from '@/utils/app/conversation';
+import { saveFolders } from '@/utils/app/folders';
+import { savePrompts } from '@/utils/app/prompts';
+import { getSettings } from '@/utils/app/settings';
 
-/* -------------------------------------------------------------------------- */
-/*  Config & Types                                                            */
-/* -------------------------------------------------------------------------- */
+import { Conversation } from '@/types/chat';
+import { KeyValuePair } from '@/types/data';
+import { FolderInterface, FolderType } from '@/types/folder';
+import { OpenAIModelID, OpenAIModels, fallbackModelID } from '@/types/openai';
+import { Prompt } from '@/types/prompt';
 
-const PREDICTIVE_API_URL =
-  'https://fastapiplatformclean-10.onrender.com/predictive/api/predict';
+import Chat from $1;
+import { Chatbar } from '@/components/Chatbar/Chatbar';
+import { Navbar } from '@/components/Mobile/Navbar';
+import Promptbar from '@/components/Promptbar';
 
-interface PredictionResult {
-  wait3h: number; wait4h: number; wait5h: number; wait6h: number;
-  admissionLikelihood: number; predictedWaitMinutes: number;
+import HomeContext from './home.context';
+import { HomeInitialState, initialState } from './home.state';
+import { v4 as uuidv4 } from 'uuid';
+
+interface Props {
+  serverSideApiKeyIsSet: boolean;
+  serverSidePluginKeysSet: boolean;
+  defaultModelId: OpenAIModelID;
+  openaiApiKey: string;
 }
 
-interface LikelihoodFormat {
-  text: string; color: string; bgColor: string; Icon: React.ElementType;
-}
+const Home = ({
+  serverSideApiKeyIsSet,
+  serverSidePluginKeysSet,
+  defaultModelId,
+  openaiApiKey,
+}: Props) => {
+  const { t } = useTranslation('chat');
+  const { getModels } = useApiService();
+  const { getModelsError } = useErrorService();
+  const [initialRender, setInitialRender] = useState<boolean>(true);
 
-interface ApiPredictionInput {
-  age: number; gender: string; patientsInED: number; patientsAhead: number;
-  dateTime: string; triageCode: number; referralSource: string;
-  isAccident: boolean; hasFever: boolean; alteredMentalStatus: boolean;
-  occupancy: string;
-}
+  const contextValue = useCreateReducer<HomeInitialState>({
+    initialState,
+  });
 
-/* -------------------------------------------------------------------------- */
-/*  Utility & UI helpers (cn, Button, Input, Label, Select, Card …)           */
-/*  … (unchanged – omitted here for brevity)                                  */
-/* -------------------------------------------------------------------------- */
-/*   ⚠️  keep all your existing helper code — nothing inside was modified.    */
-/* -------------------------------------------------------------------------- */
+  const {
+    state: {
+      apiKey,
+      lightMode,
+      folders,
+      conversations,
+      selectedConversation,
+      prompts,
+      temperature,
+    },
+    dispatch,
+  } = contextValue;
 
-/* -------------------------------------------------------------------------- */
-/*  Main Component                                                            */
-/* -------------------------------------------------------------------------- */
+  const stopConversationRef = useRef<boolean>(false);
 
-const PredictiveAnalyticsPage: FC = () => {
-  /* ----- state & handlers (existing hooks preserved) ----- */
-  // 👉 Added error state so it is defined where we use it later
-  const [error, setError] = useState<string | null>(null);
+  // Use react-query to fetch models
+  const { data, error, refetch } = useQuery(
+    ['GetModels', apiKey, serverSideApiKeyIsSet],
+    ({ signal }) => {
+      if (!apiKey && !serverSideApiKeyIsSet) return null;
+      return getModels(
+        {
+          key: apiKey,
+        },
+        signal
+      );
+    },
+    { enabled: true, refetchOnMount: false }
+  );
 
-  // … all your other useState hooks, helpers, API call, etc. should remain here …
+  // --- FIX 1: Add `type: 'change'` here
+  useEffect(() => {
+    if (data) {
+      dispatch({ type: 'change', field: 'models', value: data });
+    }
+  }, [data, dispatch]);
 
-  /* ---------------------------------------------------------------------- */
-  /*  Render                                                                 */
-  /* ---------------------------------------------------------------------- */
+  // --- FIX 2: Add `type: 'change'` here
+  useEffect(() => {
+    dispatch({
+      type: 'change',
+      field: 'modelError',
+      value: getModelsError(error),
+    });
+  }, [dispatch, error, getModelsError]);
+
+  // SELECT A CONVERSATION
+  const handleSelectConversation = (conversation: Conversation) => {
+    dispatch({
+      type: 'change',
+      field: 'selectedConversation',
+      value: conversation,
+    });
+    saveConversation(conversation);
+  };
+
+  // FOLDER OPERATIONS
+  const handleCreateFolder = (name: string, type: FolderType) => {
+    const newFolder: FolderInterface = {
+      id: uuidv4(),
+      name,
+      type,
+    };
+
+    const updatedFolders = [...folders, newFolder];
+    dispatch({ type: 'change', field: 'folders', value: updatedFolders });
+    saveFolders(updatedFolders);
+  };
+
+  const handleDeleteFolder = (folderId: string) => {
+    const updatedFolders = folders.filter((f) => f.id !== folderId);
+    dispatch({ type: 'change', field: 'folders', value: updatedFolders });
+    saveFolders(updatedFolders);
+
+    const updatedConversations: Conversation[] = conversations.map((c) => {
+      if (c.folderId === folderId) {
+        return { ...c, folderId: null };
+      }
+      return c;
+    });
+    dispatch({
+      type: 'change',
+      field: 'conversations',
+      value: updatedConversations,
+    });
+    saveConversations(updatedConversations);
+
+    const updatedPrompts: Prompt[] = prompts.map((p) => {
+      if (p.folderId === folderId) {
+        return { ...p, folderId: null };
+      }
+      return p;
+    });
+    dispatch({ type: 'change', field: 'prompts', value: updatedPrompts });
+    savePrompts(updatedPrompts);
+  };
+
+  const handleUpdateFolder = (folderId: string, name: string) => {
+    const updatedFolders = folders.map((f) => {
+      if (f.id === folderId) {
+        return { ...f, name };
+      }
+      return f;
+    });
+    dispatch({ type: 'change', field: 'folders', value: updatedFolders });
+    saveFolders(updatedFolders);
+  };
+
+  // CONVERSATION OPERATIONS
+  const handleNewConversation = () => {
+    const lastConversation = conversations[conversations.length - 1];
+    const newConversation: Conversation = {
+      id: uuidv4(),
+      name: t('New Conversation'),
+      messages: [],
+      model: lastConversation?.model || {
+        id: OpenAIModels[defaultModelId].id,
+        name: OpenAIModels[defaultModelId].name,
+        maxLength: OpenAIModels[defaultModelId].maxLength,
+        tokenLimit: OpenAIModels[defaultModelId].tokenLimit,
+      },
+      prompt: DEFAULT_SYSTEM_PROMPT,
+      temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
+      folderId: null,
+    };
+
+    const updatedConversations = [...conversations, newConversation];
+    dispatch({
+      type: 'change',
+      field: 'selectedConversation',
+      value: newConversation,
+    });
+    dispatch({
+      type: 'change',
+      field: 'conversations',
+      value: updatedConversations,
+    });
+    saveConversation(newConversation);
+    saveConversations(updatedConversations);
+    dispatch({ type: 'change', field: 'loading', value: false });
+  };
+
+  const handleUpdateConversation = (
+    conversation: Conversation,
+    data: KeyValuePair
+  ) => {
+    const updatedConversation = { ...conversation, [data.key]: data.value };
+    const { single, all } = updateConversation(
+      updatedConversation,
+      conversations
+    );
+    dispatch({ type: 'change', field: 'selectedConversation', value: single });
+    dispatch({ type: 'change', field: 'conversations', value: all });
+  };
+
+  // OTHER EFFECTS
+
+  useEffect(() => {
+    if (window.innerWidth < 640) {
+      dispatch({ type: 'change', field: 'showChatbar', value: false });
+    }
+  }, [selectedConversation]);
+
+  useEffect(() => {
+    if (defaultModelId) {
+      dispatch({ type: 'change', field: 'defaultModelId', value: defaultModelId });
+    }
+    if (serverSideApiKeyIsSet) {
+      dispatch({
+        type: 'change',
+        field: 'serverSideApiKeyIsSet',
+        value: serverSideApiKeyIsSet,
+      });
+    }
+    if (serverSidePluginKeysSet) {
+      dispatch({
+        type: 'change',
+        field: 'serverSidePluginKeysSet',
+        value: serverSidePluginKeysSet,
+      });
+    }
+  }, [defaultModelId, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
+
+  // ON LOAD
+  useEffect(() => {
+    const settings = getSettings();
+    if (settings.theme) {
+      dispatch({ type: 'change', field: 'lightMode', value: settings.theme });
+    }
+
+    // Automatically store the API key from the server into localStorage
+    if (openaiApiKey) {
+      dispatch({ type: 'change', field: 'apiKey', value: openaiApiKey });
+      localStorage.setItem('apiKey', openaiApiKey);
+    } else {
+      const storedKey = localStorage.getItem('apiKey');
+      if (storedKey) {
+        dispatch({ type: 'change', field: 'apiKey', value: storedKey });
+      }
+    }
+
+    const pluginKeys = localStorage.getItem('pluginKeys');
+    if (serverSidePluginKeysSet) {
+      dispatch({ type: 'change', field: 'pluginKeys', value: [] });
+      localStorage.removeItem('pluginKeys');
+    } else if (pluginKeys) {
+      dispatch({ type: 'change', field: 'pluginKeys', value: pluginKeys });
+    }
+
+    if (window.innerWidth < 640) {
+      dispatch({ type: 'change', field: 'showChatbar', value: false });
+      dispatch({ type: 'change', field: 'showSidePromptbar', value: false });
+    }
+
+    const showChatbar = localStorage.getItem('showChatbar');
+    if (showChatbar) {
+      dispatch({
+        type: 'change',
+        field: 'showChatbar',
+        value: showChatbar === 'true',
+      });
+    }
+
+    const showSidePromptbar = localStorage.getItem('showSidePromptbar');
+    if (showSidePromptbar) {
+      // note: if "false", the bar is closed
+      dispatch({
+        type: 'change',
+        field: 'showSidePromptbar',
+        value: showSidePromptbar === 'false'
+      });
+    }
+
+    const folders = localStorage.getItem('folders');
+    if (folders) {
+      dispatch({ type: 'change', field: 'folders', value: JSON.parse(folders) });
+    }
+
+    const prompts = localStorage.getItem('prompts');
+    if (prompts) {
+      dispatch({ type: 'change', field: 'prompts', value: JSON.parse(prompts) });
+    }
+
+    const conversationHistory = localStorage.getItem('conversationHistory');
+    if (conversationHistory) {
+      const parsedConversationHistory: Conversation[] = JSON.parse(conversationHistory);
+      const cleanedConversationHistory = cleanConversationHistory(parsedConversationHistory);
+      dispatch({
+        type: 'change',
+        field: 'conversations',
+        value: cleanedConversationHistory,
+      });
+    }
+
+    const selectedConversation = localStorage.getItem('selectedConversation');
+    if (selectedConversation) {
+      const parsedSelectedConversation: Conversation = JSON.parse(selectedConversation);
+      const cleanedSelectedConversation = cleanSelectedConversation(parsedSelectedConversation);
+      dispatch({
+        type: 'change',
+        field: 'selectedConversation',
+        value: cleanedSelectedConversation,
+      });
+    } else {
+      const lastConversation = conversations[conversations.length - 1];
+      dispatch({
+        type: 'change',
+        field: 'selectedConversation',
+        value: {
+          id: uuidv4(),
+          name: t('New Conversation'),
+          messages: [],
+          model: OpenAIModels[defaultModelId],
+          prompt: DEFAULT_SYSTEM_PROMPT,
+          temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
+          folderId: null,
+        },
+      });
+    }
+  }, [
+    defaultModelId,
+    dispatch,
+    serverSideApiKeyIsSet,
+    serverSidePluginKeysSet,
+    openaiApiKey,
+  ]);
 
   return (
-    <div className="px-4 md:px-8 lg:px-12 pb-16 pt-12 min-h-screen w-full bg-gradient-to-b from-white via-teal-50 to-white text-gray-900">
+    <HomeContext.Provider
+      value={{
+        ...contextValue,
+        handleNewConversation,
+        handleCreateFolder,
+        handleDeleteFolder,
+        handleUpdateFolder,
+        handleSelectConversation,
+        handleUpdateConversation,
+      }}
+    >
+      <Head>
+        <title>Metrix AI - The Intelligent Clinical Scribe Platform</title>
+        <meta name="description" content="Smarter algorithms for smarter working" />
+        <meta
+          name="viewport"
+          content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no"
+        />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
 
-      {/* ✅ canonical header – same spacing as other pages */}
-      <PageHeader
-        title="Predictive Insights"
-        subtitle="Estimate ED wait times and admission likelihood based on patient details."
-      />
-
-      {/* ---------- Error banner ---------- */}
-      {error && (
-        <div
-          role="alert"
-          className="mb-6 p-4 border border-red-300 bg-red-100 rounded-lg flex items-start text-sm text-red-800 shadow-sm max-w-4xl mx-auto"
-        >
-          <AlertCircle className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0 text-red-600" />
-          <span className="flex-1">{error}</span>
-          <button
-            onClick={() => setError(null)}
-            className="ml-4 text-red-700 hover:text-red-900"
-          >
-            &times;
-          </button>
-        </div>
-      )}
-
-      {/* ---------- Main content ---------- */}
-      {/* (form column, results column, skeletons, empty state) */}
-      {/* … everything inside remains exactly as in your original code … */}
-
-      {/* ---------- Disclaimer ---------- */}
-      <p className="text-center text-xs text-gray-500 max-w-lg mx-auto leading-relaxed pt-12 pb-4">
-        <strong>Disclaimer:</strong> Whilst these predictions are derived from
-        meticulously validated machine‑learning models trained on real patient
-        data, they should not replace clinical judgement; use with caution.
-      </p>
-    </div>
-  );
-};
-
-export default PredictiveAnalyticsPage;
+      <Script src="https://www.googletagmanager.com/gtag/js?id=G-S2RT6C3E5G" strategy="afterInteractive" />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
