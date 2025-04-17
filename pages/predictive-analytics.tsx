@@ -41,7 +41,7 @@ const PREDICTIVE_API_URL =
     ? "http://localhost:8000/predictive/api/predict"
     : "https://fastapiplatformclean-10.onrender.com/predictive/api/predict");
 
-// =============== Type Definitions ===============
+// =============== Types ===============
 interface PredictionResult {
   wait3h: number;
   wait4h: number;
@@ -72,7 +72,7 @@ interface ApiPredictionInput {
   occupancy: string;
 }
 
-// =============== Helper: Age Encoding ===============
+// =============== Helpers ===============
 const encodeAgeOrdinal = (rawAge: number): number => {
   if (rawAge >= 1 && rawAge <= 5) return 1;
   if (rawAge >= 6 && rawAge <= 12) return 2;
@@ -89,16 +89,12 @@ function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
-const Button: FC<React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "default" | "outline";
-  size?: "sm";
-}> = ({
-  children,
-  variant = "default",
-  size,
-  className = "",
-  ...props
-}) => {
+const Button: FC<
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    variant?: "default" | "outline";
+    size?: "sm";
+  }
+> = ({ children, variant = "default", size, className = "", ...props }) => {
   const base =
     "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:opacity-50";
   const sizeCls = size === "sm" ? "h-9 px-3" : "h-10 px-4 py-2";
@@ -133,22 +129,30 @@ const Label: FC<React.LabelHTMLAttributes<HTMLLabelElement>> = (props) => (
   <label className="block text-sm font-medium text-stone-700 mb-1" {...props} />
 );
 
-const Select: FC<{
+interface SelectProps {
   value: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
   required?: boolean;
   id?: string;
   children: ReactNode;
-}> = ({ value, onValueChange, placeholder, required, id, children }) => {
-  const selectChildren = Children.toArray(children).filter(
+}
+const Select: FC<SelectProps> = ({
+  value,
+  onValueChange,
+  placeholder,
+  required,
+  id,
+  children,
+}) => {
+  const opts = Children.toArray(children).filter(
     (c): c is ReactElement => isValidElement(c)
   );
-  const selected = selectChildren.find((c) => c.props.value === value);
-  const display = selected
-    ? typeof selected.props.children === "string"
-      ? selected.props.children
-      : ""
+  const sel = opts.find((o) => o.props.value === value);
+  const display = sel
+    ? typeof sel.props.children === "string"
+      ? sel.props.children
+      : placeholder
     : placeholder;
   return (
     <div className="relative">
@@ -175,29 +179,44 @@ const SelectItem: FC<React.OptionHTMLAttributes<HTMLOptionElement>> = ({
   ...props
 }) => <option {...props}>{children}</option>;
 
-const Card: FC<{ className?: string }> = ({ children, className }) => (
+interface CardProps {
+  children: ReactNode;
+  className?: string;
+}
+const Card: FC<CardProps> = ({ children, className }) => (
   <div className={cn("rounded-xl border bg-white shadow-md", className)}>
     {children}
   </div>
 );
-const CardHeader: FC = ({ children }) => (
-  <div className="p-5 flex items-center justify-between">{children}</div>
+
+const CardHeader: FC<{ children: ReactNode; className?: string }> = ({
+  children,
+  className,
+}) => (
+  <div className={cn("flex items-center justify-between p-5", className)}>
+    {children}
+  </div>
 );
-const CardTitle: FC = ({ children }) => (
+
+const CardTitle: FC<{ children: ReactNode }> = ({ children }) => (
   <h3 className="text-base font-semibold">{children}</h3>
 );
-const CardContent: FC<{ className?: string }> = ({ children, className }) => (
+
+const CardContent: FC<{ children: ReactNode; className?: string }> = ({
+  children,
+  className,
+}) => (
   <div className={cn("p-5 pt-0", className)}>{children}</div>
 );
 
 const Popover: FC<{ children: ReactNode }> = ({ children }) => (
   <div className="relative">{children}</div>
 );
-const PopoverTrigger: FC<{ onClick?: () => void }> = ({
-  children,
+const PopoverTrigger: FC<{ onClick?: () => void; children: ReactNode }> = ({
   onClick,
+  children,
 }) => <div onClick={onClick}>{children}</div>;
-const PopoverContent: FC<{ className?: string }> = ({
+const PopoverContent: FC<{ children: ReactNode; className?: string }> = ({
   children,
   className,
 }) => (
@@ -254,7 +273,7 @@ const SwitchMock: FC<{
 
 // =============== Main Component ===============
 const PredictiveAnalyticsPage: FC = () => {
-  // --- State ---
+  // State…
   const [age, setAge] = useState("");
   const [dateTime, setDateTime] = useState(new Date());
   const [gender, setGender] = useState("");
@@ -279,61 +298,36 @@ const PredictiveAnalyticsPage: FC = () => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  // --- Format likelihood helper ---
-  const formatLikelihood = (percentage: number): LikelihoodFormat => {
-    if (percentage > 75)
+  // Format likelihood…
+  const formatLikelihood = (p: number): LikelihoodFormat => {
+    if (p > 75)
       return { text: "Very High", color: "text-red-700", bgColor: "bg-red-500", Icon: AlertCircle };
-    if (percentage > 50)
+    if (p > 50)
       return { text: "High", color: "text-orange-700", bgColor: "bg-orange-500", Icon: AlertCircle };
-    if (percentage > 25)
+    if (p > 25)
       return { text: "Medium", color: "text-yellow-700", bgColor: "bg-yellow-500", Icon: Clock };
     return { text: "Low", color: "text-green-700", bgColor: "bg-green-500", Icon: CheckCircle };
   };
 
-  // --- Generate recommendations ---
-  const generateRecommendations = (results: PredictionResult) => {
+  // Recommendations helper…
+  const generateRecommendations = (r: PredictionResult) => {
     const recs: string[] = [];
-    const avgLikelihood =
-      (results.wait3h +
-        results.wait4h +
-        results.wait5h +
-        results.wait6h) /
-      4;
-
-    if (results.wait6h > 70 || results.wait5h > 80) {
-      recs.push("High risk of extended wait (>5-6h). Consider senior staff alert.");
-    } else if (avgLikelihood > 50) {
-      recs.push("Moderate to high likelihood of long wait. Review ED flow.");
-    }
-    if (avgLikelihood > 40) {
-      recs.push("Inform patient/family about potential significant wait.");
-    }
-
+    const avg = (r.wait3h + r.wait4h + r.wait5h + r.wait6h) / 4;
+    if (r.wait6h > 70 || r.wait5h > 80) recs.push("High risk of extended wait (>5-6h). Consider senior staff alert.");
+    else if (avg > 50) recs.push("Moderate to high likelihood of long wait. Review ED flow.");
+    if (avg > 40) recs.push("Inform patient/family about potential significant wait.");
     const tc = parseInt(triageCode, 10);
-    if (!isNaN(tc) && (tc === 1 || tc === 2)) {
-      recs.push(`High triage acuity (Code ${tc}). Ensure prompt assessment.`);
-    }
-    if (occupancy === "critical" || occupancy === "high") {
-      recs.push(`ED occupancy is ${occupancy}. Expedite discharges.`);
-    }
+    if (!isNaN(tc) && (tc === 1 || tc === 2)) recs.push(`High triage acuity (Code ${tc}). Ensure prompt assessment.`);
+    if (occupancy === "critical" || occupancy === "high") recs.push(`ED occupancy is ${occupancy}. Expedite discharges.`);
     if (alteredMentalStatus) recs.push("Note: Altered mental status present.");
     if (hasFever) recs.push("Note: Fever present.");
-    if (results.admissionLikelihood > 70) {
-      recs.push("High admission likelihood. Consider early inpatient notification.");
-    }
-    if (results.predictedWaitMinutes > 240) {
-      recs.push(
-        `Predicted wait ~${Math.round(results.predictedWaitMinutes / 60)} hours. Ensure comfort/reassessment.`
-      );
-    }
-    if (recs.length === 0) {
-      recs.push("Predicted wait times appear manageable. Continue standard monitoring.");
-    }
-
+    if (r.admissionLikelihood > 70) recs.push("High admission likelihood. Consider early inpatient notification.");
+    if (r.predictedWaitMinutes > 240) recs.push(`Predicted wait ~${Math.round(r.predictedWaitMinutes / 60)} hours. Ensure comfort/reassessment.`);
+    if (recs.length === 0) recs.push("Predicted wait times appear manageable. Continue standard monitoring.");
     setRecommendations(recs);
   };
 
-  // --- Submit handler ---
+  // Submit handler…
   const handlePredict = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -341,20 +335,20 @@ const PredictiveAnalyticsPage: FC = () => {
     setPredictions(null);
     setRecommendations(null);
 
-    const parsedAge = parseInt(age, 10);
-    const parsedTriage = parseInt(triageCode, 10);
-    const parsedAhead = parseInt(patientsAhead, 10);
-    const parsedInED = parseInt(patientsInED, 10);
+    const pa = parseInt(age, 10);
+    const pt = parseInt(triageCode, 10);
+    const pahead = parseInt(patientsAhead, 10);
+    const pined = parseInt(patientsInED, 10);
 
-    // (you already have validations here in your original)
+    // (your existing validation…)
 
     const apiInput: ApiPredictionInput = {
-      age: encodeAgeOrdinal(parsedAge),
+      age: encodeAgeOrdinal(pa),
       gender,
-      patientsInED: parsedInED,
-      patientsAhead: parsedAhead,
+      patientsInED: pined,
+      patientsAhead: pahead,
       dateTime: dateTime.toISOString(),
-      triageCode: parsedTriage,
+      triageCode: pt,
       referralSource,
       isAccident,
       hasFever,
@@ -368,16 +362,14 @@ const PredictiveAnalyticsPage: FC = () => {
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(apiInput),
       });
-
       if (!resp.ok) {
-        let msg = `API Error: ${resp.status} ${resp.statusText}`;
+        let m = `API Error: ${resp.status} ${resp.statusText}`;
         try {
-          const errJson = await resp.json();
-          msg = errJson.error || errJson.detail || msg;
+          const j = await resp.json();
+          m = j.error || j.detail || m;
         } catch {}
-        throw new Error(msg);
+        throw new Error(m);
       }
-
       const results: PredictionResult = await resp.json();
       setPredictions(results);
       generateRecommendations(results);
@@ -389,11 +381,11 @@ const PredictiveAnalyticsPage: FC = () => {
     }
   };
 
-  // --- Reset & date/time handlers omitted for brevity (unchanged) ---
+  // (rest of your date/time handlers and JSX rendering stays unchanged…)
 
   return (
     <div className="p-4 md:p-6 w-full bg-stone-50 text-stone-900">
-      {/* your full JSX form + results area goes here, exactly as before */}
+      {/* your full form + results JSX */}
     </div>
   );
 };
