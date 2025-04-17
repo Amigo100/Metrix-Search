@@ -1,132 +1,107 @@
-// /components/Chat/ChatStartOfficeVisit.tsx
-// (Using the updated version provided in the prompt - appears consistent with the redesign)
-
+// file: /components/Chat/ChatStartOfficeVisit.tsx
 import { useEffect, useRef, useContext } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'next-i18next';
-import HomeContext from '@/pages/api/home/home.context'; // Adjust path as needed
-import { Message, Role } from '@/types/chat'; // Adjust path
-import { Plugin } from '@/types/plugin'; // Adjust path
-import { IconUsers, IconLoader2 } from '@tabler/icons-react'; // Using Tabler icons
+import HomeContext from '@/pages/api/home/home.context';
+import { Message, Role } from '@/types/chat';
+import { Plugin } from '@/types/plugin';
+import { IconUsers, IconLoader2 } from '@tabler/icons-react';
 
-let RecordRTC: any; // Needs to be loaded dynamically
-type RecordRTCInstance = any; // Added type alias
+type RecordRTCInstance = any;
+let RecordRTC: any;
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const TRANSCRIBE_URL = `${API_BASE_URL}/rag/transcribe_audio`;
 
 interface Props {
-  onSend: (message: Message, plugin?: Plugin | null) => void; // Made plugin optional
+  onSend: (message: Message, plugin?: Plugin | null) => void;
 }
 
 export const ChatStartOfficeVisit = ({ onSend }: Props) => {
   const { t } = useTranslation('chat');
-  const recordRTC = useRef<RecordRTCInstance | null>(null); // Use type alias
+  const recordRTC = useRef<RecordRTCInstance | null>(null);
 
   const {
     state: { recording, transcribingAudio },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  // --- Logic (Preserved) ---
-  const handleStartRecording = () => {
-    console.log('[ChatStartOfficeVisit] Starting consultation recording...');
-    if (typeof window !== 'undefined' && navigator.mediaDevices) {
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then((stream) => {
-          if (!RecordRTC) { console.error("RecordRTC not loaded yet"); return; }
-          recordRTC.current = RecordRTC(stream, { type: 'audio', mimeType: 'audio/webm' });
-          if (recordRTC.current?.startRecording) { recordRTC.current.startRecording(); }
-          homeDispatch({ type: 'change', field: 'recording', value: true });
-          console.log('[ChatStartOfficeVisit] Recording started.');
-        })
-        .catch((error) => { console.error('[ChatStartOfficeVisit] Error accessing microphone:', error); });
-    } else { console.error('[ChatStartOfficeVisit] Audio recording not supported.'); }
+  const start = () => {
+    if (typeof window === 'undefined' || !navigator.mediaDevices) return;
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((stream) => {
+        if (!RecordRTC) return;
+        recordRTC.current = RecordRTC(stream, {
+          type: 'audio',
+          mimeType: 'audio/webm',
+        });
+        recordRTC.current.startRecording();
+        homeDispatch({ type: 'change', field: 'recording', value: true });
+      })
+      .catch((e) => console.error('[Visit] mic error', e));
   };
 
-  const handleStopRecording = () => {
-    console.log('[ChatStartOfficeVisit] Stopping consultation recording...');
+  const stop = () => {
     homeDispatch({ type: 'change', field: 'recording', value: false });
-    if (recordRTC.current?.stopRecording) {
-      recordRTC.current.stopRecording(async () => {
-        console.log('[ChatStartOfficeVisit] RecordRTC stop callback fired.');
-        homeDispatch({ type: 'change', field: 'transcribingAudio', value: true });
-        if (recordRTC.current?.getBlob) {
-          const blob = recordRTC.current.getBlob();
-          const formData = new FormData();
-          formData.append('file', blob, 'audio.webm');
-          try {
-            console.log('[ChatStartOfficeVisit] Sending audio to server...');
-            const response = await axios.post( 'http://localhost:8000/rag/transcribe_audio', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-            homeDispatch({ type: 'change', field: 'transcribingAudio', value: false });
-            const transcription = response.data.text || '';
-             if (transcription) {
-                // Updated message content slightly for clarity - sent to scribe handler
-                const messageContent = `Consultation Recorded:\n\n${transcription}`;
-                const message: Message = { role: 'user' as Role, content: messageContent };
-                console.log('[ChatStartOfficeVisit] Passing office visit message to onSend:', message);
-                onSend(message, null);
-             } else {
-                 console.log('[ChatStartOfficeVisit] Received empty transcription.');
-                 // Optionally show error
-             }
-          } catch (error) {
-            console.error('[ChatStartOfficeVisit] Error fetching transcription:', error);
-            homeDispatch({ type: 'change', field: 'transcribingAudio', value: false });
-             // Optionally show error
-          }
-        } else {
-            console.error('[ChatStartOfficeVisit] Could not get blob from recording.');
-            homeDispatch({ type: 'change', field: 'transcribingAudio', value: false }); // Ensure state reset
-        }
-      });
-    } else {
-        console.error('[ChatStartOfficeVisit] stopRecording function not available.');
-        homeDispatch({ type: 'change', field: 'transcribingAudio', value: false }); // Ensure state reset if stopRecording fails
-    }
+    recordRTC.current?.stopRecording(async () => {
+      homeDispatch({ type: 'change', field: 'transcribingAudio', value: true });
+      const blob = recordRTC.current?.getBlob?.();
+      if (!blob) return;
+      const formData = new FormData();
+      formData.append('file', blob, 'audio.webm');
+      try {
+        const res = await axios.post(TRANSCRIBE_URL, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        const text = res.data.text || '';
+        if (text)
+          onSend({ role: 'user' as Role, content: `Consultation:\n${text}` }, null);
+      } catch (e) {
+        console.error('[Visit] transcription error', e);
+      } finally {
+        homeDispatch({ type: 'change', field: 'transcribingAudio', value: false });
+      }
+    });
   };
 
-  // Load RecordRTC dynamically on the client-side
   useEffect(() => {
-    import('recordrtc').then((R) => {
-        RecordRTC = R.default || R;
-        console.log('[ChatStartOfficeVisit] RecordRTC loaded');
-    }).catch(err => console.error("Failed to load RecordRTC", err));
+    import('recordrtc')
+      .then((R) => (RecordRTC = R.default || R))
+      .catch((e) => console.error('RecordRTC load error', e));
   }, []);
 
   return (
-    // --- Updated Button Styling (from prompt) ---
-     <button
-      className={`
-        flex flex-col items-center justify-center w-full h-full min-h-[100px] p-4
-        rounded-lg border-2 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-400
-        ${recording
-          ? 'border-red-500 bg-red-50 ring-2 ring-red-300 animate-pulse' // Recording state style
+    <button
+      className={`flex flex-col items-center justify-center w-full h-full min-h-[100px] p-4 rounded-lg border-2 transition-all ${
+        recording
+          ? 'border-red-500 bg-red-50 animate-pulse'
           : transcribingAudio
-          ? 'border-gray-300 bg-gray-100 cursor-wait opacity-70' // Transcribing state style
-          : 'border-teal-500 bg-teal-50 hover:bg-teal-100 hover:border-teal-600' // Default state style
-        }
-      `}
-      onClick={recording ? handleStopRecording : handleStartRecording}
-      disabled={transcribingAudio} // Disable button while transcribing
-      title={recording ? "Stop Recording Consultation" : transcribingAudio ? "Processing..." : "Start Consultation Recording"}
+          ? 'border-gray-300 bg-gray-100 cursor-wait opacity-70'
+          : 'border-teal-500 bg-teal-50 hover:bg-teal-100'
+      }`}
+      onClick={recording ? stop : start}
+      disabled={transcribingAudio}
     >
       {transcribingAudio ? (
-        // Updated Loading Indicator
-        <div className="flex flex-col items-center text-center text-gray-600">
-           <IconLoader2 size={36} className="animate-spin text-teal-600" />
-           <span className="mt-2 text-sm font-medium">Processing...</span>
+        <div className="flex flex-col items-center text-gray-600">
+          <IconLoader2 size={36} className="animate-spin text-teal-600" />
+          <span className="mt-2 text-sm font-medium">Processing…</span>
         </div>
       ) : (
-         // Updated Content Layout
-        <div className="flex flex-col items-center text-center">
-          {/* Replaced image with Tabler icon */}
-          <IconUsers size={36} className={recording ? "text-red-600" : "text-teal-600"} />
-          <h3 className={`text-base font-semibold mt-2 ${recording ? 'text-red-700' : 'text-gray-800'}`}>
-             {recording ? 'Recording Consultation...' : 'Record Consultation'}
+        <div className="flex flex-col items-center">
+          <IconUsers
+            size={36}
+            className={recording ? 'text-red-600' : 'text-teal-600'}
+          />
+          <h3
+            className={`mt-2 font-semibold ${
+              recording ? 'text-red-700' : 'text-gray-800'
+            }`}
+          >
+            {recording ? 'Recording…' : 'Record Consultation'}
           </h3>
-           {!recording && (
-             <p className="text-xs text-gray-500 mt-1 px-2 max-w-[200px]">
-               {t('Click to record a patient consultation for automated summary')}
-             </p>
-           )}
         </div>
       )}
     </button>
