@@ -134,6 +134,9 @@ const Tasks: React.FC = () => {
   // 1️⃣  Grab BOTH value and setter so component re‑renders
   const { showSidePromptbar, setShowSidePromptbar } = useContext(HomeContext);
 
+  // modal state for AddPatientModal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   //----------------------------------------------------------------
   //  All the state & callbacks from your original file … untouched
   //----------------------------------------------------------------
