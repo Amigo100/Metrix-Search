@@ -1,172 +1,313 @@
 'use client';
-
-/* ------------------------------------------------------------------
- *  Imports
- * ----------------------------------------------------------------*/
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  ChangeEvent,
-  FormEvent,
-  useContext,
-  useRef,
-  KeyboardEvent,
-} from 'react';
-
-import {
-  Plus,
-  Clock,
-  AlertTriangle,
-  X,
-  Edit3,
-  Save,
-  Trash2,
-  CheckSquare,
-  Square,
-  MinusSquare,
-  MessageSquare,
-  BellOff,
-  AlarmClockOff,
-} from 'lucide-react';
-
-import {
-  format,
-  differenceInMinutes,
-  addMinutes,
-  formatDistanceToNowStrict,
-  parse,
-  formatRelative,
-  isValid,
-  subMinutes,
-} from 'date-fns';
-
-import HomeContext from '@/pages/api/home/home.context';
-
-/* ------------------------------------------------------------------
- *  Type definitions
- * ----------------------------------------------------------------*/
-export type TaskCompletionStatus = 'incomplete' | 'in-progress' | 'complete';
-
-export interface Task {
-  id: string | number;
-  text: string;
-  timerEnd: Date | null;
-  isTimerExpired: boolean;
-  completionStatus: TaskCompletionStatus;
-  createdAt: Date;
-  completedAt: Date | null;
-  notes: string;
-  isAcknowledged: boolean;
-}
-
-export interface Patient {
-  id: string;
-  name: string;
-  arrivalTime: Date;
-  tasks: Task[];
-  notes: string;
-}
-
-/* ------------------------------------------------------------------
- *  Lightweight shadcn/ui stand‑ins (Tailwind‑only)
- * ----------------------------------------------------------------*/
-import type { ButtonHTMLAttributes, InputHTMLAttributes, LabelHTMLAttributes, TextareaHTMLAttributes } from 'react';
-
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /** visual style */
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  /** size preset */
-  size?: 'default' | 'sm' | 'lg' | 'icon';
-  /** extra Tailwind classes */
-  className?: string;
-  /** Render as child (for shadcn pattern) */
-  asChild?: boolean;
-}
-// --- Button (clean, deduplicated) ---
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    { variant = 'default', size = 'default', className = '', asChild = false, ...props },
-    ref,
-  ) => {
-    const base =
-      'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
-
-    const variants: Record<NonNullable<ButtonProps['variant']>, string> = {
-      default: 'bg-teal-600 text-white hover:bg-teal-700',
-      destructive: 'bg-red-600 text-white hover:bg-red-700',
-      outline: 'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50',
-      secondary: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
-      ghost: 'hover:bg-gray-100 text-gray-800',
-      link: 'text-teal-600 underline-offset-4 hover:underline',
-    };
-
-    const sizes: Record<NonNullable<ButtonProps['size']>, string> = {
-      default: 'h-10 px-4 py-2',
-      sm: 'h-9 rounded-md px-3',
-      lg: 'h-11 rounded-md px-8',
-      icon: 'h-10 w-10',
-    };
-
-    return (
-      <button
-        ref={ref}
-        className={`${base} ${variants[variant]} ${sizes[size]} ${className}`.trim()}
-        {...props}
-      />
-    );
-  },
-);
-Button.displayName = 'Button';
-
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {}
-export const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
-  const base =
-    'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 ring-offset-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
-  return <input ref={ref} className={`${base} ${props.className ?? ''}`.trim()} {...props} />;
-});
-Input.displayName = 'Input';
-
-interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {}
-export const Label = React.forwardRef<HTMLLabelElement, LabelProps>((props, ref) => (
-  <label
-    ref={ref}
-    className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${props.className ?? ''}`.trim()}
-    {...props}
-  />
-));
-Label.displayName = 'Label';
-
-interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {}
-export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>((props, ref) => {
-  const base =
-    'flex min-h-[60px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 ring-offset-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
-  return <textarea ref={ref} className={`${base} ${props.className ?? ''}`.trim()} {...props} />;
-});
-Textarea.displayName = 'Textarea';
-
-/* ------------------------------------------------------------------
- *  Dialog + Card skeletons
- * ----------------------------------------------------------------*/
-// (unchanged lightweight mocks)
-// ...
-
-/* ------------------------------------------------------------------
- *  Utility helpers (border / bg based on LOS)
- * ----------------------------------------------------------------*/
-const getBorderColor = (minutes: number): string => {
-  if (minutes >= 300) return 'border-rose-500 animate-pulse-border';
-  if (minutes >= 240) return 'border-rose-500';
-  if (minutes >= 120) return 'border-orange-500';
-  return 'border-emerald-500';
-};
-
-const getBackgroundColor = (minutes: number): string => {
-  if (minutes >= 300) return 'bg-rose-100';
-  if (minutes >= 240) return 'bg-rose-100';
-  if (minutes >= 120) return 'bg-orange-100';
-  return 'bg-emerald-100';
-};
+ 
+ import React, {
+   useState,
+   useEffect,
+   useCallback,
+   ChangeEvent,
+   FormEvent,
+   useContext, // Removed ForwardedRef as mock components don't use it
+   ForwardedRef,
+   useContext,
+   useRef,
+   KeyboardEvent,
+ } from 'react';
+ import {
+   Plus,
+   Clock,
+   AlertTriangle,
+   X,
+   Edit3,
+   Save,
+   Trash2,
+   CheckSquare,
+   Square,
+   MinusSquare,
+   MessageSquare,
+   BellOff,
+   AlarmClockOff,
+ } from 'lucide-react';
+ import {
+   format,
+   differenceInMinutes,
+   addMinutes,
+   formatDistanceToNowStrict,
+   parse,
+   formatRelative,
+   isValid,
+ } from 'date-fns';
+ 
+ import HomeContext from '@/pages/api/home/home.context'; // Adjust path as needed
+ import HomeContext from '@/pages/api/home/home.context';
+ 
+ // --- Types (Preserved) ---
+ type TaskCompletionStatus = 'incomplete' | 'in-progress' | 'complete';
+ interface Task { id: string | number; text: string; timerEnd: Date | null; isTimerExpired: boolean; completionStatus: TaskCompletionStatus; createdAt: Date; completedAt: Date | null; notes: string; isAcknowledged: boolean; }
+ interface Patient { id: string; name: string; arrivalTime: Date; tasks: Task[]; notes: string; }
+ 
+ // --- Themed Mock UI Components (Replace with actual imports if using shadcn/ui) ---
+ // Using Tailwind classes directly to match Metrix theme
+ interface Task {
+   id: string | number;
+   text: string;
+   timerEnd: Date | null;
+   isTimerExpired: boolean;
+   completionStatus: TaskCompletionStatus;
+   createdAt: Date;
+   completedAt: Date | null;
+   notes: string;
+   isAcknowledged: boolean;
+ }
+ 
+ interface Patient {
+   id: string;
+   name: string;
+   arrivalTime: Date;
+   tasks: Task[];
+   notes: string;
+ }
+ 
+ // --- Mock shadcn/ui Components ---
+ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+   size?: 'default' | 'sm' | 'lg' | 'icon';
+   className?: string; // Allow className override
+   asChild?: boolean;
+   className?: string;
+ }
+ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+   ({ className, variant = 'default', size = 'default', ...props }, ref) => {
+     const baseStyle = 'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed';
+     // Updated variants for Metrix theme
+   ({ className, variant = 'default', size = 'default', asChild = false, ...props }, ref) => {
+     const baseStyle =
+       'inline-flex items-center justify-center rounded-md text-sm font-medium ' +
+       'ring-offset-background transition-colors focus-visible:outline-none ' +
+       'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+     const variants = {
+       default: 'bg-teal-600 text-white hover:bg-teal-700', // Teal primary
+       destructive: 'bg-red-600 text-white hover:bg-red-700',
+       outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+       secondary: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+       ghost: 'hover:bg-teal-50 text-teal-600', // Teal accent on hover
+       link: 'text-teal-600 underline-offset-4 hover:underline',
+       default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+       destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+       outline:
+         'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+       secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+       ghost: 'hover:bg-accent hover:text-accent-foreground',
+       link: 'text-primary underline-offset-4 hover:underline',
+     };
+     const sizes = {
+       default: 'h-10 px-4 py-2',
+       sm: 'h-9 rounded-md px-3',
+       lg: 'h-11 rounded-md px-8',
+       icon: 'h-10 w-10', // Default icon size
+       icon: 'h-10 w-10',
+     };
+     // Helper for icon button specific sizing if needed
+     const iconSizes = { icon: 'h-8 w-8 p-0', sm: 'h-8 w-8 p-0', lg: 'h-12 w-12 p-0' }; // Example smaller icon sizes
+ 
+     return (
+       <button
+         className={`${baseStyle} ${variants[variant]} ${size === 'icon' ? iconSizes[size] : sizes[size]} ${className ?? ''}`}
+         className={`${baseStyle} ${variants[variant]} ${sizes[size]} ${className ?? ''}`}
+         ref={ref}
+         {...props}
+       />
+     );
+   }
+ );
+ Button.displayName = 'Button';
+ 
+ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> { className?: string }
+ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+   className?: string;
+ }
+ const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, type, ...props }, ref) => {
+   // Updated input styles for Metrix theme
+   const baseStyle = 'flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 focus:border-teal-500 disabled:cursor-not-allowed disabled:opacity-50';
+   return <input type={type} className={`${baseStyle} ${className ?? ''}`} ref={ref} {...props} />;
+   const baseStyle =
+     'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 ' +
+     'text-sm ring-offset-background file:border-0 file:bg-gray-800 file:text-sm ' +
+     'file:font-medium placeholder:text-muted-foreground focus-visible:outline-none ' +
+     'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ' +
+     'disabled:cursor-not-allowed disabled:opacity-50';
+   return <input type={type} className={`${baseStyle} ${className}`} ref={ref} {...props} />;
+ });
+ Input.displayName = 'Input';
+ 
+ interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> { className?: string }
+ interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
+   className?: string;
+ }
+ const Label = React.forwardRef<HTMLLabelElement, LabelProps>(({ className, ...props }, ref) => (
+   // Updated label styles for Metrix theme
+   <label ref={ref} className={`text-sm font-medium text-gray-700 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className ?? ''}`} {...props} />
+   <label
+     ref={ref}
+     className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className}`}
+     {...props}
+   />
+ ));
+ Label.displayName = 'Label';
+ 
+ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> { className?: string }
+ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({ className, ...props }, ref) => (
+      // Added basic Textarea mock consistent with Input
+      <textarea ref={ref} className={`flex min-h-[60px] w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 focus:border-teal-500 disabled:cursor-not-allowed disabled:opacity-50 ${className ?? ''}`} {...props} />
+ ));
+ Textarea.displayName = 'Textarea';
+ 
+ // Basic Dialog (Themed)
+ interface DialogProps { open: boolean; onOpenChange: (open: boolean) => void; children: React.ReactNode; }
+ // Basic Dialog
+ interface DialogProps {
+   open: boolean;
+   onOpenChange: (open: boolean) => void;
+   children: React.ReactNode;
+ }
+ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) =>
+   open ? (
+     // Updated overlay opacity
+     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
+       {/* Updated content background/shadow */}
+       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md border border-gray-200">{children}</div>
+     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+       <div className="bg-card rounded-lg shadow-lg w-full max-w-md">{children}</div>
+     </div>
+   ) : null;
+ 
+ interface DialogContentProps { children: React.ReactNode; className?: string; }
+ interface DialogContentProps {
+   children: React.ReactNode;
+   className?: string;
+ }
+ const DialogContent: React.FC<DialogContentProps> = ({ children, className }) => (
+   <div className={`p-6 ${className ?? ''}`}>{children}</div> // Standard padding
+   <div className={`p-6 ${className}`}>{children}</div>
+ );
+ interface DialogHeaderProps { children: React.ReactNode; className?: string; }
+ interface DialogHeaderProps {
+   children: React.ReactNode;
+   className?: string;
+ }
+ const DialogHeader: React.FC<DialogHeaderProps> = ({ children, className }) => (
+   <div className={`mb-4 relative ${className ?? ''}`}>{children}</div> // Added relative for close button positioning
+   <div className={`mb-4 ${className}`}>{children}</div>
+ );
+ interface DialogTitleProps { children: React.ReactNode; className?: string; }
+ interface DialogTitleProps {
+   children: React.ReactNode;
+   className?: string;
+ }
+ const DialogTitle: React.FC<DialogTitleProps> = ({ children, className }) => (
+   // Updated text color
+   <h2 className={`text-lg font-semibold text-gray-900 ${className ?? ''}`}>{children}</h2>
+   <h2 className={`text-lg font-semibold ${className}`}>{children}</h2>
+ );
+ interface DialogDescriptionProps { children: React.ReactNode; className?: string; }
+ interface DialogDescriptionProps {
+   children: React.ReactNode;
+   className?: string;
+ }
+ const DialogDescription: React.FC<DialogDescriptionProps> = ({ children, className }) => (
+    // Updated text color
+   <p className={`text-sm text-gray-600 ${className ?? ''}`}>{children}</p>
+   <p className={`text-sm text-muted-foreground ${className}`}>{children}</p>
+ );
+ interface DialogFooterProps { children: React.ReactNode; className?: string; }
+ interface DialogFooterProps {
+   children: React.ReactNode;
+   className?: string;
+ }
+ const DialogFooter: React.FC<DialogFooterProps> = ({ children, className }) => (
+    // Updated border color and added padding
+   <div className={`mt-6 flex justify-end space-x-2 border-t border-gray-200 pt-4 ${className ?? ''}`}>{children}</div>
+   <div className={`mt-6 flex justify-end space-x-2 ${className}`}>{children}</div>
+ );
+ interface DialogCloseProps { children: React.ReactElement; onClick?: () => void; }
+ const DialogClose: React.FC<DialogCloseProps> = ({ children, onClick }) => React.cloneElement(children, { onClick });
+ interface DialogCloseProps {
+   children: React.ReactElement;
+   onClick?: () => void;
+   asChild?: boolean;
+ }
+ const DialogClose: React.FC<DialogCloseProps> = ({ children, onClick }) =>
+   React.cloneElement(children, { onClick });
+ 
+ // Basic Card (Themed)
+ interface CardProps extends React.HTMLAttributes<HTMLDivElement> { className?: string; }
+ // Basic Card
+ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+   className?: string;
+ }
+ const Card = React.forwardRef<HTMLDivElement, CardProps>(({ className, ...props }, ref) => (
+   // Updated card styles
+   <div ref={ref} className={`rounded-xl border border-gray-200 bg-white text-gray-900 shadow-lg ${className ?? ''}`} {...props} />
+   <div
+     ref={ref}
+     className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}
+     {...props}
+   />
+ ));
+ Card.displayName = 'Card';
+ 
+ interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> { className?: string; }
+ interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+   className?: string;
+ }
+ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(({ className, ...props }, ref) => (
+   <div ref={ref} className={`flex flex-col space-y-1.5 p-4 ${className ?? ''}`} {...props} /> // Adjusted padding
+   <div ref={ref} className={`flex flex-col space-y-1.5 p-4 ${className}`} {...props} />
+ ));
+ CardHeader.displayName = 'CardHeader';
+ 
+ interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> { className?: string; }
+ interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
+   className?: string;
+ }
+ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(({ className, ...props }, ref) => (
+   // Updated text color
+   <h3 ref={ref} className={`text-lg font-semibold leading-none tracking-tight text-gray-900 ${className ?? ''}`} {...props} />
+   <h3 ref={ref} className={`text-lg font-semibold leading-none tracking-tight ${className}`} {...props} />
+ ));
+ CardTitle.displayName = 'CardTitle';
+ 
+ interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> { className?: string; }
+ interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
+   className?: string;
+ }
+ const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(({ className, ...props }, ref) => (
+   <div ref={ref} className={`p-4 pt-0 ${className ?? ''}`} {...props} /> // Adjusted padding
+   <div ref={ref} className={`p-4 pt-0 ${className}`} {...props} />
+ ));
+ CardContent.displayName = 'CardContent';
+ 
+ // --- Helper Functions ---
+ // Updated border colors to use Tailwind classes
+ const getBorderColor = (minutes: number): string => {
+   if (minutes >= 300) return 'border-red-500 animate-pulse'; // Use standard pulse
+   if (minutes >= 240) return 'border-red-400';
+   if (minutes >= 120) return 'border-amber-400';
+   return 'border-green-400';
+   if (minutes >= 300) return 'border-red-500 animate-pulse-border'; // Flashing Red >= 5 hours
+   if (minutes >= 240) return 'border-red-500'; // Red >= 4 hours
+   if (minutes >= 120) return 'border-amber-500'; // Amber >= 2 hours
+   return 'border-green-500'; // Green < 2 hours
+ };
+ 
+ // --- LocalStorage Parsing (Preserved) ---
+ const parsePatientsWithDates = (jsonData: string): Patient[] | null => { /* ... existing logic ... */
+  try { const parsedData = JSON.parse(jsonData); if (!Array.isArray(parsedData)) return null; return parsedData.map((patient: any) => { const arrivalTime = patient.arrivalTime ? new Date(patient.arrivalTime) : new Date(); const tasks = Array.isArray(patient.tasks) ? patient.tasks.map((t: any) => { const createdAt = t.createdAt ? new Date(t.createdAt) : new Date(); const completedAt = t.completedAt ? new Date(t.completedAt) : null; const timerEnd = t.timerEnd ? new Date(t.timerEnd) : null; return { ...t, createdAt: isValid(createdAt) ? createdAt : new Date(), completedAt: completedAt && isValid(completedAt) ? completedAt : null, timerEnd: timerEnd && isValid(timerEnd) ? timerEnd : null, completionStatus: t.completionStatus || 'incomplete', notes: t.notes || '', isAcknowledged: t.isAcknowledged || false, isTimerExpired: !!timerEnd && timerEnd <= new Date(), }; }) : []; return { ...patient, arrivalTime: isValid(arrivalTime) ? arrivalTime : new Date(), tasks, notes: patient.notes || '', }; }); } catch (error) { console.error('Error parsing patient data from localStorage:', error); return null; }
+ const getBackgroundColor = (minutes: number): string => {
+   if (minutes >= 300) return 'bg-neutral-50';
+   if (minutes >= 240) return 'bg-neutral-50';
+   if (minutes >= 120) return 'bg-neutral-50';
+   return 'bg-neutral-50';
+ };
  
  // --- TaskItem component (Themed) ---
  interface TaskItemProps { task: Task; patientId: string; patientName: string; updateTaskTimerState: (patientId: string, taskId: string | number, isExpired: boolean) => void; updateTaskTimer: (patientId: string, taskId: string | number, newTimerMinutes: string | null) => void; removeTask: (patientId: string, taskId: string | number) => void; updateTaskCompletion: ( patientId: string, taskId: string | number, status: TaskCompletionStatus ) => void; acknowledgeTimer: (patientId: string, taskId: string | number) => void; updateTaskNotes: (patientId: string, taskId: string | number, notes: string) => void; }
