@@ -1,8 +1,12 @@
 // /components/Modals/ProfileModal.tsx
-
 import { useState, useContext } from 'react';
 import { useTranslation } from 'next-i18next';
 import HomeContext from '@/pages/api/home/home.context';
+
+/* Utility class for inputs */
+const inputCls =
+  'mt-1 block w-full px-3 py-2 border border-gray-300 rounded dark:border-gray-600 ' +
+  'dark:bg-gray-700 dark:text-gray-100';
 
 export const ProfileModal = () => {
   const { t } = useTranslation();
@@ -10,119 +14,93 @@ export const ProfileModal = () => {
 
   if (state.openModal !== 'profile') return null;
 
-  // Example defaults
-  const [fullName, setFullName] = useState('Dr James Deighton');
-  const [site, setSite] = useState('Whanganui Hospital, New Zealand');
-  const [email, setEmail] = useState('j.deighton@metrixai.com');
-  const [password, setPassword] = useState('');
-  const [signOff, setSignOff] = useState('Dr James Deighton, MBBS');
+  /* example defaults – can come from backend later */
+  const [fullName, setFullName] = useState('Dr James Deighton');
+  const [site, setSite] = useState('Whanganui Hospital, NZ');
+  const [role, setRole] = useState('Emergency Physician');
+  const [dept, setDept] = useState('Emergency Department');
+  const [common, setCommon] = useState('CHF, AF, COPD exacerbations');
+  const [style, setStyle] = useState('Concise, bullet‑points');
+  const [signOff, setSignOff] = useState('Dr J Deighton MBBS FACEM');
 
-  const handleClose = () => {
-    // IMPORTANT: add type: 'change'
+  const close = () =>
     dispatch({ type: 'change', field: 'openModal', value: null });
-  };
 
-  const handleSaveProfile = () => {
+  const handleSave = () => {
+    const ctx = `
+Role/Title: ${role}
+Site: ${site}
+Department/Service: ${dept}
+Common cases/phrases: ${common}
+Preferred writing style: ${style}
+`.trim();
+
+    dispatch({ type: 'change', field: 'userContext', value: ctx });
     dispatch({ type: 'change', field: 'userSignOff', value: signOff });
-    alert('Profile saved! (placeholder)');
-    handleClose();
+
+    alert('Profile saved!');
+    close();
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-      <div className="bg-white dark:bg-gray-800 w-full max-w-3xl p-6 rounded shadow overflow-auto max-h-[90vh]">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-          {t('My Profile')}
-        </h2>
-        <div className="flex flex-col md:flex-row">
-          {/* Left column: Profile Form */}
-          <div className="md:w-1/2 md:pr-4">
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
-              {t('Full Name')}
-              <input
-                type="text"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 
-                  dark:border-gray-600 rounded dark:bg-gray-700 dark:text-gray-100"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
+    <div className='fixed inset-0 z-50 bg-black/50 flex items-center justify-center'>
+      <div className='bg-white w-full max-w-3xl p-6 rounded shadow overflow-auto max-h-[90vh]'>
+        <h2 className='text-xl font-semibold mb-4'>{t('My Profile')}</h2>
+
+        <div className='grid md:grid-cols-2 gap-4'>
+          <div className='space-y-3'>
+            <label className='block text-sm font-medium'>
+              Full Name
+              <input className={inputCls} value={fullName} onChange={(e) => setFullName(e.target.value)} />
             </label>
 
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
-              {t('Site')}
-              <input
-                type="text"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 
-                  dark:border-gray-600 rounded dark:bg-gray-700 dark:text-gray-100"
-                value={site}
-                onChange={(e) => setSite(e.target.value)}
-              />
+            <label className='block text-sm font-medium'>
+              Site
+              <input className={inputCls} value={site} onChange={(e) => setSite(e.target.value)} />
             </label>
 
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
-              {t('Email')}
-              <input
-                type="email"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 
-                  dark:border-gray-600 rounded dark:bg-gray-700 dark:text-gray-100"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+            <label className='block text-sm font-medium'>
+              Role / Title
+              <input className={inputCls} value={role} onChange={(e) => setRole(e.target.value)} />
             </label>
 
-            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
-              {t('Password')}
-              <input
-                type="password"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 
-                  dark:border-gray-600 rounded dark:bg-gray-700 dark:text-gray-100"
-                placeholder={t('Enter new password') as string}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+            <label className='block text-sm font-medium'>
+              Department / Service
+              <input className={inputCls} value={dept} onChange={(e) => setDept(e.target.value)} />
             </label>
 
-            <label className="block mb-4 text-sm font-medium text-gray-700 dark:text-gray-200">
-              {t('Document Sign-Off / Credentials')}
-              <textarea
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 
-                  dark:border-gray-600 rounded dark:bg-gray-700 dark:text-gray-100 h-20"
-                value={signOff}
-                onChange={(e) => setSignOff(e.target.value)}
-              />
+            <label className='block text-sm font-medium'>
+              Common cases / phrases
+              <textarea className={`${inputCls} h-20`} value={common} onChange={(e) => setCommon(e.target.value)} />
             </label>
 
-            <div className="flex justify-end space-x-2">
-              <button
-                className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 
-                  dark:text-gray-100 rounded hover:bg-gray-400 dark:hover:bg-gray-500"
-                onClick={handleClose}
-              >
-                {t('Cancel')}
-              </button>
-              <button
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
-                onClick={handleSaveProfile}
-              >
-                {t('Save')}
-              </button>
-            </div>
+            <label className='block text-sm font-medium'>
+              Preferred writing style
+              <input className={inputCls} value={style} onChange={(e) => setStyle(e.target.value)} />
+            </label>
+
+            <label className='block text-sm font-medium'>
+              Document sign‑off / credentials
+              <textarea className={`${inputCls} h-20`} value={signOff} onChange={(e) => setSignOff(e.target.value)} />
+            </label>
           </div>
 
-          {/* Right column: Additional Info */}
-          <div className="md:w-1/2 md:pl-4 mt-6 md:mt-0">
-            <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded shadow">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-                {t('Recent Changes')}
-              </h3>
-              <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
-                <li>- {t('Updated UI for better user experience')}</li>
-                <li>- {t('Bug fixes in transcription')}</li>
-                <li>- {t('Enhanced security for local ML usage')}</li>
-                <li>- {t('Refined sign-off field')}</li>
-              </ul>
-            </div>
+          <div className='bg-gray-50 p-4 rounded text-sm'>
+            <p className='font-semibold mb-2'>Tip</p>
+            <p>
+              The <strong>Context</strong> fields personalise AI output. Sign‑off is
+              appended to every clinical document.
+            </p>
           </div>
+        </div>
+
+        <div className='mt-6 flex justify-end gap-2'>
+          <button onClick={close} className='px-4 py-2 bg-gray-200 rounded'>
+            {t('Cancel')}
+          </button>
+          <button onClick={handleSave} className='px-4 py-2 bg-blue-600 text-white rounded'>
+            {t('Save')}
+          </button>
         </div>
       </div>
     </div>
