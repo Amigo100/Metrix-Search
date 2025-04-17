@@ -579,37 +579,35 @@ const PredictiveAnalyticsPage: FC = () => {
   //  JSX Render
   // ─────────────────────────────────────
   return (
-    // Apply the themed background gradient and base text color
-    // Added pb-16 to ensure space for the disclaimer at the bottom
-    <div className="p-4 md:p-8 lg:p-12 min-h-screen w-full bg-gradient-to-b from-white via-teal-50 to-white text-gray-900 pb-16">
+    // *** MODIFIED: Applied standard pt-12, adjusted other padding ***
+    <div className="px-4 md:px-8 lg:px-12 pb-16 pt-12 min-h-screen w-full bg-gradient-to-b from-white via-teal-50 to-white text-gray-900">
 
-      {/* Header - Centered Logo and Title */}
-      <div className="mb-8 flex flex-col items-center text-center">
-        <img
-          src="/MetrixAI.png" // Ensure this path is correct
-          alt="Metrix Logo"
-          width={64} // Set explicit width
-          height={64} // Set explicit height
-          className="h-16 w-16 sm:h-20 sm:w-20 mb-3" // Tailwind classes control visual size
-        />
-        <h1
-          className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2"
-        >
-          Predictive Insights
-        </h1>
-         <p
-           className="text-lg text-gray-700 max-w-xl text-center mt-2"
-         >
-           Estimate ED wait times and admission likelihood based on patient details.
-         </p>
-        {/* Disclaimer Removed From Header */}
-      </div>
+      {/* *** MODIFIED: Standardized Page Header *** */}
+      <header className="flex flex-col items-center justify-center text-center mb-8 max-w-3xl mx-auto">
+          <img
+              src="/MetrixAI.png" // Ensure this path is correct
+              alt="Metrix Logo"
+              width={64} // Standard size
+              height={64} // Standard size
+              // Removed Tailwind size classes (h-16 w-16 sm:h-20 sm:w-20)
+              className="mb-3" // Standard bottom margin
+          />
+          {/* Standard Title Style */}
+          <h1 className="text-3xl font-bold text-gray-900">
+              Predictive Insights
+          </h1>
+          {/* Standard Subtitle Style */}
+          <p className="text-gray-600 mt-1">
+              Estimate ED wait times and admission likelihood based on patient details.
+          </p>
+          {/* Disclaimer Removed From Header */}
+      </header>
 
       {/* Error banner - Standard red alert style */}
       {error && (
         <div
           role="alert"
-          className="mb-6 p-4 border border-red-300 bg-red-100 rounded-lg flex items-start text-sm text-red-800 shadow-sm"
+          className="mb-6 p-4 border border-red-300 bg-red-100 rounded-lg flex items-start text-sm text-red-800 shadow-sm max-w-4xl mx-auto" // Added max-width and centering
         >
           <AlertCircle className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0 text-red-600" />
           <span className="flex-1">{error}</span>
@@ -618,7 +616,8 @@ const PredictiveAnalyticsPage: FC = () => {
       )}
 
       {/* Main Content Area - Form and Results */}
-      <div className="flex flex-col lg:flex-row gap-8">
+      {/* Added max-width and centering */}
+      <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto"> {/* Increased max-width slightly */}
 
         {/* ── Left column – Form ─────────────── */}
         <div className="w-full lg:w-2/5 xl:w-1/3 shrink-0">
@@ -1043,9 +1042,9 @@ const PredictiveAnalyticsPage: FC = () => {
                         <div className="flex justify-between items-center mb-2">
                            <span className="text-xs font-medium text-gray-500">{t}</span>
                            {t === 'Admission Likelihood' ? (
-                             <LogIn className="h-4 w-4 text-gray-400" />
+                              <LogIn className="h-4 w-4 text-gray-400" />
                            ) : (
-                             <Hourglass className="h-4 w-4 text-gray-400" />
+                              <Hourglass className="h-4 w-4 text-gray-400" />
                            )}
                         </div>
                         <p className="text-xl font-semibold text-gray-400">-- %</p>
@@ -1055,17 +1054,17 @@ const PredictiveAnalyticsPage: FC = () => {
                    {/* Breach skeletons */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {['> 4 h Wait', '> 6 h Wait'].map((t) => (
-                       <div key={t} className="p-4 border border-gray-200 rounded-lg bg-gray-50">
-                         <div className="flex justify-between items-center mb-2">
-                           <span className="text-xs font-medium text-gray-500">{t}</span>
-                           <Clock className="h-4 w-4 text-gray-400" />
-                         </div>
-                         <div className="flex justify-between items-baseline mb-1">
-                            <span className="text-lg font-semibold text-gray-400">--</span>
-                            <span className="text-sm font-medium text-gray-400">-- %</span>
-                          </div>
-                         <Progress value={0} colorClass="bg-gray-300" />
-                       </div>
+                        <div key={t} className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                           <div className="flex justify-between items-center mb-2">
+                             <span className="text-xs font-medium text-gray-500">{t}</span>
+                             <Clock className="h-4 w-4 text-gray-400" />
+                           </div>
+                           <div className="flex justify-between items-baseline mb-1">
+                             <span className="text-lg font-semibold text-gray-400">--</span>
+                             <span className="text-sm font-medium text-gray-400">-- %</span>
+                           </div>
+                          <Progress value={0} colorClass="bg-gray-300" />
+                        </div>
                     ))}
                   </div>
                 </div>
