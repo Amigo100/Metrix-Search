@@ -154,7 +154,7 @@ export default function DashboardPage() {
         {/* 2. Quick Access Tools Grid */}
         <section className="animate-fadeInUp delay-100"> {/* Assuming animate-fadeInUp is defined globally */}
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Access Tools</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {coreTools.map((tool) => (
                 <QuickAccessCard
                     key={tool.title}
