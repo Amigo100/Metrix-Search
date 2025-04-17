@@ -24,7 +24,7 @@ import {
 // import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 // --- Placeholder Data (Replace with actual data fetching) ---
-const userName = "Dr. Evans"; // Fetch actual user name
+const userName = "Dr. Dobrogowska"; // Fetch actual user name
 const pendingTaskCount = 3; // Fetch from task state/context
 const overdueTaskCount = 1; // Fetch from task state/context
 const systemStatus = { online: true, message: "All systems operational." }; // Fetch status
