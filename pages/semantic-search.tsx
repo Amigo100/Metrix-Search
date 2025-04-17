@@ -100,9 +100,10 @@ function PolicySearchPage() { // Renamed component to follow convention
   // --- Render Component ---
   return (
     // Apply the background gradient and standard top padding
-    <div className="min-h-screen bg-gradient-to-b from-white via-teal-50 to-white p-4 md:p-8 pt-12 pb-16 font-sans">
+    // *** MODIFIED: Increased top padding from pt-12 to pt-16 ***
+    <div className="min-h-screen bg-gradient-to-b from-white via-teal-50 to-white p-4 md:p-8 pt-16 pb-16 font-sans">
       {/* Main content wrapper - Centered */}
-      <div className="max-w-4xl mx-auto"> {/* Removed p-0, padding handled inside */}
+      <div className="max-w-4xl mx-auto"> {/* Removed p-0, padding handled by elements below or main container */}
 
         {/* Standardized Brand Header */}
         <header className="flex flex-col items-center justify-center text-center mb-8 max-w-3xl mx-auto">
@@ -119,116 +120,114 @@ function PolicySearchPage() { // Renamed component to follow convention
            <p className="text-gray-600 mt-1">Powered by Metrix AI</p>
          </header>
 
-         {/* *** MODIFICATION START: Reintroduced content container *** */}
-         {/* This container wraps the form and results, providing padding and shadow, but transparent background/border */}
-         <div className="bg-transparent border border-transparent rounded-xl shadow-lg p-6 md:p-8">
+         {/* *** MODIFICATION START: Removed transparent content container *** */}
 
-            {/* Search Form - Now inside container */}
-            {/* Removed max-width/mx-auto as container handles centering/width */}
-            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center gap-3 mb-6">
-              <div className="relative flex-grow w-full sm:w-auto">
-                 <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">
-                     <SearchIcon size={18} />
-                 </span>
-                 <input
-                   type="search"
-                   value={query}
-                   onChange={(e) => setQuery(e.target.value)}
-                   placeholder="Enter your search query..."
-                   className={`${formInputStyles} pl-10`}
-                   aria-label="Search query"
-                   disabled={isLoading}
-                 />
-              </div>
-              <button
-                type="submit"
-                disabled={isLoading || !query.trim()}
-                className={`${primaryButtonStyles} w-full sm:w-auto flex-shrink-0 h-[46px]`}
-              >
-                {isLoading ? (
-                  <Loader2 size={18} className="animate-spin" />
-                ) : (
-                   <Send size={18} />
-                )}
-                <span className="ml-2">{isLoading ? 'Searching...' : 'Search'}</span>
-              </button>
-            </form>
+         {/* Search Form - Centering restored */}
+         {/* *** MODIFIED: Added max-w-3xl mx-auto back *** */}
+         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center gap-3 mb-6 max-w-3xl mx-auto">
+           <div className="relative flex-grow w-full sm:w-auto">
+              <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">
+                  <SearchIcon size={18} />
+              </span>
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Enter your search query..."
+                className={`${formInputStyles} pl-10`}
+                aria-label="Search query"
+                disabled={isLoading}
+              />
+           </div>
+           <button
+             type="submit"
+             disabled={isLoading || !query.trim()}
+             className={`${primaryButtonStyles} w-full sm:w-auto flex-shrink-0 h-[46px]`}
+           >
+             {isLoading ? (
+               <Loader2 size={18} className="animate-spin" />
+             ) : (
+                <Send size={18} />
+             )}
+             <span className="ml-2">{isLoading ? 'Searching...' : 'Search'}</span>
+           </button>
+         </form>
 
-            {/* Container for Loading, Error, Results - Now inside container */}
-            {/* Removed max-width/mx-auto */}
-            <div className="mt-8">
-                {/* Loading State Indicator - Themed */}
-                {isLoading && (
-                  <div className="text-center text-teal-600 font-medium py-4 flex items-center justify-center gap-2">
-                    <Loader2 size={16} className="animate-spin" />
-                    <span>Loading results...</span>
-                  </div>
-                )}
+         {/* Container for Loading, Error, Results - Centering restored */}
+         {/* *** MODIFIED: Added max-w-4xl mx-auto back *** */}
+         <div className="max-w-4xl mx-auto mt-8">
+             {/* Loading State Indicator - Themed */}
+             {isLoading && (
+               <div className="text-center text-teal-600 font-medium py-4 flex items-center justify-center gap-2">
+                 <Loader2 size={16} className="animate-spin" />
+                 <span>Loading results...</span>
+               </div>
+             )}
 
-                {/* Error Display Area - Themed */}
-                {error && !isLoading && (
-                  <div className={errorAlertStyles} role="alert">
-                     <AlertTriangle size={18} className="text-yellow-600 flex-shrink-0"/>
-                    <div>
-                       <strong className="font-semibold">Error: </strong>
-                       <span>{error}</span>
-                    </div>
-                  </div>
-                )}
+             {/* Error Display Area - Themed */}
+             {error && !isLoading && (
+               <div className={errorAlertStyles} role="alert">
+                  <AlertTriangle size={18} className="text-yellow-600 flex-shrink-0"/>
+                 <div>
+                    <strong className="font-semibold">Error: </strong>
+                    <span>{error}</span>
+                 </div>
+               </div>
+             )}
 
-                {/* Results Display Area - Themed */}
-                {results && !isLoading && (
-                  <div className="space-y-6">
-                    {/* Display Answer */}
-                    <div>
-                      <h2 className="text-xl font-semibold mb-3 text-gray-800">Answer:</h2>
-                      <div className="bg-gray-50/70 backdrop-blur-sm p-4 rounded-lg text-gray-800 whitespace-pre-wrap border border-gray-200/80 shadow-sm">
-                        {results.answer || <span className="text-gray-500 italic">No answer generated.</span>}
-                      </div>
-                    </div>
+             {/* Results Display Area - Themed */}
+             {results && !isLoading && (
+               <div className="space-y-6">
+                 {/* Display Answer */}
+                 <div>
+                   <h2 className="text-xl font-semibold mb-3 text-gray-800">Answer:</h2>
+                   <div className="bg-gray-50/70 backdrop-blur-sm p-4 rounded-lg text-gray-800 whitespace-pre-wrap border border-gray-200/80 shadow-sm">
+                     {results.answer || <span className="text-gray-500 italic">No answer generated.</span>}
+                   </div>
+                 </div>
 
-                    {/* Display Citations */}
-                    {results.citations && results.citations.length > 0 && (
+                 {/* Display Citations */}
+                 {results.citations && results.citations.length > 0 && (
+                   <div>
+                     <h3 className="text-lg font-semibold mb-3 text-gray-800">Sources:</h3>
+                     <ul className="list-none space-y-3 pl-0">
+                       {results.citations.map((citation) => (
+                         <li key={citation.qdrant_id || citation.source_id} className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-gray-200/80 shadow-sm transition-shadow hover:shadow-md">
+                           <div className="font-medium text-gray-900 mb-1">
+                             [{citation.source_id}] {citation.document_title || 'Unknown Document'}
+                           </div>
+                           <div className="text-sm text-gray-600 block mb-1">
+                             {citation.page_number ? `Page: ${citation.page_number} | ` : ''}
+                             Heading: {citation.heading || 'N/A'} |
+                             Score: {citation.score.toFixed(3)}
+                           </div>
+                           {citation.url && (
+                             <a
+                               href={`${API_BASE_URL}${citation.url}`}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               className={linkStyles}
+                             >
+                               Click here to view source document
+                             </a>
+                           )}
+                         </li>
+                       ))}
+                     </ul>
+                   </div>
+                 )}
+                 {/* Handle case with answer but no citations */}
+                  {results.citations && results.citations.length === 0 && (
                       <div>
-                        <h3 className="text-lg font-semibold mb-3 text-gray-800">Sources:</h3>
-                        <ul className="list-none space-y-3 pl-0">
-                          {results.citations.map((citation) => (
-                            <li key={citation.qdrant_id || citation.source_id} className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-gray-200/80 shadow-sm transition-shadow hover:shadow-md">
-                              <div className="font-medium text-gray-900 mb-1">
-                                [{citation.source_id}] {citation.document_title || 'Unknown Document'}
-                              </div>
-                              <div className="text-sm text-gray-600 block mb-1">
-                                {citation.page_number ? `Page: ${citation.page_number} | ` : ''}
-                                Heading: {citation.heading || 'N/A'} |
-                                Score: {citation.score.toFixed(3)}
-                              </div>
-                              {citation.url && (
-                                <a
-                                  href={`${API_BASE_URL}${citation.url}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={linkStyles}
-                                >
-                                  Click here to view source document
-                                </a>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {/* Handle case with answer but no citations */}
-                     {results.citations && results.citations.length === 0 && (
-                         <div>
-                            <h3 className="text-lg font-semibold mb-2 text-gray-700">Sources:</h3>
-                            <p className="text-gray-500 italic">No specific sources were cited for this answer.</p>
-                        </div>
-                     )}
-                  </div>
-                )}
-            </div> {/* End of Loading/Error/Results container */}
+                         <h3 className="text-lg font-semibold mb-2 text-gray-700">Sources:</h3>
+                         <p className="text-gray-500 italic">No specific sources were cited for this answer.</p>
+                     </div>
+                  )}
+               </div>
+             )}
+         </div> {/* End of Loading/Error/Results container */}
 
-         </div> {/* *** MODIFICATION END: Closing tag for transparent content container *** */}
+         {/* *** MODIFICATION END: Transparent container removed *** */}
 
       </div> {/* End of main content wrapper */}
 
