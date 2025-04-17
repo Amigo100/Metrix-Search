@@ -83,6 +83,23 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Render as child (for shadcn pattern) */
   asChild?: boolean;
 }
+// --- Button (clean, deduplicated) ---
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    { variant = 'default', size = 'default', className = '', asChild = false, ...props },
+    ref,
+  ) => {
+    const base =
+      'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+
+    const variants: Record<NonNullable<ButtonProps['variant']>, string> = {
+      default: 'bg-teal-600 text-white hover:bg-teal-700',
+      destructive: 'bg-red-600 text-white hover:bg-red-700',
+      outline: 'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50',
+      secondary: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+      ghost: 'hover:bg-gray-100 text-gray-800',
+      link: 'text-teal-600 underline-offset-4 hover:underline',
+    };
 
     const sizes: Record<NonNullable<ButtonProps['size']>, string> = {
       default: 'h-10 px-4 py-2',
