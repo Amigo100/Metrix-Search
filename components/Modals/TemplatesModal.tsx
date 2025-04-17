@@ -1,6 +1,6 @@
 // file: /components/Modals/TemplatesModal.tsx
 
-import React, { useState, useContext, useEffect, useRef } from 'react'; // Added useEffect, useRef
+import React, { useState, useContext, useEffect, useRef, KeyboardEvent } from 'react'; // Added KeyboardEvent
 import { useTranslation } from 'next-i18next'; // Hook for internationalization
 import HomeContext from '@/pages/api/home/home.context'; // Context for global state
 import { Prompt } from '@/types/prompt'; // Type definition for a prompt/template
@@ -184,7 +184,8 @@ export const TemplatesModal = () => {
                         {/* Save/Cancel Buttons */}
                         <div className="flex justify-end gap-2 mt-2">
                           <button className={`${secondaryButtonStyles} text-xs px-3 py-1`} onClick={() => setEditingTemplateId(null)} > {t('Cancel')} </button>
-                          <button className={`${primaryButtonStyles} text-xs px-3 py-1 bg-green-600 hover:bg-green-700`} onClick={() => handleSaveTemplate(tpl.id)} > <Check size={14} className="mr-1"/> {t('Save')} </button>
+                          {/* Changed save button to use primary styles */}
+                          <button className={`${primaryButtonStyles} text-xs px-3 py-1`} onClick={() => handleSaveTemplate(tpl.id)} > <Check size={14} className="mr-1"/> {t('Save')} </button>
                         </div>
                       </>
                     ) : (
@@ -211,4 +212,5 @@ export const TemplatesModal = () => {
   );
 };
 
-// export default TemplatesModal; // Keep if this is the intended default export
+// *** ADDED DEFAULT EXPORT LINE ***
+export default TemplatesModal;
