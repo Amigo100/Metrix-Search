@@ -99,14 +99,15 @@ function PolicySearchPage() { // Renamed component to follow convention
 
   // --- Render Component ---
   return (
-    // Apply the background gradient and standard top padding
-    // *** MODIFIED: Increased top padding from pt-12 to pt-16 ***
-    <div className="min-h-screen bg-gradient-to-b from-white via-teal-50 to-white p-4 md:p-8 pt-16 pb-16 font-sans">
+    // Apply the background gradient
+    // *** MODIFIED: Removed explicit pt-16, relying on p-4/md:p-8 for base top padding ***
+    <div className="min-h-screen bg-gradient-to-b from-white via-teal-50 to-white p-4 md:p-8 pb-16 font-sans">
       {/* Main content wrapper - Centered */}
-      <div className="max-w-4xl mx-auto"> {/* Removed p-0, padding handled by elements below or main container */}
+      <div className="max-w-4xl mx-auto">
 
         {/* Standardized Brand Header */}
-        <header className="flex flex-col items-center justify-center text-center mb-8 max-w-3xl mx-auto">
+        {/* *** MODIFIED: Added mt-16 to header element *** */}
+        <header className="flex flex-col items-center justify-center text-center mt-16 mb-8 max-w-3xl mx-auto">
           <img
               src="/MetrixAI.png"
               alt="Metrix Logo"
@@ -120,10 +121,7 @@ function PolicySearchPage() { // Renamed component to follow convention
            <p className="text-gray-600 mt-1">Powered by Metrix AI</p>
          </header>
 
-         {/* *** MODIFICATION START: Removed transparent content container *** */}
-
          {/* Search Form - Centering restored */}
-         {/* *** MODIFIED: Added max-w-3xl mx-auto back *** */}
          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center gap-3 mb-6 max-w-3xl mx-auto">
            <div className="relative flex-grow w-full sm:w-auto">
               <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">
@@ -154,7 +152,6 @@ function PolicySearchPage() { // Renamed component to follow convention
          </form>
 
          {/* Container for Loading, Error, Results - Centering restored */}
-         {/* *** MODIFIED: Added max-w-4xl mx-auto back *** */}
          <div className="max-w-4xl mx-auto mt-8">
              {/* Loading State Indicator - Themed */}
              {isLoading && (
@@ -226,8 +223,6 @@ function PolicySearchPage() { // Renamed component to follow convention
                </div>
              )}
          </div> {/* End of Loading/Error/Results container */}
-
-         {/* *** MODIFICATION END: Transparent container removed *** */}
 
       </div> {/* End of main content wrapper */}
 
