@@ -100,14 +100,14 @@ function PolicySearchPage() { // Renamed component to follow convention
   // --- Render Component ---
   return (
     // Apply the background gradient
-    // *** MODIFIED: Removed explicit pt-16, relying on p-4/md:p-8 for base top padding ***
+    // Relying on p-4/md:p-8 for base top padding
     <div className="min-h-screen bg-gradient-to-b from-white via-teal-50 to-white p-4 md:p-8 pb-16 font-sans">
       {/* Main content wrapper - Centered */}
       <div className="max-w-4xl mx-auto">
 
         {/* Standardized Brand Header */}
-        {/* *** MODIFIED: Added mt-16 to header element *** */}
-        <header className="flex flex-col items-center justify-center text-center mt-16 mb-8 max-w-3xl mx-auto">
+        {/* *** MODIFIED: Changed mt-16 to mt-8 (halved top margin) *** */}
+        <header className="flex flex-col items-center justify-center text-center mt-8 mb-8 max-w-3xl mx-auto">
           <img
               src="/MetrixAI.png"
               alt="Metrix Logo"
