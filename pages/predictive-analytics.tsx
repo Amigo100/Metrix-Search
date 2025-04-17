@@ -1,4 +1,4 @@
-// file: pages/predictive-analytics.tsx
+// file: pages/predictive‑analytics.tsx
 
 import {
   useState,
@@ -73,7 +73,22 @@ interface ApiPredictionInput {
   occupancy: string;
 }
 
-// ... all your Button, Input, Select, Card, etc. components unchanged ...
+// =============== Helper: Age Encoding ===============
+const encodeAgeOrdinal = (rawAge: number): number => {
+  if (rawAge >= 1 && rawAge <= 5) return 1;
+  if (rawAge >= 6 && rawAge <= 12) return 2;
+  if (rawAge >= 13 && rawAge <= 18) return 3;
+  if (rawAge >= 19 && rawAge <= 39) return 4;
+  if (rawAge >= 40 && rawAge <= 64) return 5;
+  if (rawAge >= 65 && rawAge <= 80) return 6;
+  if (rawAge >= 81) return 7;
+  return 0;
+};
+
+// =============== Helper UI Components (unchanged) ===============
+// ... Button, Input, Select, SelectItem, Card, CardHeader, CardTitle,
+//     CardContent, Popover, PopoverTrigger, PopoverContent,
+//     Progress, SwitchMock, and cn() definitions go here ...
 
 // =============== Main Component ===============
 const PredictiveAnalyticsPage: FC = () => {
@@ -115,7 +130,7 @@ const PredictiveAnalyticsPage: FC = () => {
     const parsedPatientsAhead = parseInt(patientsAhead, 10);
     const parsedPatientsInED = parseInt(patientsInED, 10);
 
-    // validations omitted for brevity...
+    // (your existing validation logic…)
 
     const apiInput: ApiPredictionInput = {
       age: encodeAgeOrdinal(parsedAge),
@@ -147,7 +162,7 @@ const PredictiveAnalyticsPage: FC = () => {
           const errData = await response.json();
           errorDetail = errData.error || errData.detail || errorDetail;
         } catch {
-          // ignore JSON parse errors
+          /* ignore parse errors */
         }
         throw new Error(errorDetail);
       }
@@ -163,11 +178,11 @@ const PredictiveAnalyticsPage: FC = () => {
     }
   };
 
-  // ... rest of your component (generateRecommendations, handlers, JSX) unchanged ...
+  // (the rest of your component: generateRecommendations, handlers, JSX output…)
 
   return (
     <div className="p-4 md:p-6 w-full bg-stone-50 text-stone-900">
-      {/* your full JSX here */}
+      {/* ... your full form + results JSX unchanged ... */}
     </div>
   );
 };
