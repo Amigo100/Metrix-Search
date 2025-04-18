@@ -205,6 +205,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 const Card = React.forwardRef<HTMLDivElement, CardProps>(({ className, ...props }, ref) => (
   <div
     ref={ref}
+    // The base card provides a default border (border-gray-200). Specific classes like border-2 and borderColor will override this.
     className={`rounded-lg border bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm border-gray-200 dark:border-gray-700 ${className ?? ''}`}
     {...props}
   />
@@ -242,14 +243,6 @@ const getBorderColor = (minutes: number): string => {
   if (minutes >= 120) return 'border-amber-500'; // Amber >= 2 hours
   return 'border-green-500'; // Green < 2 hours
 };
-
-// Background color is less critical now with white background cards
-// const getBackgroundColor = (minutes: number): string => {
-//   if (minutes >= 300) return 'bg-red-50 dark:bg-red-900/20';
-//   if (minutes >= 240) return 'bg-red-50 dark:bg-red-900/20';
-//   if (minutes >= 120) return 'bg-amber-50 dark:bg-amber-900/20';
-//   return 'bg-white dark:bg-gray-800'; // Default card background
-// };
 
 // --- LocalStorage Parsing ---
 const parsePatientsWithDates = (jsonData: string): Patient[] | null => {
@@ -723,7 +716,6 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
 
 // --- PatientCard ---
-// [NO CHANGES IN THIS COMPONENT]
 interface PatientCardProps {
   patient: Patient;
   removePatient: (patientId: string) => void;
@@ -823,17 +815,16 @@ const PatientCard: React.FC<PatientCardProps> = ({
 
   // Determine border color based on LOS
   const borderColor = getBorderColor(lengthOfStayMinutes);
-  // const bgColor = getBackgroundColor(lengthOfStayMinutes); // Background color handled by Card component now
 
   // Separate tasks into pending and completed
   const pendingTasks = patient.tasks.filter((t) => t.completionStatus !== 'complete');
   const completedTasks = patient.tasks.filter((t) => t.completionStatus === 'complete');
 
   return (
-    // Card container with dynamic border color
     // ***** MODIFICATION START *****
-    // Add id attribute for scroll-to functionality
-    <Card id={`patient-card-${patient.id}`} className={`mb-4 border-l-4 ${borderColor} transition-colors duration-500`}>
+    // Reverted border-l-4 to border-2 for uniform border width.
+    // The borderColor variable now applies its color to all four sides.
+    <Card id={`patient-card-${patient.id}`} className={`mb-4 border-2 ${borderColor} transition-colors duration-500`}>
     {/* ***** MODIFICATION END ***** */}
       {/* Card Header: Patient Name and Remove Button */}
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -1249,7 +1240,6 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
 
 
 // --- MAIN SIDEBAR COMPONENT ---
-// Renamed from 'Tasks' to 'PatientTrackerSidebar' for clarity
 const PatientTrackerSidebar: React.FC = () => {
   // Use mock context for sidebar visibility state
   const { state } = useContext(HomeContext);
@@ -1267,10 +1257,8 @@ const PatientTrackerSidebar: React.FC = () => {
     typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
   );
 
-  // ***** MODIFICATION START *****
   // State to control the visibility of the attention list
   const [isAttentionListExpanded, setIsAttentionListExpanded] = useState<boolean>(false);
-  // ***** MODIFICATION END *****
 
   // Effect to load patient data from localStorage on initial mount
   useEffect(() => {
@@ -1288,57 +1276,40 @@ const PatientTrackerSidebar: React.FC = () => {
       }
     } catch (err) {
       console.error('Error reading from localStorage:', err);
-      // Optionally clear corrupted data: localStorage.removeItem(PATIENT_STORAGE_KEY);
     }
-
-    // If no valid data found in localStorage, set empty array (or defaults if needed)
-    setPatients([]);
-    // Example default data (can be removed if not needed):
-    // const defaultPatients: Patient[] = [
-    //   // ... example patient objects ...
-    // ];
-    // setPatients(defaultPatients.sort((a, b) => a.arrivalTime.getTime() - b.arrivalTime.getTime()));
-
-  }, []); // Empty dependency array ensures this runs only once on mount
+    setPatients([]); // Default to empty array if load fails
+  }, []);
 
   // Effect to save patient data to localStorage whenever the 'patients' state changes
   useEffect(() => {
     if (typeof window === 'undefined') return; // Don't run on server-side rendering
-
     try {
-      // Ensure patients are sorted before saving (optional, but good practice)
       const sortedPatients = [...patients].sort((a, b) => a.arrivalTime.getTime() - b.arrivalTime.getTime());
       window.localStorage.setItem(PATIENT_STORAGE_KEY, JSON.stringify(sortedPatients));
     } catch (err) {
       console.error('Error saving to localStorage:', err);
-      // Handle potential storage errors (e.g., quota exceeded)
     }
-  }, [patients]); // Run this effect whenever the patients array changes
+  }, [patients]);
 
   // Effect to request notification permission if not already granted or denied
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
-      if (notificationPermission === 'default') { // Only request if permission is 'default'
+      if (notificationPermission === 'default') {
         Notification.requestPermission().then(setNotificationPermission);
       }
     }
-  }, [notificationPermission]); // Re-run if notificationPermission state changes
+  }, [notificationPermission]);
 
   // --- CRUD Operation Callbacks (Memoized with useCallback) ---
   // [NO CHANGES IN THESE CALLBACKS]
-  // Add a new patient to the list and sort
   const addPatient = useCallback((newPatient: Patient) => {
     setPatients((prev) =>
       [...prev, newPatient].sort((a, b) => a.arrivalTime.getTime() - b.arrivalTime.getTime())
     );
-  }, []); // No dependencies, function identity is stable
-
-  // Remove a patient from the list by ID
+  }, []);
   const removePatient = useCallback((patientId: string) => {
     setPatients((prev) => prev.filter((p) => p.id !== patientId));
-  }, []); // No dependencies, function identity is stable
-
-  // Update the isTimerExpired and isAcknowledged state of a specific task
+  }, []);
   const updateTaskTimerState = useCallback(
     (patientId: string, taskId: string | number, isExpired: boolean) => {
       setPatients((prevPatients) =>
@@ -1346,54 +1317,33 @@ const PatientTrackerSidebar: React.FC = () => {
           if (p.id === patientId) {
             const newTasks = p.tasks.map((t) => {
               if (t.id === taskId && t.isTimerExpired !== isExpired) {
-                // Reset acknowledged state when timer becomes expired, keep it otherwise
                 const newAcknowledged = isExpired ? false : t.isAcknowledged;
                 return { ...t, isTimerExpired: isExpired, isAcknowledged: newAcknowledged };
-              }
-              return t;
+              } return t;
             });
             return { ...p, tasks: newTasks };
-          }
-          return p;
+          } return p;
         })
       );
-    },
-    [] // No dependencies, function identity is stable
-  );
-
-  // Add a new task to a specific patient
+    }, []);
   const addTaskToPatient = useCallback(
     (patientId: string, taskText: string, timerMinutes: string) => {
       setPatients((prevPatients) =>
         prevPatients.map((p) => {
           if (p.id === patientId) {
-            // Logic to create the new task (similar to AddPatientModal)
             const timerMinutesNum = parseInt(timerMinutes, 10);
             const isValidTimer = !isNaN(timerMinutesNum) && timerMinutesNum > 0 && timerMinutesNum <= 999;
             const timerEndDate = isValidTimer ? addMinutes(new Date(), timerMinutesNum) : null;
-
             const newTask: Task = {
               id: `task-${Date.now()}-${Math.random().toString(36).substring(7)}`,
-              text: taskText.trim(),
-              timerEnd: timerEndDate,
-              isTimerExpired: !!(timerEndDate && timerEndDate <= new Date()),
-              completionStatus: 'incomplete',
-              createdAt: new Date(),
-              completedAt: null,
-              notes: '',
-              isAcknowledged: false,
+              text: taskText.trim(), timerEnd: timerEndDate, isTimerExpired: !!(timerEndDate && timerEndDate <= new Date()),
+              completionStatus: 'incomplete', createdAt: new Date(), completedAt: null, notes: '', isAcknowledged: false,
             };
-            // Add the new task to the patient's task list
             return { ...p, tasks: [...p.tasks, newTask] };
-          }
-          return p;
+          } return p;
         })
       );
-    },
-    [] // No dependencies, function identity is stable
-  );
-
-  // Update the timer (timerEnd, isTimerExpired, isAcknowledged) for a specific task
+    }, []);
   const updateTaskTimer = useCallback(
     (patientId: string, taskId: string | number, newTimerMinutes: string | null) => {
       setPatients((prevPatients) =>
@@ -1401,49 +1351,32 @@ const PatientTrackerSidebar: React.FC = () => {
           if (p.id === patientId) {
             const newTasks = p.tasks.map((t) => {
               if (t.id === taskId) {
-                let newTimerEnd: Date | null = null;
-                let newIsTimerExpired = false;
-                // Calculate new timer end date if minutes are provided
+                let newTimerEnd: Date | null = null; let newIsTimerExpired = false;
                 if (newTimerMinutes !== null) {
                   const timerMinutesNum = parseInt(newTimerMinutes, 10);
                   if (!isNaN(timerMinutesNum) && timerMinutesNum > 0 && timerMinutesNum <= 999) {
                     newTimerEnd = addMinutes(new Date(), timerMinutesNum);
-                    newIsTimerExpired = newTimerEnd <= new Date(); // Check if immediately expired
+                    newIsTimerExpired = newTimerEnd <= new Date();
                   }
                 }
-                // Return updated task, resetting acknowledged status
-                return {
-                  ...t,
-                  timerEnd: newTimerEnd,
-                  isTimerExpired: newIsTimerExpired,
-                  isAcknowledged: false, // Always reset acknowledgement when timer changes
-                };
-              }
-              return t;
+                return { ...t, timerEnd: newTimerEnd, isTimerExpired: newIsTimerExpired, isAcknowledged: false };
+              } return t;
             });
             return { ...p, tasks: newTasks };
-          }
-          return p;
+          } return p;
         })
       );
-    },
-    [] // No dependencies, function identity is stable
-  );
-
-  // Remove a specific task from a patient's task list
+    }, []);
   const removeTaskFromPatient = useCallback((patientId: string, taskId: string | number) => {
     setPatients((prevPatients) =>
       prevPatients.map((p) => {
         if (p.id === patientId) {
           const remainingTasks = p.tasks.filter((t) => t.id !== taskId);
           return { ...p, tasks: remainingTasks };
-        }
-        return p;
+        } return p;
       })
     );
-  }, []); // No dependencies, function identity is stable
-
-  // Update the completion status and related fields (completedAt, isAcknowledged) of a task
+  }, []);
   const updateTaskCompletion = useCallback(
     (patientId: string, taskId: string | number, status: TaskCompletionStatus) => {
       setPatients((prevPatients) =>
@@ -1452,55 +1385,35 @@ const PatientTrackerSidebar: React.FC = () => {
             const newTasks = p.tasks.map((t) => {
               if (t.id === taskId) {
                 const isNowComplete = status === 'complete';
-                // Set completion time if status is 'complete', otherwise null
                 const completedTime = isNowComplete ? new Date() : null;
-                // Acknowledge implicitly when completed, otherwise keep current state
                 const newAcknowledged = isNowComplete ? true : t.isAcknowledged;
-                return {
-                  ...t,
-                  completionStatus: status,
-                  completedAt: completedTime,
-                  isAcknowledged: newAcknowledged,
-                };
-              }
-              return t;
+                return { ...t, completionStatus: status, completedAt: completedTime, isAcknowledged: newAcknowledged };
+              } return t;
             });
             return { ...p, tasks: newTasks };
-          }
-          return p;
+          } return p;
         })
       );
-    },
-    [] // No dependencies, function identity is stable
-  );
-
-  // Mark an expired timer as acknowledged
+    }, []);
   const acknowledgeTaskTimer = useCallback((patientId: string, taskId: string | number) => {
     setPatients((prevPatients) =>
       prevPatients.map((p) => {
         if (p.id === patientId) {
           const newTasks = p.tasks.map((t) => {
-            // Only acknowledge if the task exists and is currently expired
             if (t.id === taskId && t.isTimerExpired) {
               return { ...t, isAcknowledged: true };
-            }
-            return t;
+            } return t;
           });
           return { ...p, tasks: newTasks };
-        }
-        return p;
+        } return p;
       })
     );
-  }, []); // No dependencies, function identity is stable
-
-  // Update the general notes for a patient
+  }, []);
   const updatePatientNotes = useCallback((patientId: string, notes: string) => {
     setPatients((prevPatients) =>
       prevPatients.map((p) => (p.id === patientId ? { ...p, notes: notes.trim() } : p))
     );
-  }, []); // No dependencies, function identity is stable
-
-  // Update the notes for a specific task
+  }, []);
   const updateTaskNotes = useCallback(
     (patientId: string, taskId: string | number, notes: string) => {
       setPatients((prevPatients) =>
@@ -1509,20 +1422,14 @@ const PatientTrackerSidebar: React.FC = () => {
             const newTasks = p.tasks.map((t) => {
               if (t.id === taskId) {
                 return { ...t, notes: notes.trim() };
-              }
-              return t;
+              } return t;
             });
             return { ...p, tasks: newTasks };
-          }
-          return p;
+          } return p;
         })
       );
-    },
-    [] // No dependencies, function identity is stable
-  );
+    }, []);
 
-
-  // ***** MODIFICATION START *****
   // Calculate patients needing attention (expired and unacknowledged tasks)
   const attentionPatients = useMemo(() => {
     return patients.filter(patient =>
@@ -1535,20 +1442,15 @@ const PatientTrackerSidebar: React.FC = () => {
     const element = document.getElementById(`patient-card-${patientId}`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Optional: Add a temporary highlight effect
       element.classList.add('highlight-scroll');
       setTimeout(() => {
         element.classList.remove('highlight-scroll');
-      }, 1500); // Remove highlight after 1.5 seconds
+      }, 1500);
     }
   };
-  // ***** MODIFICATION END *****
-
 
   // --- Sidebar Width Calculation ---
-  // Adjust width based on the showSidePromptbar state from context
-  // Using slightly different widths for better responsiveness
-  const sidebarWidth = showSidePromptbar ? 'w-80 lg:w-96' : 'w-0'; // Example: 320px on small, 384px on large
+  const sidebarWidth = showSidePromptbar ? 'w-80 lg:w-96' : 'w-0';
 
   return (
     // Main sidebar container div
@@ -1561,23 +1463,14 @@ const PatientTrackerSidebar: React.FC = () => {
           {/* Sidebar Header */}
           <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Patient Tracker</h2>
-            {/* Add Patient Button */}
-            <Button
-              variant="default" // Use the primary teal color
-              size="sm"
-              onClick={() => setIsModalOpen(true)}
-              // className="bg-[#008080] hover:bg-[#006666] text-white" // Direct styling (can be removed if variant handles it)
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Patient
+            <Button variant="default" size="sm" onClick={() => setIsModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" /> Add Patient
             </Button>
           </div>
 
-          {/* ***** MODIFICATION START ***** */}
           {/* Attention Summary Section */}
           {attentionPatients.length > 0 && (
             <div className="p-3 border-b border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 flex-shrink-0">
-              {/* Header row with count and toggle button */}
               <div className="flex justify-between items-center">
                 <div className="flex items-center text-sm font-medium text-red-700 dark:text-red-400">
                   <AlertTriangle className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -1586,8 +1479,7 @@ const PatientTrackerSidebar: React.FC = () => {
                   </span>
                 </div>
                 <Button
-                  variant="ghost"
-                  size="icon"
+                  variant="ghost" size="icon"
                   className="h-6 w-6 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30"
                   onClick={() => setIsAttentionListExpanded(!isAttentionListExpanded)}
                   title={isAttentionListExpanded ? "Hide list" : "Show list"}
@@ -1595,8 +1487,6 @@ const PatientTrackerSidebar: React.FC = () => {
                   {isAttentionListExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </Button>
               </div>
-
-              {/* Collapsible list of patient names */}
               {isAttentionListExpanded && (
                 <ul className="mt-2 pl-5 space-y-1 list-disc list-inside">
                   {attentionPatients.map(patient => (
@@ -1614,36 +1504,24 @@ const PatientTrackerSidebar: React.FC = () => {
               )}
             </div>
           )}
-          {/* ***** MODIFICATION END ***** */}
-
 
           {/* Main Content Area (Scrollable Patient List) */}
-          {/* Removed space-y-4 from here to avoid double spacing with the new section */}
           <div className="flex-1 overflow-y-auto p-4">
             {patients.length === 0 ? (
-              // Placeholder when no patients are being tracked
               <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 text-center px-4">
                 <AlertTriangle className="w-10 h-10 mb-4 text-gray-400 dark:text-gray-500" />
                 <p className="font-medium">No patients being tracked.</p>
                 <p className="text-sm mt-1">Click &quot;Add Patient&quot; to start.</p>
               </div>
             ) : (
-              // Render a PatientCard for each patient in the list
-              // Added space-y-4 wrapper div for consistent spacing
               <div className="space-y-4">
                 {patients.map((patient) => (
                   <PatientCard
-                    key={patient.id} // Unique key for React list rendering
-                    patient={patient}
-                    // Pass down all necessary callback functions
-                    removePatient={removePatient}
-                    updateTaskTimerState={updateTaskTimerState}
-                    addTaskToPatient={addTaskToPatient}
-                    updateTaskTimer={updateTaskTimer}
-                    removeTaskFromPatient={removeTaskFromPatient}
-                    updateTaskCompletion={updateTaskCompletion}
-                    acknowledgeTaskTimer={acknowledgeTaskTimer}
-                    updatePatientNotes={updatePatientNotes}
+                    key={patient.id} patient={patient}
+                    removePatient={removePatient} updateTaskTimerState={updateTaskTimerState}
+                    addTaskToPatient={addTaskToPatient} updateTaskTimer={updateTaskTimer}
+                    removeTaskFromPatient={removeTaskFromPatient} updateTaskCompletion={updateTaskCompletion}
+                    acknowledgeTaskTimer={acknowledgeTaskTimer} updatePatientNotes={updatePatientNotes}
                     updateTaskNotes={updateTaskNotes}
                   />
                 ))}
@@ -1651,67 +1529,31 @@ const PatientTrackerSidebar: React.FC = () => {
             )}
           </div>
 
-          {/* Render the AddPatientModal (controlled by isModalOpen state) */}
-          <AddPatientModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)} // Function to close the modal
-            addPatient={addPatient} // Function to add a new patient
-          />
+          {/* AddPatientModal */}
+          <AddPatientModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} addPatient={addPatient} />
 
-          {/* CSS for the flashing animation and scroll highlight */}
-          {/* ***** MODIFICATION START ***** */}
+          {/* Global Styles */}
           <style jsx global>{`
-            @keyframes flash {
-              0%, 100% { background-color: transparent; }
-              50% { background-color: rgba(255, 0, 0, 0.1); } /* Light red flash */
-            }
-            .animate-flash {
-              animation: flash 1.5s infinite;
-            }
-            @keyframes pulse-border {
-              0%, 100% { border-color: #ef4444; } /* red-500 */
-              50% { border-color: #f87171; } /* red-400 */
-            }
-            .animate-pulse-border {
-              animation: pulse-border 1.5s infinite;
-            }
-            /* Hide scrollbar for Chrome, Safari and Opera */
-            .overflow-y-auto::-webkit-scrollbar {
-                display: none;
-            }
-            /* Hide scrollbar for IE, Edge and Firefox */
-            .overflow-y-auto {
-                -ms-overflow-style: none;  /* IE and Edge */
-                scrollbar-width: none;  /* Firefox */
-            }
-            /* Scroll highlight effect */
-            @keyframes highlight {
-              from { background-color: rgba(250, 204, 21, 0.4); } /* amber-300/40 */
-              to { background-color: transparent; }
-            }
-            .highlight-scroll {
-              animation: highlight 1.5s ease-out;
-            }
+            @keyframes flash { 0%, 100% { background-color: transparent; } 50% { background-color: rgba(255, 0, 0, 0.1); } }
+            .animate-flash { animation: flash 1.5s infinite; }
+            @keyframes pulse-border { 0%, 100% { border-color: #ef4444; } 50% { border-color: #f87171; } }
+            .animate-pulse-border { animation: pulse-border 1.5s infinite; }
+            .overflow-y-auto::-webkit-scrollbar { display: none; }
+            .overflow-y-auto { -ms-overflow-style: none; scrollbar-width: none; }
+            @keyframes highlight { from { background-color: rgba(250, 204, 21, 0.4); } to { background-color: transparent; } }
+            .highlight-scroll { animation: highlight 1.5s ease-out; }
           `}</style>
-          {/* ***** MODIFICATION END ***** */}
         </>
       )}
     </div>
   );
 };
 
-
 // --- App Component (Example Usage) ---
 // [NO CHANGES IN THIS COMPONENT]
-// This is a simple wrapper to demonstrate how PatientTrackerSidebar might be used.
-// In your actual application, you'd integrate it into your layout.
 const App: React.FC = () => {
-  // Mock state for the HomeContext provider
   const [homeState, setHomeState] = useState({ showSidePromptbar: true });
-
-  // Mock dispatch function (not used in this example)
   const dispatch = (action: any) => {
-    // Handle actions if needed, e.g., toggling the sidebar
     console.log("Dispatch called with:", action);
     if (action.type === 'TOGGLE_SIDEBAR') {
         setHomeState(prev => ({ ...prev, showSidePromptbar: !prev.showSidePromptbar }));
@@ -1719,21 +1561,15 @@ const App: React.FC = () => {
   };
 
   return (
-    // Provide the mock context value
     <HomeContext.Provider value={{ state: homeState, dispatch }}>
-       {/* Basic Tailwind setup for demonstration */}
        <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-          {/* Mock Main Content Area */}
           <div className="flex-1 p-4">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Main Content Area</h1>
             <p className="text-gray-700 dark:text-gray-300">This is where the main application content would go.</p>
-            {/* Example button to toggle sidebar (using mock dispatch) */}
             <Button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="mt-4">
                 Toggle Sidebar
             </Button>
           </div>
-
-          {/* Render the Patient Tracker Sidebar */}
           <PatientTrackerSidebar />
        </div>
     </HomeContext.Provider>
