@@ -72,6 +72,7 @@ interface Patient {
 }
 
 // --- Mock shadcn/ui Components ---
+// [NO CHANGES IN THIS SECTION]
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
@@ -165,8 +166,18 @@ interface DialogDescriptionProps { children: React.ReactNode; className?: string
 const DialogDescription: React.FC<DialogDescriptionProps> = ({ children, className }) => ( <p className={`text-sm text-gray-600 dark:text-gray-400 mt-1 ${className ?? ''}`}>{children}</p> );
 interface DialogFooterProps { children: React.ReactNode; className?: string; }
 const DialogFooter: React.FC<DialogFooterProps> = ({ children, className }) => ( <div className={`mt-6 flex justify-end space-x-3 ${className ?? ''}`}>{children}</div> );
+// Mock DialogClose - simplified, might not behave exactly like shadcn/ui's version
 interface DialogCloseProps { children: React.ReactElement; onClick?: () => void; asChild?: boolean; }
-const DialogClose: React.FC<DialogCloseProps> = ({ children, onClick }) => React.cloneElement(children, { onClick });
+const DialogClose: React.FC<DialogCloseProps> = ({ children, onClick }) => {
+  // Basic implementation: clones the child and adds onClick if provided.
+  // Doesn't fully replicate `asChild` behavior which merges props.
+  // For this specific error, removing the wrapper is the simplest fix.
+  if (onClick) {
+    return React.cloneElement(children, { onClick });
+  }
+  return children; // If no onClick, just return the child
+};
+
 
 // Basic Card
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> { className?: string; }
@@ -212,6 +223,7 @@ const parsePatientsWithDates = (jsonData: string): Patient[] | null => {
 };
 
 // --- TaskItem component ---
+// [NO CHANGES IN THIS COMPONENT]
 interface TaskItemProps {
   task: Task;
   patientId: string;
@@ -220,13 +232,13 @@ interface TaskItemProps {
   updateTaskTimer: (patientId: string, taskId: string | number, newTimerMinutes: string | null) => void;
   removeTask: (patientId: string, taskId: string | number) => void;
   updateTaskCompletion: ( patientId: string, taskId: string | number, status: TaskCompletionStatus ) => void;
-  acknowledgeTaskTimer: (patientId: string, taskId: string | number) => void; // Correct name here
+  acknowledgeTaskTimer: (patientId: string, taskId: string | number) => void;
   updateTaskNotes: (patientId: string, taskId: string | number, notes: string) => void;
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({
   task, patientId, patientName, updateTaskTimerState, updateTaskTimer, removeTask,
-  updateTaskCompletion, acknowledgeTaskTimer, updateTaskNotes, // Correct name used here
+  updateTaskCompletion, acknowledgeTaskTimer, updateTaskNotes,
 }) => {
   const [isTimerExpired, setIsTimerExpired] = useState<boolean>(task.isTimerExpired);
   const [timeRemaining, setTimeRemaining] = useState<string>('');
@@ -313,9 +325,9 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
 
 // --- PatientCard ---
+// [NO CHANGES IN THIS COMPONENT]
 interface PatientCardProps {
-  // Add id prop for targeting scroll
-  id: string;
+  id: string; // Added id prop
   patient: Patient;
   removePatient: (patientId: string) => void;
   updateTaskTimerState: (patientId: string, taskId: string | number, isExpired: boolean) => void;
@@ -323,14 +335,13 @@ interface PatientCardProps {
   updateTaskTimer: (patientId: string, taskId: string | number, newTimerMinutes: string | null) => void;
   removeTaskFromPatient: (patientId: string, taskId: string | number) => void;
   updateTaskCompletion: ( patientId: string, taskId: string | number, status: TaskCompletionStatus ) => void;
-  acknowledgeTaskTimer: (patientId: string, taskId: string | number) => void; // Correct name here
+  acknowledgeTaskTimer: (patientId: string, taskId: string | number) => void;
   updatePatientNotes: (patientId: string, notes: string) => void;
   updateTaskNotes: (patientId: string, taskId: string | number, notes: string) => void;
 }
 const PatientCard: React.FC<PatientCardProps> = ({
-  id, // Destructure id prop
-  patient, removePatient, updateTaskTimerState, addTaskToPatient, updateTaskTimer,
-  removeTaskFromPatient, updateTaskCompletion, acknowledgeTaskTimer, updatePatientNotes, updateTaskNotes, // Correct name used here
+  id, patient, removePatient, updateTaskTimerState, addTaskToPatient, updateTaskTimer,
+  removeTaskFromPatient, updateTaskCompletion, acknowledgeTaskTimer, updatePatientNotes, updateTaskNotes,
 }) => {
   const [lengthOfStayMinutes, setLengthOfStayMinutes] = useState<number>(() => differenceInMinutes(new Date(), patient.arrivalTime));
   const [lengthOfStayFormatted, setLengthOfStayFormatted] = useState<string>('');
@@ -353,7 +364,6 @@ const PatientCard: React.FC<PatientCardProps> = ({
   const completedTasks = patient.tasks.filter((t) => t.completionStatus === 'complete');
 
   return (
-    // Use the passed id prop here
     <Card id={id} className={`mb-4 border-2 ${borderColor} transition-colors duration-500`}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle>{patient.name}</CardTitle>
@@ -368,17 +378,11 @@ const PatientCard: React.FC<PatientCardProps> = ({
           <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">Pending Tasks:</h4>
           {pendingTasks.length === 0 ? ( <p className="text-xs text-gray-500 dark:text-gray-400 italic">No pending tasks.</p> )
            : ( pendingTasks.map((task) => (
-               // ***** MODIFICATION START *****
-               // Corrected prop name: acknowledgeTimer -> acknowledgeTaskTimer
                <TaskItem key={task.id} task={task} patientId={patient.id} patientName={patient.name} {...{ updateTaskTimerState, updateTaskTimer, removeTask: removeTaskFromPatient, updateTaskCompletion, acknowledgeTaskTimer, updateTaskNotes }} />
-               // ***** MODIFICATION END *****
              )))}
         </div>
         {completedTasks.length > 0 && ( <div className="mt-3 border-t border-gray-200/70 dark:border-gray-700/50 pt-2"> <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Completed Tasks:</h4> {completedTasks.map((task) => (
-            // ***** MODIFICATION START *****
-            // Corrected prop name: acknowledgeTimer -> acknowledgeTaskTimer
             <TaskItem key={task.id} task={task} patientId={patient.id} patientName={patient.name} {...{ updateTaskTimerState, updateTaskTimer, removeTask: removeTaskFromPatient, updateTaskCompletion, acknowledgeTaskTimer, updateTaskNotes }} />
-            // ***** MODIFICATION END *****
           ))} </div> )}
         <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
           <form onSubmit={handleAddTaskSubmit} className="flex items-center gap-2">
@@ -394,6 +398,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
 
 
 // --- AddPatientModal ---
+// [NO CHANGES IN THIS COMPONENT]
 interface ModalTaskState { id: number; text: string; timerMinutes: string; }
 interface AddPatientModalProps { isOpen: boolean; onClose: () => void; addPatient: (newPatient: Patient) => void; }
 const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addPatient }) => {
@@ -419,7 +424,12 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
         <DialogHeader>
           <DialogTitle>Add New Patient</DialogTitle>
           <DialogDescription> Enter patient details, arrival time, initial tasks, and optional notes. </DialogDescription>
-          <DialogClose asChild> <Button variant="ghost" size="icon" className="absolute top-3 right-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full h-8 w-8" onClick={onClose}> <X className="h-4 w-4" /> <span className="sr-only">Close</span> </Button> </DialogClose>
+          {/* ***** MODIFICATION START ***** */}
+          {/* Removed DialogClose wrapper as Button already has onClick */}
+          <Button variant="ghost" size="icon" className="absolute top-3 right-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full h-8 w-8" onClick={onClose}>
+             <X className="h-4 w-4" /> <span className="sr-only">Close</span>
+          </Button>
+          {/* ***** MODIFICATION END ***** */}
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
@@ -489,7 +499,6 @@ const PatientTrackerSidebar: React.FC = () => {
           <div className="flex-1 overflow-y-auto p-4">
             {patients.length === 0 ? ( <div className="flex flex-col items-center justify-center h-full text-center px-4 text-gray-500 dark:text-gray-400"> <AlertTriangle className="w-12 h-12 mb-4 text-gray-400 dark:text-gray-500" /> <p className="font-medium">No patients being tracked.</p> <p className="text-sm mt-1">Click &quot;Add Patient&quot; to start.</p> </div> )
              : ( <div className="space-y-4"> {patients.map((patient) => (
-                 // Pass id prop to PatientCard
                  <PatientCard key={patient.id} id={`patient-card-${patient.id}`} patient={patient} {...{ removePatient, updateTaskTimerState, addTaskToPatient, updateTaskTimer, removeTaskFromPatient, updateTaskCompletion, acknowledgeTaskTimer, updatePatientNotes, updateTaskNotes }} />
                ))} </div> )}
           </div>
