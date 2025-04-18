@@ -12,6 +12,8 @@ PyPDF2==3.0.1
 # Use the unified pandas version:
 pandas==2.2.3
 sentence-transformers==2.2.2
+transformers>=4.50,<5.0
+tokenizers==0.15.2          # has macOS‑arm64 / py312 wheels
 nltk==3.8.1
 huggingface_hub==0.13.3
 langchain_core
