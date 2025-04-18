@@ -1,102 +1,84 @@
 # predictive_backend/ingest_policy_docs.py
 """
-Ingest every PDF under predictive_backend/app/policy_documents/,
-chunk into ~350‑token slices, embed with OpenAI, and upsert to Qdrant.
-
-Run once (locally or as a one‑off Render Job). It is NOT imported by FastAPI.
+One‑shot script that reads every PDF under predictive_backend/policy_documents/,
+splits into chunks, gets OpenAI embeddings and upserts into the Qdrant
+collection given by $QDRANT_COLLECTION_NAME (default 'policy_documents').
 """
 
 from __future__ import annotations
 import os, pathlib, hashlib, logging, mimetypes
 from dotenv import load_dotenv
+load_dotenv()
 
-load_dotenv()                              # read .env if present
+PDF_DIR    = pathlib.Path(__file__).parent / "policy_documents"
+COLLECTION = os.getenv("QDRANT_COLLECTION_NAME", "policy_documents")
+CHUNK      = 350
+OVERLAP    = 50
+EMBED_MODEL= "text-embedding-ada-002"
 
-# ----------------- configuration -----------------
-PDF_DIR      = pathlib.Path(__file__).parent / "app" / "policy_documents"
-COLLECTION   = os.getenv("QDRANT_COLLECTION_NAME", "policy_documents")
-CHUNK_SIZE   = 350     # ~tokens / 5 ≈ words
-OVERLAP      = 50
-EMBED_MODEL  = "text-embedding-ada-002"
-
-# ----------------- logging -----------------------
-logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(message)s")
 log = logging.getLogger("ingest")
 
-# ----------------- deps --------------------------
-from qdrant_client import QdrantClient
-from qdrant_client.http.models import VectorParams, Distance, PointStruct
-
-from app.qdrant_client import get_qdrant_client      # absolute import
-from app.qdrant_client import ensure_collection_exists
 from openai import OpenAI
+from qdrant_client.http.models import VectorParams, Distance, PointStruct
+# ✔ absolute import path
+from predictive_backend.app.qdrant_client import get_qdrant_client, ensure_collection_exists    
 
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_KEY:
     raise RuntimeError("OPENAI_API_KEY not set")
+openai = OpenAI(api_key=OPENAI_KEY)
 
-openai_client = OpenAI(api_key=OPENAI_KEY)
-
-# ----------------- helpers -----------------------
-def chunk_text(text: str, size: int = CHUNK_SIZE, overlap: int = OVERLAP) -> list[str]:
-    words = text.split()
-    i, out = 0, []
+def chunk_text(txt: str) -> list[str]:
+    words, out, i = txt.split(), [], 0
     while i < len(words):
-        out.append(" ".join(words[i : i + size]))
-        i += size - overlap
+        out.append(" ".join(words[i:i+CHUNK]))
+        i += CHUNK - OVERLAP
     return out
 
-
-def embed(texts: list[str]) -> list[list[float]]:
-    """Batch‑embed; OpenAI lets up to 2048 tokens / request, so we call per chunk."""
-    resp = openai_client.embeddings.create(model=EMBED_MODEL, input=texts)
+def embed(batch: list[str]) -> list[list[float]]:
+    resp = openai.embeddings.create(model=EMBED_MODEL, input=batch)
     return [d.embedding for d in resp.data]
 
-
-def process_pdf(pdf_path: pathlib.Path, qc: QdrantClient):
+def process_pdf(pdf: pathlib.Path, qc):
     import pdfplumber
+    log.info("▶ %s", pdf.name)
+    text = ""
+    with pdfplumber.open(pdf) as p:
+        for pg in p.pages:
+            text += (pg.extract_text() or "") + "\n"
+    chunks = chunk_text(text)
+    vecs   = embed(chunks)
 
-    log.info("▶ %s", pdf_path.name)
-    with pdfplumber.open(pdf_path) as pdf:
-        raw_text = "\n".join(p.extract_text() or "" for p in pdf.pages)
+    pts = []
+    for n, (c, v) in enumerate(zip(chunks, vecs)):
+        pid = int(hashlib.sha256(f"{pdf}:{n}".encode()).hexdigest()[:16], 16)
+        pts.append(
+            PointStruct(
+                id=pid,
+                vector=v,
+                payload={
+                    "document_title": pdf.stem,
+                    "page_number"   : None,
+                    "heading"       : "N/A",
+                    "content"       : c,
+                },
+            )
+        )
+    qc.upsert(COLLECTION, points=pts, wait=True)
+    log.info("   ↳ %d chunks", len(pts))
 
-    chunks = chunk_text(raw_text)
-    vectors = embed(chunks)
-
-    points = []
-    for idx, (c_text, vec) in enumerate(zip(chunks, vectors)):
-        # reproducible 64‑bit ID
-        pid = int(hashlib.sha256(f"{pdf_path}:{idx}".encode()).hexdigest()[:16], 16)
-        payload = {
-            "document_title": pdf_path.stem,
-            "page_number"   : None,
-            "heading"       : "N/A",
-            "content"       : c_text,
-            # backend url will be generated at query‑time
-        }
-        points.append(PointStruct(id=pid, vector=vec, payload=payload))
-
-    qc.upsert(collection_name=COLLECTION, points=points, wait=True)
-    log.info("   ↳ upserted %d chunks", len(chunks))
-
-
-# ----------------- main --------------------------
 def main():
     qc = get_qdrant_client()
-    ensure_collection_exists(qc, COLLECTION, vector_size=1536, distance=Distance.COSINE)
+    ensure_collection_exists(qc, COLLECTION, vector_size=1536,
+                             distance=Distance.COSINE)
 
-    pdf_files = [
-        p for p in PDF_DIR.glob("**/*") if mimetypes.guess_type(p.name)[0] == "application/pdf"
-    ]
-    if not pdf_files:
-        log.warning("No PDF files found under %s", PDF_DIR)
-        return
-
-    for pdf in pdf_files:
-        process_pdf(pdf, qc)
-
-    log.info("✅ Done. Ingested %d PDFs into collection '%s'.", len(pdf_files), COLLECTION)
-
+    pdfs = [p for p in PDF_DIR.glob("**/*")
+            if mimetypes.guess_type(p.name)[0] == "application/pdf"]
+    if not pdfs:
+        log.warning("No PDFs found in %s", PDF_DIR); return
+    for p in pdfs: process_pdf(p, qc)
+    log.info("✅ Done (%d PDFs).", len(pdfs))
 
 if __name__ == "__main__":
     main()
