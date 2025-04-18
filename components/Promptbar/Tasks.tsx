@@ -29,7 +29,7 @@ import {
   ChevronDown,
   ChevronUp,
   PanelLeftClose,
-  PanelRightOpen, // <-- Changed PanelRightClose to PanelRightOpen for clarity
+  PanelRightOpen,
 } from 'lucide-react';
 import {
   format,
@@ -237,30 +237,42 @@ const PatientTrackerSidebar: React.FC = () => {
 
   // Sidebar Width Calculation using local state
   const sidebarWidth = isLocallyVisible ? 'w-80 md:w-96' : 'w-0';
+  // ***** MODIFICATION START *****
+  // Calculate margin based on visibility to push content when expanded
+  const sidebarMargin = isLocallyVisible ? 'ml-8' : 'ml-0'; // Assuming tab width w-8
+  // ***** MODIFICATION END *****
+
 
   return (
-    // ***** MODIFICATION START *****
-    // Removed outer div, using React Fragment and fixed position toggle button
-    <>
-      {/* Persistent Toggle Tab Button */}
+    // Use a wrapper div with relative positioning to contain both the tab and the sidebar content
+    // This allows the absolute positioned tab to be placed relative to this wrapper.
+    <div className="relative h-full">
+      {/* Persistent Toggle Tab Button - Now absolutely positioned */}
       <Button
         onClick={() => setIsLocallyVisible(!isLocallyVisible)}
         variant="secondary" // Use secondary variant for the tab
         size="icon"
-        className={`fixed top-1/2 -translate-y-1/2 left-0 z-20 h-12 w-8 rounded-l-none rounded-r-md shadow-lg border border-l-0 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#008080] focus:ring-offset-0 ${isLocallyVisible ? '-ml-px' : '' }`} // Style as a tab, adjust margin when open
+        // ***** MODIFICATION START *****
+        // Changed from fixed to absolute, adjusted positioning and styles
+        className={`absolute top-1/2 -translate-y-1/2 left-0 z-20 h-12 w-8 rounded-l-none rounded-r-md shadow-lg border border-l-0 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#008080] focus:ring-offset-0 transition-transform duration-300 ease-in-out ${isLocallyVisible ? 'translate-x-0' : 'translate-x-0'}`} // Position at left=0 always
+        // ***** MODIFICATION END *****
         title={isLocallyVisible ? "Collapse Sidebar" : "Expand Sidebar"}
       >
         {isLocallyVisible ? <PanelLeftClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
       </Button>
 
       {/* Main Sidebar Container */}
-      <div className={`flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out bg-white dark:bg-gray-900 shadow-lg border-l border-gray-200 dark:border-gray-700 ${sidebarWidth}`}>
+      {/* ***** MODIFICATION START ***** */}
+      {/* Added conditional margin-left and transition for margin */}
+      <div className={`flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out bg-white dark:bg-gray-900 shadow-lg border-l border-gray-200 dark:border-gray-700 ${sidebarWidth} ${sidebarMargin}`}>
+      {/* ***** MODIFICATION END ***** */}
         {/* Render content only when visible */}
         {isLocallyVisible && (
           <>
             {/* Sidebar Header - Removed original collapse button */}
             <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 ml-2">Patient Tracker</h2> {/* Added margin for spacing from edge */}
+               {/* Removed the internal collapse button, added slight ml to title to avoid overlap with external tab */}
+               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 ml-1">Patient Tracker</h2>
               <Button variant="default" size="sm" onClick={() => setIsModalOpen(true)}> <Plus className="h-4 w-4 mr-2" /> Add Patient </Button>
             </div>
 
@@ -299,10 +311,8 @@ const PatientTrackerSidebar: React.FC = () => {
             `}</style>
           </>
         )}
-        {/* Removed the previous expand button block */}
       </div>
-    </>
-    // ***** MODIFICATION END *****
+    </div> // End of the relative wrapper div
   );
 };
 
