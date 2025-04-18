@@ -238,81 +238,97 @@ const PatientTrackerSidebar: React.FC = () => {
   // Sidebar Width Calculation using local state
   const sidebarWidth = isLocallyVisible ? 'w-80 md:w-96' : 'w-0';
   // ***** MODIFICATION START *****
-  // Calculate margin based on visibility to push content when expanded
-  const sidebarMargin = isLocallyVisible ? 'ml-8' : 'ml-0'; // Assuming tab width w-8
+  // Removed sidebarMargin calculation as it's no longer needed
+  // const sidebarMargin = isLocallyVisible ? 'ml-8' : 'ml-0';
   // ***** MODIFICATION END *****
 
 
   return (
-    // Use a wrapper div with relative positioning to contain both the tab and the sidebar content
-    // This allows the absolute positioned tab to be placed relative to this wrapper.
-    <div className="relative h-full">
-      {/* Persistent Toggle Tab Button - Now absolutely positioned */}
-      <Button
-        onClick={() => setIsLocallyVisible(!isLocallyVisible)}
-        variant="secondary" // Use secondary variant for the tab
-        size="icon"
-        // ***** MODIFICATION START *****
-        // Changed from fixed to absolute, adjusted positioning and styles
-        className={`absolute top-1/2 -translate-y-1/2 left-0 z-20 h-12 w-8 rounded-l-none rounded-r-md shadow-lg border border-l-0 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[#008080] focus:ring-offset-0 transition-transform duration-300 ease-in-out ${isLocallyVisible ? 'translate-x-0' : 'translate-x-0'}`} // Position at left=0 always
-        // ***** MODIFICATION END *****
-        title={isLocallyVisible ? "Collapse Sidebar" : "Expand Sidebar"}
-      >
-        {isLocallyVisible ? <PanelLeftClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
-      </Button>
+    // ***** MODIFICATION START *****
+    // Removed the outer relative div wrapper and the absolute positioned tab button
+    // The main div is now the top-level element again.
+    <div className={`flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out bg-white dark:bg-gray-900 shadow-lg border-l border-gray-200 dark:border-gray-700 ${sidebarWidth}`}>
+    {/* Removed conditional margin class */}
+    {/* ***** MODIFICATION END ***** */}
 
-      {/* Main Sidebar Container */}
+      {/* Render content only when visible */}
+      {isLocallyVisible && (
+        <>
+          {/* Sidebar Header */}
+          <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+             {/* ***** MODIFICATION START ***** */}
+             {/* Added back the header toggle button */}
+             <div className="flex items-center gap-2">
+                 <Button
+                    onClick={() => setIsLocallyVisible(false)} // Action is now collapse
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    title="Collapse Sidebar"
+                 >
+                    <PanelLeftClose className="h-4 w-4" />
+                 </Button>
+                 {/* Removed margin from title */}
+                 <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Patient Tracker</h2>
+             </div>
+             {/* ***** MODIFICATION END ***** */}
+            <Button variant="default" size="sm" onClick={() => setIsModalOpen(true)}> <Plus className="h-4 w-4 mr-2" /> Add Patient </Button>
+          </div>
+
+          {/* Attention Summary Section */}
+          {attentionPatients.length > 0 && ( <div className="p-3 border-b border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-800/30 flex-shrink-0"> <div className="flex justify-between items-center"> <div className="flex items-center text-sm font-medium text-red-700 dark:text-red-300"> <AlertTriangle className="h-4 w-4 mr-2 flex-shrink-0" /> <span> {attentionPatients.length} Patient{attentionPatients.length > 1 ? 's' : ''} require attention </span> </div> <Button variant="ghost" size="icon" className="h-7 w-7 text-red-600 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-700/50 rounded-md" onClick={() => setIsAttentionListExpanded(!isAttentionListExpanded)} title={isAttentionListExpanded ? "Hide list" : "Show list"}> {isAttentionListExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />} </Button> </div> {isAttentionListExpanded && ( <ul className="mt-2 pl-5 space-y-1 list-disc list-inside"> {attentionPatients.map(patient => ( <li key={patient.id} className="text-xs"> <button onClick={() => scrollToPatient(patient.id)} className="text-red-700 dark:text-red-300 hover:text-red-900 dark:hover:text-red-200 underline hover:no-underline focus:outline-none focus:ring-1 focus:ring-red-500 rounded px-0.5" title={`Scroll to ${patient.name}`}> {patient.name} </button> </li> ))} </ul> )} </div> )}
+
+          {/* Main Content Area (Scrollable Patient List) */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {patients.length === 0 ? ( <div className="flex flex-col items-center justify-center h-full text-center px-4 text-gray-500 dark:text-gray-400"> <AlertTriangle className="w-12 h-12 mb-4 text-gray-400 dark:text-gray-500" /> <p className="font-medium">No patients being tracked.</p> <p className="text-sm mt-1">Click &quot;Add Patient&quot; to start.</p> </div> )
+             : ( <div className="space-y-4"> {patients.map((patient) => (
+                 <PatientCard key={patient.id} id={`patient-card-${patient.id}`} patient={patient} {...{ removePatient, updateTaskTimerState, addTaskToPatient, updateTaskTimer, removeTaskFromPatient, updateTaskCompletion, acknowledgeTaskTimer, updatePatientNotes, updateTaskNotes }} />
+               ))} </div> )}
+          </div>
+
+          {/* AddPatientModal */}
+          <AddPatientModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} addPatient={addPatient} />
+
+          {/* Global Styles */}
+          <style jsx global>{`
+            .overflow-y-auto { scrollbar-width: thin; scrollbar-color: #cbd5e1 #f1f5f9; }
+            .dark .overflow-y-auto { scrollbar-color: #4b5563 #1f2937; }
+            .overflow-y-auto::-webkit-scrollbar { width: 8px; }
+            .overflow-y-auto::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+            .dark .overflow-y-auto::-webkit-scrollbar-track { background: #1f2937; }
+            .overflow-y-auto::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; border: 2px solid #f1f5f9; }
+            .dark .overflow-y-auto::-webkit-scrollbar-thumb { background-color: #4b5563; border-color: #1f2937; }
+            .overflow-y-auto::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+            .dark .overflow-y-auto::-webkit-scrollbar-thumb:hover { background-color: #6b7280; }
+            @keyframes flash-bg { 0%, 100% { background-color: transparent; } 50% { background-color: rgba(239, 68, 68, 0.1); } }
+            .animate-flash-bg { animation: flash-bg 1.5s infinite; }
+            @keyframes pulse-border { 0%, 100% { border-color: #ef4444; } 50% { border-color: #f87171; } }
+            .dark @keyframes pulse-border { 0%, 100% { border-color: #dc2626; } 50% { border-color: #ef4444; } }
+            .animate-pulse-border { animation: pulse-border 1.5s infinite; }
+            @keyframes highlight { from { background-color: rgba(250, 204, 21, 0.4); } to { background-color: transparent; } }
+            .highlight-scroll { animation: highlight 1.5s ease-out; }
+          `}</style>
+        </>
+      )}
       {/* ***** MODIFICATION START ***** */}
-      {/* Added conditional margin-left and transition for margin */}
-      <div className={`flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out bg-white dark:bg-gray-900 shadow-lg border-l border-gray-200 dark:border-gray-700 ${sidebarWidth} ${sidebarMargin}`}>
+      {/* Button to re-open the sidebar if it's closed - now using header button logic */}
+      {!isLocallyVisible && (
+         // This button needs to be positioned appropriately by the parent layout
+         // For demonstration, placing it absolutely top-left of the viewport
+         <div className="fixed top-2 left-2 z-30"> {/* Use fixed positioning for demo */}
+             <Button
+                 onClick={() => setIsLocallyVisible(true)} // Action is now expand
+                 variant="ghost"
+                 size="icon"
+                 className="h-8 w-8 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-md rounded-md" // Adjusted style
+                 title="Expand Sidebar"
+             >
+                 <PanelRightOpen className="h-4 w-4" />
+             </Button>
+         </div>
+      )}
       {/* ***** MODIFICATION END ***** */}
-        {/* Render content only when visible */}
-        {isLocallyVisible && (
-          <>
-            {/* Sidebar Header - Removed original collapse button */}
-            <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-               {/* Removed the internal collapse button, added slight ml to title to avoid overlap with external tab */}
-               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 ml-1">Patient Tracker</h2>
-              <Button variant="default" size="sm" onClick={() => setIsModalOpen(true)}> <Plus className="h-4 w-4 mr-2" /> Add Patient </Button>
-            </div>
-
-            {/* Attention Summary Section */}
-            {attentionPatients.length > 0 && ( <div className="p-3 border-b border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-800/30 flex-shrink-0"> <div className="flex justify-between items-center"> <div className="flex items-center text-sm font-medium text-red-700 dark:text-red-300"> <AlertTriangle className="h-4 w-4 mr-2 flex-shrink-0" /> <span> {attentionPatients.length} Patient{attentionPatients.length > 1 ? 's' : ''} require attention </span> </div> <Button variant="ghost" size="icon" className="h-7 w-7 text-red-600 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-700/50 rounded-md" onClick={() => setIsAttentionListExpanded(!isAttentionListExpanded)} title={isAttentionListExpanded ? "Hide list" : "Show list"}> {isAttentionListExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />} </Button> </div> {isAttentionListExpanded && ( <ul className="mt-2 pl-5 space-y-1 list-disc list-inside"> {attentionPatients.map(patient => ( <li key={patient.id} className="text-xs"> <button onClick={() => scrollToPatient(patient.id)} className="text-red-700 dark:text-red-300 hover:text-red-900 dark:hover:text-red-200 underline hover:no-underline focus:outline-none focus:ring-1 focus:ring-red-500 rounded px-0.5" title={`Scroll to ${patient.name}`}> {patient.name} </button> </li> ))} </ul> )} </div> )}
-
-            {/* Main Content Area (Scrollable Patient List) */}
-            <div className="flex-1 overflow-y-auto p-4">
-              {patients.length === 0 ? ( <div className="flex flex-col items-center justify-center h-full text-center px-4 text-gray-500 dark:text-gray-400"> <AlertTriangle className="w-12 h-12 mb-4 text-gray-400 dark:text-gray-500" /> <p className="font-medium">No patients being tracked.</p> <p className="text-sm mt-1">Click &quot;Add Patient&quot; to start.</p> </div> )
-               : ( <div className="space-y-4"> {patients.map((patient) => (
-                   <PatientCard key={patient.id} id={`patient-card-${patient.id}`} patient={patient} {...{ removePatient, updateTaskTimerState, addTaskToPatient, updateTaskTimer, removeTaskFromPatient, updateTaskCompletion, acknowledgeTaskTimer, updatePatientNotes, updateTaskNotes }} />
-                 ))} </div> )}
-            </div>
-
-            {/* AddPatientModal */}
-            <AddPatientModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} addPatient={addPatient} />
-
-            {/* Global Styles */}
-            <style jsx global>{`
-              .overflow-y-auto { scrollbar-width: thin; scrollbar-color: #cbd5e1 #f1f5f9; }
-              .dark .overflow-y-auto { scrollbar-color: #4b5563 #1f2937; }
-              .overflow-y-auto::-webkit-scrollbar { width: 8px; }
-              .overflow-y-auto::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
-              .dark .overflow-y-auto::-webkit-scrollbar-track { background: #1f2937; }
-              .overflow-y-auto::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; border: 2px solid #f1f5f9; }
-              .dark .overflow-y-auto::-webkit-scrollbar-thumb { background-color: #4b5563; border-color: #1f2937; }
-              .overflow-y-auto::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
-              .dark .overflow-y-auto::-webkit-scrollbar-thumb:hover { background-color: #6b7280; }
-              @keyframes flash-bg { 0%, 100% { background-color: transparent; } 50% { background-color: rgba(239, 68, 68, 0.1); } }
-              .animate-flash-bg { animation: flash-bg 1.5s infinite; }
-              @keyframes pulse-border { 0%, 100% { border-color: #ef4444; } 50% { border-color: #f87171; } }
-              .dark @keyframes pulse-border { 0%, 100% { border-color: #dc2626; } 50% { border-color: #ef4444; } }
-              .animate-pulse-border { animation: pulse-border 1.5s infinite; }
-              @keyframes highlight { from { background-color: rgba(250, 204, 21, 0.4); } to { background-color: transparent; } }
-              .highlight-scroll { animation: highlight 1.5s ease-out; }
-            `}</style>
-          </>
-        )}
-      </div>
-    </div> // End of the relative wrapper div
+    </div>
   );
 };
 
