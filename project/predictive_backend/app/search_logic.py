@@ -3,7 +3,7 @@
 Semantic‑search helper – DOES NOT interfere with the ML endpoints.
 
 1. Embed query with OpenAI
-2. Similarity‑search in Qdrant (collection = policy_documents)
+2. Similarity‑search in Qdrant (collection = policy_chunks)
 3. Ask GPT‑4 to answer, citing the numbered chunks
 """
 
@@ -24,7 +24,7 @@ OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_KEY:
     raise RuntimeError("OPENAI_API_KEY must be set")
 
-COLLECTION   = os.getenv("QDRANT_COLLECTION_NAME", "policy_documents")
+COLLECTION   = os.getenv("QDRANT_COLLECTION_NAME", "policy_chunks")
 EMBED_MODEL  = "text-embedding-ada-002"
 CHAT_MODEL   = "gpt-4"
 SEARCH_LIMIT = 5
