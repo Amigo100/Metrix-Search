@@ -1,25 +1,40 @@
-fastapi==0.110.2
-uvicorn[standard]==0.29.0
+# ───────────────────────── project/combined_requirements.txt ─────────────────────────
+#
+#  • All packages have Python‑3.12, macOS‑arm64 wheels on PyPI
+#  • “heavy” extras that need C/C++ tool‑chains (onnx, opencv, …) are NOT pulled in
+#  • If you later need full OCR / computer‑vision support, switch
+#       unstructured[md] → unstructured[all-docs]
+#    and make sure cmake + tesseract are installed on the host.
+# -------------------------------------------------------------------------------------
 
+# ── FastAPI stack ─────────────────────────────────────────────────────────────────────
+fastapi==0.110.2
+uvicorn[standard]==0.29.0          # httptools, uvloop, watchfiles, websockets wheels
+
+# ── RAG + vector DB ───────────────────────────────────────────────────────────────────
 openai>=1.2.0
 qdrant-client==1.13.3
-unstructured==0.10.19
-PyPDF2==3.0.1
-pandas==2.2.3
-
-sentence-transformers==3.4.1        # first wheels for py312/mac‑arm64
+langchain_core==0.3.54
+sentence-transformers==3.4.1
 transformers==4.51.0
-tokenizers==0.21.1                  # ← wheel available for py312/mac‑arm64
-
+tokenizers==0.21.1                 # latest wheel for macOS‑arm64 / py312
 nltk==3.8.1
 huggingface_hub==0.30.2
-langchain_core
-python-multipart
 
-xgboost==2.1.4
-scikit-learn==1.4.2
-joblib==1.4.2
-numpy==1.26.3
-python-dotenv==1.0.1
+# ── Document loaders / parsing ────────────────────────────────────────────────────────
+# core package + Markdown support ONLY (pure‑Python → no compiler needed)
+unstructured[md]==0.10.19
+PyPDF2==3.0.1
 pdfplumber
-python-magic==0.4.27
+python-multipart                   # for file uploads in FastAPI
+
+# ── Data wrangling / ML ───────────────────────────────────────────────────────────────
+pandas==2.2.3
+numpy==1.26.3
+scikit-learn==1.4.2
+xgboost==2.1.4
+joblib==1.4.2
+
+# ── Misc utils ────────────────────────────────────────────────────────────────────────
+python-dotenv==1.0.1
+python-magic==0.4.27               # MIME‑type detection on macOS & Linux
