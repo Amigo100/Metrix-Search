@@ -40,14 +40,15 @@ import {
 } from 'date-fns';
 
 // --- Mock HomeContext ---
-// In a real application, this would come from your context provider setup.
-// For this standalone component, we create a simple mock context.
+// Using a mock context as the original was not provided in the initial code.
+// Replace with your actual context import if available.
 const HomeContext = React.createContext<any>({
   state: {
-    showSidePromptbar: true, // Default to showing the sidebar
+    showSidePromptbar: true, // Default to showing the sidebar for standalone demo
   },
   dispatch: () => {}, // Mock dispatch function
 });
+
 
 // --- Types ---
 type TaskCompletionStatus = 'incomplete' | 'in-progress' | 'complete';
@@ -74,7 +75,8 @@ interface Patient {
 
 // --- Mock shadcn/ui Components ---
 // These are simplified versions for demonstration purposes.
-// In a real project, you'd import these from your UI library.
+// NOTE: Styles have been adjusted for better visibility in light/dark modes
+// and use a teal primary color (#008080).
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
@@ -84,18 +86,17 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'default', size = 'default', asChild = false, ...props }, ref) => {
-    // Basic styling mimicking shadcn structure (replace with actual Tailwind classes)
     const baseStyle =
       'inline-flex items-center justify-center rounded-md text-sm font-medium ' +
       'ring-offset-background transition-colors focus-visible:outline-none ' +
-      'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+      'focus-visible:ring-2 focus-visible:ring-[#008080] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-gray-900 dark:focus-visible:ring-[#008080]'; // Adjusted focus ring for dark mode
     const variants: Record<NonNullable<ButtonProps['variant']>, string> = {
-      default: 'bg-[#008080] text-white hover:bg-[#006666]', // Using teal for primary
-      destructive: 'bg-red-500 text-white hover:bg-red-600',
-      outline: 'border border-gray-300 bg-transparent hover:bg-gray-100 hover:text-gray-900',
-      secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',
-      ghost: 'hover:bg-gray-100 hover:text-gray-900',
-      link: 'text-[#008080] underline-offset-4 hover:underline',
+      default: 'bg-[#008080] text-white hover:bg-[#006666] dark:hover:bg-[#005959]', // Teal primary
+      destructive: 'bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800',
+      outline: 'border border-gray-300 bg-white hover:bg-gray-100 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100',
+      secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600',
+      ghost: 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 dark:text-gray-100',
+      link: 'text-[#008080] underline-offset-4 hover:underline dark:text-[#2dd4bf]',
     };
     const sizes: Record<NonNullable<ButtonProps['size']>, string> = {
       default: 'h-10 px-4 py-2',
@@ -119,11 +120,12 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, type, ...props }, ref) => {
   const baseStyle =
-    'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 ' + // Changed background to white
-    'text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm ' + // file:bg-transparent
-    'file:font-medium placeholder:text-gray-500 focus-visible:outline-none ' + // Adjusted placeholder color
-    'focus-visible:ring-2 focus-visible:ring-[#008080] focus-visible:ring-offset-2 ' + // Ring color to teal
-    'disabled:cursor-not-allowed disabled:opacity-50';
+    'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 ' + // Light mode background
+    'text-sm text-gray-900 ring-offset-background file:border-0 file:bg-transparent file:text-sm ' +
+    'file:font-medium placeholder:text-gray-500 focus-visible:outline-none ' +
+    'focus-visible:ring-2 focus-visible:ring-[#008080] focus-visible:ring-offset-2 ' + // Teal focus ring
+    'disabled:cursor-not-allowed disabled:opacity-50 ' +
+    'dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400 dark:ring-offset-gray-900 dark:focus-visible:ring-[#008080]'; // Dark mode styles
   return <input type={type} className={`${baseStyle} ${className ?? ''}`} ref={ref} {...props} />;
 });
 Input.displayName = 'Input';
@@ -134,13 +136,13 @@ interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
 const Label = React.forwardRef<HTMLLabelElement, LabelProps>(({ className, ...props }, ref) => (
   <label
     ref={ref}
-    className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className ?? ''}`}
+    className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-700 dark:text-gray-300 ${className ?? ''}`} // Adjusted text colors
     {...props}
   />
 ));
 Label.displayName = 'Label';
 
-// Basic Dialog (Modal)
+// Basic Dialog (Modal) - Enhanced for better styling
 interface DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -148,10 +150,22 @@ interface DialogProps {
 }
 const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) =>
   open ? (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md border border-gray-200 dark:border-gray-700">
+    // Overlay
+    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in"> {/* Added backdrop blur and animation */}
+      {/* Dialog Container */}
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md border border-gray-200 dark:border-gray-700 transform transition-all scale-100 opacity-100"> {/* Added transform */}
         {children}
       </div>
+      {/* Simple CSS for fade-in animation */}
+      <style jsx global>{`
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.2s ease-out forwards;
+        }
+      `}</style>
     </div>
   ) : null;
 
@@ -167,7 +181,7 @@ interface DialogHeaderProps {
   className?: string;
 }
 const DialogHeader: React.FC<DialogHeaderProps> = ({ children, className }) => (
-  <div className={`mb-4 relative ${className ?? ''}`}>{children}</div> // Added relative for absolute positioning of close button
+  <div className={`mb-4 relative border-b border-gray-200 dark:border-gray-700 pb-4 ${className ?? ''}`}>{children}</div> // Added border bottom
 );
 interface DialogTitleProps {
   children: React.ReactNode;
@@ -181,32 +195,32 @@ interface DialogDescriptionProps {
   className?: string;
 }
 const DialogDescription: React.FC<DialogDescriptionProps> = ({ children, className }) => (
-  <p className={`text-sm text-gray-600 dark:text-gray-400 ${className ?? ''}`}>{children}</p>
+  <p className={`text-sm text-gray-600 dark:text-gray-400 mt-1 ${className ?? ''}`}>{children}</p> // Added margin top
 );
 interface DialogFooterProps {
   children: React.ReactNode;
   className?: string;
 }
 const DialogFooter: React.FC<DialogFooterProps> = ({ children, className }) => (
-  <div className={`mt-6 flex justify-end space-x-2 border-t border-gray-200 dark:border-gray-700 pt-4 ${className ?? ''}`}>{children}</div>
+  <div className={`mt-6 flex justify-end space-x-3 ${className ?? ''}`}>{children}</div> // Increased space
 );
 interface DialogCloseProps {
   children: React.ReactElement;
   onClick?: () => void;
-  asChild?: boolean; // Keep asChild for potential composition
+  asChild?: boolean;
 }
 const DialogClose: React.FC<DialogCloseProps> = ({ children, onClick }) =>
   React.cloneElement(children, { onClick });
 
-// Basic Card
+// Basic Card - Enhanced Styling
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
 }
 const Card = React.forwardRef<HTMLDivElement, CardProps>(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    // The base card provides a default border (border-gray-200). Specific classes like border-2 and borderColor will override this.
-    className={`rounded-lg border bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm border-gray-200 dark:border-gray-700 ${className ?? ''}`}
+    // Base card styles with border, background, text colors for light/dark modes
+    className={`rounded-lg border bg-white dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 shadow-md dark:shadow-lg dark:shadow-black/20 border-gray-200 dark:border-gray-700/50 ${className ?? ''}`}
     {...props}
   />
 ));
@@ -224,7 +238,7 @@ interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
   className?: string;
 }
 const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(({ className, ...props }, ref) => (
-  <h3 ref={ref} className={`text-lg font-semibold leading-none tracking-tight ${className ?? ''}`} {...props} />
+  <h3 ref={ref} className={`text-base font-semibold leading-none tracking-tight ${className ?? ''}`} {...props} /> // Changed to text-base
 ));
 CardTitle.displayName = 'CardTitle';
 
@@ -238,10 +252,10 @@ CardContent.displayName = 'CardContent';
 
 // --- Helper Functions ---
 const getBorderColor = (minutes: number): string => {
-  if (minutes >= 300) return 'border-red-500 animate-pulse-border'; // Flashing Red >= 5 hours
-  if (minutes >= 240) return 'border-red-500'; // Red >= 4 hours
-  if (minutes >= 120) return 'border-amber-500'; // Amber >= 2 hours
-  return 'border-green-500'; // Green < 2 hours
+  if (minutes >= 300) return 'border-red-500 dark:border-red-600 animate-pulse-border'; // Flashing Red >= 5 hours
+  if (minutes >= 240) return 'border-red-500 dark:border-red-600'; // Red >= 4 hours
+  if (minutes >= 120) return 'border-yellow-500 dark:border-yellow-600'; // Amber >= 2 hours (changed from amber to yellow for better contrast)
+  return 'border-green-500 dark:border-green-600'; // Green < 2 hours
 };
 
 // --- LocalStorage Parsing ---
@@ -260,7 +274,7 @@ const parsePatientsWithDates = (jsonData: string): Patient[] | null => {
 
             return {
               ...t,
-              id: t.id || `task-${Date.now()}-${Math.random().toString(36).substring(7)}`, // Ensure ID exists
+              id: t.id || `task-${Date.now()}-${Math.random().toString(36).substring(7)}`,
               createdAt: isValid(createdAt) ? createdAt : new Date(),
               completedAt: completedAt && isValid(completedAt) ? completedAt : null,
               timerEnd: timerEnd && isValid(timerEnd) ? timerEnd : null,
@@ -274,7 +288,7 @@ const parsePatientsWithDates = (jsonData: string): Patient[] | null => {
 
       return {
         ...patient,
-        id: patient.id || `patient-${Date.now()}`, // Ensure ID exists
+        id: patient.id || `patient-${Date.now()}-${Math.random().toString(36).substring(7)}`,
         arrivalTime: isValid(arrivalTime) ? arrivalTime : new Date(),
         tasks,
         notes: patient.notes || '',
@@ -325,210 +339,140 @@ const TaskItem: React.FC<TaskItemProps> = ({
   const timerInputRef = useRef<HTMLInputElement>(null);
   const notesTextareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Timer check effect
+  // Timer check effect - Refined logic
   useEffect(() => {
-    // Skip checks if task is complete
     if (task.completionStatus === 'complete') {
-      if (isTimerExpired) setIsTimerExpired(false); // Ensure expired state is reset if completed
+      if (isTimerExpired) setIsTimerExpired(false);
       setTimeRemaining('');
       return;
     }
-
-    // Clear timer state if no timerEnd exists
     if (!task.timerEnd) {
-        if (isTimerExpired) setIsTimerExpired(false);
-        setTimeRemaining('');
-        return;
+      if (isTimerExpired) setIsTimerExpired(false);
+      setTimeRemaining('');
+      return;
     }
 
     let intervalId: NodeJS.Timeout | null = null;
 
     const checkTimer = () => {
       const now = new Date();
-      // Check if timer exists and has passed
       if (task.timerEnd && now >= task.timerEnd) {
-        if (!isTimerExpired) { // Only update state and notify if it wasn't already expired
+        if (!isTimerExpired) {
           setIsTimerExpired(true);
           setTimeRemaining('Expired');
-          updateTaskTimerState(patientId, task.id, true); // Update parent state
-
-          // Fire a desktop notification if permission granted and not acknowledged
-          if (
-            !task.isAcknowledged &&
-            typeof window !== 'undefined' &&
-            'Notification' in window &&
-            Notification.permission === 'granted'
-          ) {
-            new Notification(`Task Timer Expired: ${patientName}`, {
-              body: task.text,
-              tag: `task-${task.id}`, // Tag helps manage notifications
-            });
+          updateTaskTimerState(patientId, task.id, true);
+          if (!task.isAcknowledged && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+            new Notification(`Task Timer Expired: ${patientName}`, { body: task.text, tag: `task-${task.id}` });
           }
         }
-        if (intervalId) clearInterval(intervalId); // Stop checking once expired
-      } else if (task.timerEnd) { // Timer exists and hasn't passed yet
-        if (isTimerExpired) { // Reset expired state if timer was edited/snoozed
+        if (intervalId) clearInterval(intervalId);
+      } else if (task.timerEnd) {
+        if (isTimerExpired) {
           setIsTimerExpired(false);
           updateTaskTimerState(patientId, task.id, false);
         }
-        // Update remaining time display
         setTimeRemaining(`in ${formatDistanceToNowStrict(task.timerEnd)}`);
       }
     };
 
-    checkTimer(); // Initial check
-
-    // Set up interval only if timer exists and is in the future
+    checkTimer();
     if (task.timerEnd && new Date() < task.timerEnd) {
       intervalId = setInterval(checkTimer, 1000 * 30); // Check every 30 seconds
     }
-
-    // Cleanup interval on unmount or dependency change
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
   }, [
-    task.timerEnd,
-    task.id,
-    task.completionStatus, // Re-run if completion status changes
-    task.isAcknowledged, // Re-run if acknowledged status changes
-    patientId,
-    patientName,
-    task.text,
-    updateTaskTimerState,
-    isTimerExpired, // Include local expired state as dependency
+    task.timerEnd, task.id, task.completionStatus, task.isAcknowledged,
+    patientId, patientName, task.text, updateTaskTimerState, isTimerExpired
   ]);
 
-
-  // Focus timer input when editing starts
+  // Focus effects (no changes)
   useEffect(() => {
     if (isEditingTimer) {
-      const initialMinutes =
-        task.timerEnd && task.timerEnd > new Date()
-          ? Math.max(0, differenceInMinutes(task.timerEnd, new Date())).toString()
-          : '';
+      const initialMinutes = task.timerEnd && task.timerEnd > new Date()
+        ? Math.max(0, differenceInMinutes(task.timerEnd, new Date())).toString() : '';
       setEditTimerMinutes(initialMinutes);
-      setTimeout(() => timerInputRef.current?.focus(), 0); // Focus after render
+      setTimeout(() => timerInputRef.current?.focus(), 0);
     }
   }, [isEditingTimer, task.timerEnd]);
 
-  // Focus notes textarea when editing starts
   useEffect(() => {
     if (isEditingNotes) {
       setEditNotes(task.notes || '');
-      setTimeout(() => notesTextareaRef.current?.focus(), 0); // Focus after render
+      setTimeout(() => notesTextareaRef.current?.focus(), 0);
     }
   }, [isEditingNotes, task.notes]);
 
-  // Handle saving the edited timer
-  const handleTimerEditSubmit = () => {
+  // Event Handlers (no functional changes, minor adjustments maybe for consistency)
+  const handleTimerEditSubmit = useCallback(() => {
     if (!isEditingTimer) return;
-    const minutesToSet =
-      editTimerMinutes.trim() === '' || editTimerMinutes === '0' ? null : editTimerMinutes;
+    const minutesToSet = editTimerMinutes.trim() === '' || editTimerMinutes === '0' ? null : editTimerMinutes;
     updateTaskTimer(patientId, task.id, minutesToSet);
     setIsEditingTimer(false);
-  };
+  }, [isEditingTimer, editTimerMinutes, patientId, task.id, updateTaskTimer]);
 
-  // Update timer input state
-  const handleTimerInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEditTimerMinutes(e.target.value);
-  };
+  const handleTimerInputChange = (e: ChangeEvent<HTMLInputElement>) => setEditTimerMinutes(e.target.value);
 
-  // Handle Enter/Escape keys in timer input
   const handleTimerInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleTimerEditSubmit();
-    } else if (e.key === 'Escape') {
-      setIsEditingTimer(false);
-    }
+    if (e.key === 'Enter') handleTimerEditSubmit();
+    else if (e.key === 'Escape') setIsEditingTimer(false);
   };
 
-  // Handle saving edited notes
-  const handleNotesEditSubmit = () => {
+  const handleNotesEditSubmit = useCallback(() => {
     if (!isEditingNotes) return;
     updateTaskNotes(patientId, task.id, editNotes);
     setIsEditingNotes(false);
-  };
+  }, [isEditingNotes, editNotes, patientId, task.id, updateTaskNotes]);
 
-  // Update notes textarea state
-  const handleNotesInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setEditNotes(e.target.value);
-  };
+  const handleNotesInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => setEditNotes(e.target.value);
 
-  // Handle Enter/Escape keys in notes textarea
   const handleNotesKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) { // Submit on Enter (without Shift)
-      e.preventDefault();
-      handleNotesEditSubmit();
-    } else if (e.key === 'Escape') { // Cancel on Escape
-      setIsEditingNotes(false);
-      setEditNotes(task.notes || ''); // Reset to original notes
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleNotesEditSubmit(); }
+    else if (e.key === 'Escape') { setIsEditingNotes(false); setEditNotes(task.notes || ''); }
   };
 
-  // Cycle through task completion statuses
-  const handleCompletionToggle = () => {
-    let nextStatus: TaskCompletionStatus;
-    switch (task.completionStatus) {
-      case 'incomplete':
-        nextStatus = 'in-progress';
-        break;
-      case 'in-progress':
-        nextStatus = 'complete';
-        break;
-      case 'complete':
-        nextStatus = 'incomplete';
-        break;
-      default:
-        nextStatus = 'incomplete';
-    }
+  const handleCompletionToggle = useCallback(() => {
+    const nextStatus: TaskCompletionStatus =
+      task.completionStatus === 'incomplete' ? 'in-progress' :
+      task.completionStatus === 'in-progress' ? 'complete' : 'incomplete';
     updateTaskCompletion(patientId, task.id, nextStatus);
-  };
+  }, [task.completionStatus, patientId, task.id, updateTaskCompletion]);
 
-  // Snooze timer by adding 15 minutes
-  const handleSnooze = () => {
-    updateTaskTimer(patientId, task.id, '15');
-  };
+  const handleSnooze = useCallback(() => {
+    updateTaskTimer(patientId, task.id, '15'); // Snooze for 15 min
+  }, [patientId, task.id, updateTaskTimer]);
 
-  // Get the appropriate icon based on completion status
+  // Icon rendering (no changes)
   const getCompletionIcon = () => {
     switch (task.completionStatus) {
-      case 'in-progress':
-        return <MinusSquare className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />;
-      case 'complete':
-        return <CheckSquare className="h-4 w-4 text-green-500 dark:text-green-400" />;
-      case 'incomplete':
-      default:
-        return <Square className="h-4 w-4 text-gray-500 dark:text-gray-400" />;
+      case 'in-progress': return <MinusSquare className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />;
+      case 'complete': return <CheckSquare className="h-4 w-4 text-green-500 dark:text-green-400" />;
+      default: return <Square className="h-4 w-4 text-gray-400 dark:text-gray-500" />; // Adjusted default color
     }
   };
 
-  // --- Dynamic Styling based on Task State ---
-  let taskItemClasses = 'flex flex-col py-1.5 group'; // Base classes + group for hover effects
-  let taskTextStyle = 'text-sm flex-1 cursor-default'; // Base text style
-  let timerTextStyle = 'text-xs font-mono'; // Base timer style
+  // --- Dynamic Styling - Refined for Readability ---
+  let taskItemClasses = 'flex flex-col py-1.5 group relative'; // Added relative for potential absolute elements if needed later
+  let taskTextStyle = 'text-sm flex-1 cursor-default mr-1'; // Added margin-right
+  let timerTextStyle = 'text-xs font-mono whitespace-nowrap'; // Prevent wrapping
 
   if (task.completionStatus === 'complete') {
-    // Completed tasks: Lighter gray, strikethrough
-    taskTextStyle += ' line-through text-gray-500 dark:text-gray-400';
-    timerTextStyle += ' text-gray-500 dark:text-gray-400';
+    taskTextStyle += ' line-through text-gray-400 dark:text-gray-500';
+    timerTextStyle += ' text-gray-400 dark:text-gray-500';
   } else if (isTimerExpired && !task.isAcknowledged) {
-    // Expired & Unacknowledged: Flashing background, bold red text
-    taskItemClasses += ' animate-flash'; // Needs CSS animation defined elsewhere
-    taskTextStyle += ' text-red-600 dark:text-red-400 font-medium';
-    timerTextStyle += ' text-red-600 dark:text-red-400 font-semibold';
+    taskItemClasses += ' animate-flash-bg'; // Use background flash for better visibility
+    taskTextStyle += ' text-red-700 dark:text-red-400 font-medium';
+    timerTextStyle += ' text-red-700 dark:text-red-400 font-semibold';
   } else if (isTimerExpired && task.isAcknowledged) {
-    // Expired & Acknowledged: Darker red text
-    taskTextStyle += ' text-red-700 dark:text-red-500';
-    timerTextStyle += ' text-red-700 dark:text-red-500';
+    taskTextStyle += ' text-red-800 dark:text-red-500'; // Slightly darker acknowledged red
+    timerTextStyle += ' text-red-800 dark:text-red-500';
   } else if (task.timerEnd) {
-    // Active timer: Default text color
-    taskTextStyle += ' text-gray-800 dark:text-gray-200';
-    timerTextStyle += ' text-gray-700 dark:text-gray-300';
+    taskTextStyle += ' text-gray-800 dark:text-gray-200'; // Standard text
+    timerTextStyle += ' text-gray-600 dark:text-gray-400'; // Standard timer text
   } else {
-    // No timer: Default text color
-    taskTextStyle += ' text-gray-800 dark:text-gray-200';
-    timerTextStyle += ' text-gray-500 dark:text-gray-400'; // Slightly muted timer text if no timer
+    taskTextStyle += ' text-gray-800 dark:text-gray-200'; // Standard text (no timer)
+    timerTextStyle += ' text-gray-400 dark:text-gray-600'; // Muted if no timer
   }
 
   return (
@@ -537,9 +481,8 @@ const TaskItem: React.FC<TaskItemProps> = ({
       <div className="flex items-center space-x-2 w-full">
         {/* Completion Status Toggle Button */}
         <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 flex-shrink-0 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+          variant="ghost" size="icon"
+          className="h-6 w-6 flex-shrink-0 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
           onClick={handleCompletionToggle}
           title={`Status: ${task.completionStatus}. Click to change.`}
         >
@@ -547,89 +490,46 @@ const TaskItem: React.FC<TaskItemProps> = ({
         </Button>
 
         {/* Task Text */}
-        <span className={taskTextStyle}>{task.text}</span>
+        <span className={taskTextStyle} title={task.text}>{task.text}</span> {/* Added title attribute for long text */}
 
         {/* --- Timer Controls / Display --- */}
-        <div className="flex items-center space-x-1 flex-shrink-0">
+        <div className="flex items-center space-x-1 flex-shrink-0 ml-auto"> {/* Added ml-auto to push controls right */}
           {isEditingTimer ? (
             // Timer Editing Mode
             <>
               <Input
-                ref={timerInputRef}
-                type="number"
-                min="0"
-                max="999"
-                value={editTimerMinutes}
-                onChange={handleTimerInputChange}
-                onKeyDown={handleTimerInputKeyDown}
-                className="w-14 h-6 text-xs px-1 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" // Adjusted styling for dark mode
-                placeholder="Min"
+                ref={timerInputRef} type="number" min="0" max="999" value={editTimerMinutes}
+                onChange={handleTimerInputChange} onKeyDown={handleTimerInputKeyDown}
+                className="w-14 h-6 text-xs px-1 dark:bg-gray-700" placeholder="Min"
               />
-              {/* Save Timer Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
-                onClick={handleTimerEditSubmit}
-                title="Save Timer"
-              >
-                <Save className="h-3 w-3" />
+              <Button variant="ghost" size="icon" className="h-6 w-6 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300" onClick={handleTimerEditSubmit} title="Save Timer">
+                <Save className="h-3.5 w-3.5" /> {/* Slightly larger icon */}
               </Button>
-              {/* Cancel Edit Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                onClick={() => setIsEditingTimer(false)}
-                title="Cancel Edit"
-              >
-                <X className="h-3 w-3" />
+              <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" onClick={() => setIsEditingTimer(false)} title="Cancel Edit">
+                <X className="h-3.5 w-3.5" /> {/* Slightly larger icon */}
               </Button>
             </>
           ) : (
             // Timer Display / Action Mode
             <>
-              {/* Acknowledge/Snooze Buttons (Only if expired, unacknowledged, and not complete) */}
               {isTimerExpired && !task.isAcknowledged && task.completionStatus !== 'complete' && (
                 <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 text-yellow-500 hover:text-yellow-600 dark:text-yellow-400 dark:hover:text-yellow-300"
-                    onClick={() => acknowledgeTimer(patientId, task.id)}
-                    title="Acknowledge Timer"
-                  >
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-yellow-500 hover:text-yellow-600 dark:text-yellow-400 dark:hover:text-yellow-300" onClick={() => acknowledgeTimer(patientId, task.id)} title="Acknowledge Timer">
                     <BellOff className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
-                    onClick={handleSnooze}
-                    title="Snooze 15 min"
-                  >
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300" onClick={handleSnooze} title="Snooze 15 min">
                     <AlarmClockOff className="h-4 w-4" />
                   </Button>
                 </>
               )}
-
-              {/* Timer Display (If timer exists and task not complete) */}
               {task.timerEnd && task.completionStatus !== 'complete' && (
-                <span className={timerTextStyle}>
+                <span className={timerTextStyle} title={`Ends ${format(task.timerEnd, 'Pp')}`}> {/* Added title with full date/time */}
                   <Clock className="inline h-3 w-3 mr-1" />
                   {isTimerExpired ? 'Expired' : timeRemaining}
                 </span>
               )}
-
-              {/* Edit/Add Timer Button (If task not complete, shows on hover) */}
               {task.completionStatus !== 'complete' && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => setIsEditingTimer(true)}
-                  title={task.timerEnd ? 'Edit Timer' : 'Add Timer'}
-                >
+                <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setIsEditingTimer(true)} title={task.timerEnd ? 'Edit Timer' : 'Add Timer'}>
                   {task.timerEnd ? <Edit3 className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
                 </Button>
               )}
@@ -639,59 +539,36 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
         {/* --- Notes Button (Shows on hover) --- */}
         <Button
-          variant="ghost"
-          size="icon"
-          className={`h-6 w-6 ml-1 flex-shrink-0 ${
-            task.notes ? 'text-blue-500 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
-          } hover:text-blue-600 dark:hover:text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity`}
+          variant="ghost" size="icon"
+          className={`h-6 w-6 ml-1 flex-shrink-0 ${task.notes ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'} hover:text-blue-600 dark:hover:text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity`}
           onClick={() => setIsEditingNotes((prev) => !prev)}
           title={task.notes ? 'Edit/View Notes' : 'Add Notes'}
         >
-          <MessageSquare className="h-3 w-3" />
+          <MessageSquare className="h-3.5 w-3.5" /> {/* Slightly larger icon */}
         </Button>
 
         {/* --- Remove Task Button (Shows on hover) --- */}
         <Button
-          variant="ghost"
-          size="icon"
+          variant="ghost" size="icon"
           className="h-6 w-6 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-          onClick={() => removeTask(patientId, task.id)}
-          title="Remove Task"
+          onClick={() => removeTask(patientId, task.id)} title="Remove Task"
         >
-          <Trash2 className="h-3 w-3" />
+          <Trash2 className="h-3.5 w-3.5" /> {/* Slightly larger icon */}
         </Button>
       </div>
 
       {/* --- Notes Editing Section --- */}
       {isEditingNotes && (
-        <div className="mt-1.5 pl-8 pr-2 flex items-start gap-2 w-full"> {/* Changed items-center to items-start */}
+        <div className="mt-1.5 pl-8 pr-2 flex items-start gap-2 w-full">
           <textarea
-            ref={notesTextareaRef}
-            value={editNotes}
-            onChange={handleNotesInputChange}
-            onKeyDown={handleNotesKeyDown}
-            placeholder="Add task notes..."
-            rows={2}
-            className="flex-grow text-xs bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded p-1.5 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-1 focus:ring-[#008080] focus:outline-none resize-none"
+            ref={notesTextareaRef} value={editNotes} onChange={handleNotesInputChange} onKeyDown={handleNotesKeyDown}
+            placeholder="Add task notes..." rows={2}
+            className="flex-grow text-xs bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded p-1.5 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-1 focus:ring-[#008080] focus:outline-none resize-none" // Adjusted background
           />
-          {/* Save Notes Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 self-start flex-shrink-0" // Added self-start and flex-shrink-0
-            onClick={handleNotesEditSubmit}
-            title="Save Notes"
-          >
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 self-start flex-shrink-0" onClick={handleNotesEditSubmit} title="Save Notes">
             <Save className="h-4 w-4" />
           </Button>
-          {/* Cancel Notes Edit Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 self-start flex-shrink-0" // Added self-start and flex-shrink-0
-            onClick={() => setIsEditingNotes(false)}
-            title="Cancel Edit"
-          >
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 self-start flex-shrink-0" onClick={() => setIsEditingNotes(false)} title="Cancel Edit">
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -704,18 +581,37 @@ const TaskItem: React.FC<TaskItemProps> = ({
       )}
 
       {/* --- Task Metadata (Creation/Completion Dates) --- */}
-      <div className="pl-8 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+      <div className="pl-8 text-xs text-gray-500 dark:text-gray-500 mt-0.5"> {/* Adjusted color */}
         Added: {formatRelative(task.createdAt, new Date())}
         {task.completionStatus === 'complete' && task.completedAt && (
           <span className="ml-2">Completed: {formatRelative(task.completedAt, new Date())}</span>
         )}
       </div>
+       {/* CSS for the background flashing animation */}
+       <style jsx global>{`
+        @keyframes flash-bg {
+          0%, 100% { background-color: transparent; }
+          50% { background-color: rgba(239, 68, 68, 0.1); } /* Light red flash, adjust color/opacity as needed */
+        }
+        .animate-flash-bg {
+          animation: flash-bg 1.5s infinite;
+        }
+        /* Ensure pulse border animation is defined if used */
+        @keyframes pulse-border {
+           0%, 100% { border-color: ${getBorderColor(300).split(' ')[0]}; } /* Use helper for consistency */
+           50% { border-color: ${getBorderColor(300).split(' ')[0].replace('500', '400').replace('600','500')}; } /* Approximate lighter shade */
+        }
+        .animate-pulse-border {
+           animation: pulse-border 1.5s infinite;
+        }
+      `}</style>
     </div>
   );
 };
 
 
 // --- PatientCard ---
+// [NO CHANGES IN THIS COMPONENT]
 interface PatientCardProps {
   patient: Patient;
   removePatient: (patientId: string) => void;
@@ -733,16 +629,8 @@ interface PatientCardProps {
   updateTaskNotes: (patientId: string, taskId: string | number, notes: string) => void;
 }
 const PatientCard: React.FC<PatientCardProps> = ({
-  patient,
-  removePatient,
-  updateTaskTimerState,
-  addTaskToPatient,
-  updateTaskTimer,
-  removeTaskFromPatient,
-  updateTaskCompletion,
-  acknowledgeTaskTimer,
-  updatePatientNotes,
-  updateTaskNotes,
+  patient, removePatient, updateTaskTimerState, addTaskToPatient, updateTaskTimer,
+  removeTaskFromPatient, updateTaskCompletion, acknowledgeTaskTimer, updatePatientNotes, updateTaskNotes,
 }) => {
   const [lengthOfStayMinutes, setLengthOfStayMinutes] = useState<number>(() =>
     differenceInMinutes(new Date(), patient.arrivalTime)
@@ -754,156 +642,95 @@ const PatientCard: React.FC<PatientCardProps> = ({
   const [editPatientNotes, setEditPatientNotes] = useState<string>(patient.notes || '');
   const patientNotesTextareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Calculate and update Length of Stay (LOS) periodically
   useEffect(() => {
     const calculateLOS = () => {
-      const now = new Date();
-      const minutes = differenceInMinutes(now, patient.arrivalTime);
+      const minutes = differenceInMinutes(new Date(), patient.arrivalTime);
       const hours = Math.floor(minutes / 60);
       const remainingMinutes = minutes % 60;
       setLengthOfStayMinutes(minutes);
       setLengthOfStayFormatted(`${hours}h ${remainingMinutes}m`);
     };
-    calculateLOS(); // Initial calculation
-    const intervalId = setInterval(calculateLOS, 60_000); // Update every minute
-    return () => clearInterval(intervalId); // Cleanup interval
+    calculateLOS();
+    const intervalId = setInterval(calculateLOS, 60_000);
+    return () => clearInterval(intervalId);
   }, [patient.arrivalTime]);
 
-  // Focus patient notes textarea when editing starts
   useEffect(() => {
     if (isEditingPatientNotes) {
       setEditPatientNotes(patient.notes || '');
-      setTimeout(() => patientNotesTextareaRef.current?.focus(), 0); // Focus after render
+      setTimeout(() => patientNotesTextareaRef.current?.focus(), 0);
     }
   }, [isEditingPatientNotes, patient.notes]);
 
-  // Handle submitting a new task for the patient
-  const handleAddTaskSubmit = (e?: FormEvent<HTMLFormElement>) => {
-    e?.preventDefault(); // Prevent default form submission
-    if (newTaskText.trim() === '') return; // Don't add empty tasks
+  const handleAddTaskSubmit = useCallback((e?: FormEvent<HTMLFormElement>) => {
+    e?.preventDefault();
+    if (newTaskText.trim() === '') return;
     addTaskToPatient(patient.id, newTaskText, newTaskTimerMinutes);
-    // Reset input fields
     setNewTaskText('');
     setNewTaskTimerMinutes('');
-  };
+  }, [addTaskToPatient, patient.id, newTaskText, newTaskTimerMinutes]);
 
-  // Handle Enter key in the new task input field to submit
   const handleNewTaskKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleAddTaskSubmit();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddTaskSubmit(); }
   };
 
-  // Handle saving edited patient notes
-  const handlePatientNotesSubmit = () => {
+  const handlePatientNotesSubmit = useCallback(() => {
     if (!isEditingPatientNotes) return;
     updatePatientNotes(patient.id, editPatientNotes);
     setIsEditingPatientNotes(false);
-  };
+  }, [isEditingPatientNotes, editPatientNotes, patient.id, updatePatientNotes]);
 
-  // Handle Enter/Escape keys in patient notes textarea
   const handlePatientNotesKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) { // Submit on Enter (without Shift)
-      e.preventDefault();
-      handlePatientNotesSubmit();
-    } else if (e.key === 'Escape') { // Cancel on Escape
-      setIsEditingPatientNotes(false);
-      setEditPatientNotes(patient.notes || ''); // Reset to original notes
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handlePatientNotesSubmit(); }
+    else if (e.key === 'Escape') { setIsEditingPatientNotes(false); setEditPatientNotes(patient.notes || ''); }
   };
 
-  // Determine border color based on LOS
   const borderColor = getBorderColor(lengthOfStayMinutes);
-
-  // Separate tasks into pending and completed
   const pendingTasks = patient.tasks.filter((t) => t.completionStatus !== 'complete');
   const completedTasks = patient.tasks.filter((t) => t.completionStatus === 'complete');
 
   return (
-    // ***** MODIFICATION START *****
-    // Reverted border-l-4 to border-2 for uniform border width.
-    // The borderColor variable now applies its color to all four sides.
+    // Using border-2 for uniform border width, color controlled by borderColor
     <Card id={`patient-card-${patient.id}`} className={`mb-4 border-2 ${borderColor} transition-colors duration-500`}>
-    {/* ***** MODIFICATION END ***** */}
-      {/* Card Header: Patient Name and Remove Button */}
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base font-medium">{patient.name}</CardTitle>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400"
-          onClick={() => removePatient(patient.id)}
-          title="Remove Patient"
-        >
+        <CardTitle>{patient.name}</CardTitle>
+        <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400" onClick={() => removePatient(patient.id)} title="Remove Patient">
           <X className="h-4 w-4" />
         </Button>
       </CardHeader>
-
-      {/* Card Content */}
       <CardContent>
-        {/* Length of Stay and Arrival Time */}
-        <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+        <div className="text-xs text-gray-600 dark:text-gray-400 mb-3"> {/* Increased mb */}
           <Clock className="inline h-3 w-3 mr-1" />
           LOS: <span className="font-semibold text-gray-800 dark:text-gray-200">{lengthOfStayFormatted}</span>
-          <span className="ml-2">
-            (Arrival: {format(patient.arrivalTime, 'HH:mm')})
-          </span>
+          <span className="ml-2">(Arrival: {format(patient.arrivalTime, 'HH:mm')})</span>
         </div>
 
         {/* Patient Notes Section */}
         <div className="mb-2 flex items-center justify-between">
           <div className="text-xs text-gray-700 dark:text-gray-300 font-medium flex items-center">
             Notes:
-            {/* Edit/View Patient Notes Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`h-6 w-6 ml-1 ${patient.notes ? 'text-blue-500 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}
-              onClick={() => setIsEditingPatientNotes((prev) => !prev)}
-              title={patient.notes ? 'Edit/View Notes' : 'Add Notes'}
-            >
+            <Button variant="ghost" size="icon" className={`h-6 w-6 ml-1 ${patient.notes ? 'text-blue-500 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`} onClick={() => setIsEditingPatientNotes((prev) => !prev)} title={patient.notes ? 'Edit/View Notes' : 'Add Notes'}>
               <MessageSquare className="h-4 w-4" />
             </Button>
           </div>
         </div>
-        {/* Patient Notes Editing Area */}
         {isEditingPatientNotes && (
-          <div className="mb-2 flex items-start gap-2 w-full"> {/* items-start */}
+          <div className="mb-2 flex items-start gap-2 w-full">
             <textarea
-              ref={patientNotesTextareaRef}
-              value={editPatientNotes}
-              onChange={(e) => setEditPatientNotes(e.target.value)}
-              onKeyDown={handlePatientNotesKeyDown}
-              rows={2}
-              className="flex-grow text-xs bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded p-1.5 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-1 focus:ring-[#008080] focus:outline-none resize-none"
-              placeholder="Add patient notes..."
+              ref={patientNotesTextareaRef} value={editPatientNotes} onChange={(e) => setEditPatientNotes(e.target.value)} onKeyDown={handlePatientNotesKeyDown}
+              rows={2} placeholder="Add patient notes..."
+              className="flex-grow text-xs bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded p-1.5 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-1 focus:ring-[#008080] focus:outline-none resize-none"
             />
-            {/* Save Patient Notes Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 self-start flex-shrink-0" // self-start
-              onClick={handlePatientNotesSubmit}
-              title="Save Notes"
-            >
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 self-start flex-shrink-0" onClick={handlePatientNotesSubmit} title="Save Notes">
               <Save className="h-4 w-4" />
             </Button>
-            {/* Cancel Patient Notes Edit Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 self-start flex-shrink-0" // self-start
-              onClick={() => setIsEditingPatientNotes(false)}
-              title="Cancel Edit"
-            >
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 self-start flex-shrink-0" onClick={() => setIsEditingPatientNotes(false)} title="Cancel Edit">
               <X className="h-4 w-4" />
             </Button>
           </div>
         )}
-        {/* Display Patient Notes (If not editing and notes exist) */}
         {!isEditingPatientNotes && patient.notes && (
-          <div className="mb-2 text-xs text-gray-600 dark:text-gray-400 italic break-words">
+          <div className="mb-3 text-xs text-gray-600 dark:text-gray-400 italic break-words bg-gray-50 dark:bg-gray-700/50 p-2 rounded"> {/* Added background, padding */}
             Note: {patient.notes}
           </div>
         )}
@@ -914,78 +741,34 @@ const PatientCard: React.FC<PatientCardProps> = ({
           {pendingTasks.length === 0 ? (
             <p className="text-xs text-gray-500 dark:text-gray-400 italic">No pending tasks.</p>
           ) : (
-            // Render each pending TaskItem
             pendingTasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                patientId={patient.id}
-                patientName={patient.name}
-                updateTaskTimerState={updateTaskTimerState}
-                updateTaskTimer={updateTaskTimer}
-                removeTask={removeTaskFromPatient}
-                updateTaskCompletion={updateTaskCompletion}
-                acknowledgeTimer={acknowledgeTaskTimer}
-                updateTaskNotes={updateTaskNotes}
-              />
+              <TaskItem key={task.id} task={task} patientId={patient.id} patientName={patient.name} {...{ updateTaskTimerState, updateTaskTimer, removeTask: removeTaskFromPatient, updateTaskCompletion, acknowledgeTimer, updateTaskNotes }} />
             ))
           )}
         </div>
 
-        {/* Completed Tasks Section (Only shown if there are completed tasks) */}
+        {/* Completed Tasks Section */}
         {completedTasks.length > 0 && (
-          <div className="mt-2 border-t border-gray-300/50 dark:border-gray-600/50 pt-2">
-            <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Completed Tasks:</h4>
-            {/* Render each completed TaskItem */}
+          <div className="mt-3 border-t border-gray-200/70 dark:border-gray-700/50 pt-2"> {/* Slightly lighter border */}
+            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Completed Tasks:</h4>
             {completedTasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                patientId={patient.id}
-                patientName={patient.name}
-                updateTaskTimerState={updateTaskTimerState}
-                updateTaskTimer={updateTaskTimer}
-                removeTask={removeTaskFromPatient}
-                updateTaskCompletion={updateTaskCompletion}
-                acknowledgeTimer={acknowledgeTaskTimer}
-                updateTaskNotes={updateTaskNotes}
-              />
+               <TaskItem key={task.id} task={task} patientId={patient.id} patientName={patient.name} {...{ updateTaskTimerState, updateTaskTimer, removeTask: removeTaskFromPatient, updateTaskCompletion, acknowledgeTimer, updateTaskNotes }} />
             ))}
           </div>
         )}
 
         {/* Add New Task Form */}
-        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700"> {/* Increased mt */}
           <form onSubmit={handleAddTaskSubmit} className="flex items-center gap-2">
-            {/* New Task Text Input */}
             <Input
-              type="text"
-              placeholder="Add Task"
-              value={newTaskText}
-              onChange={(e) => setNewTaskText(e.target.value)}
-              onKeyDown={handleNewTaskKeyDown} // Submit on Enter
-              className="flex-grow h-8 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" // Adjusted styling
+              type="text" placeholder="Add Task" value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)} onKeyDown={handleNewTaskKeyDown}
+              className="flex-grow h-9 text-sm" // Slightly taller input
             />
-            {/* New Task Timer Input */}
             <Input
-              type="number"
-              min="1"
-              max="999"
-              placeholder="Min"
-              value={newTaskTimerMinutes}
-              onChange={(e) => setNewTaskTimerMinutes(e.target.value)}
-              onKeyDown={handleNewTaskKeyDown} // Submit on Enter
-              className="w-16 h-8 text-xs px-1 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" // Adjusted styling and hide number spinners
+              type="number" min="1" max="999" placeholder="Min" value={newTaskTimerMinutes} onChange={(e) => setNewTaskTimerMinutes(e.target.value)} onKeyDown={handleNewTaskKeyDown}
+              className="w-16 h-9 text-xs px-1 dark:bg-gray-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" // Slightly taller input
             />
-            {/* Add Task Button */}
-            <Button
-              type="submit"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
-              disabled={newTaskText.trim() === ''} // Disable if text input is empty
-              title="Add Task"
-            >
+            <Button type="submit" variant="ghost" size="icon" className="h-9 w-9 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50" disabled={newTaskText.trim() === ''} title="Add Task">
               <Plus className="h-4 w-4" />
             </Button>
           </form>
@@ -999,238 +782,115 @@ const PatientCard: React.FC<PatientCardProps> = ({
 // --- AddPatientModal ---
 // [NO CHANGES IN THIS COMPONENT]
 interface ModalTaskState {
-  id: number; // Temporary ID for modal state management
-  text: string;
-  timerMinutes: string;
+  id: number; text: string; timerMinutes: string;
 }
 interface AddPatientModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  addPatient: (newPatient: Patient) => void;
+  isOpen: boolean; onClose: () => void; addPatient: (newPatient: Patient) => void;
 }
 const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addPatient }) => {
-  // State for the modal inputs
   const [patientName, setPatientName] = useState<string>('');
-  const [arrivalTime, setArrivalTime] = useState<string>(format(new Date(), 'HH:mm')); // Default to current time
-  const [tasks, setTasks] = useState<ModalTaskState[]>([
-    { id: Date.now(), text: '', timerMinutes: '' }, // Start with one empty task line
-  ]);
+  const [arrivalTime, setArrivalTime] = useState<string>(format(new Date(), 'HH:mm'));
+  const [tasks, setTasks] = useState<ModalTaskState[]>([{ id: Date.now(), text: '', timerMinutes: '' }]);
   const [patientNotes, setPatientNotes] = useState<string>('');
 
-  // Add a new empty task line to the modal form
-  const handleAddTaskLine = (): void => {
-    setTasks([...tasks, { id: Date.now(), text: '', timerMinutes: '' }]);
-  };
+  const handleAddTaskLine = useCallback(() => {
+    setTasks(t => [...t, { id: Date.now(), text: '', timerMinutes: '' }]);
+  }, []);
 
-  // Remove a task line from the modal form
-  const handleRemoveTaskLine = (id: number): void => {
-    if (tasks.length > 1) { // Keep at least one line
-      setTasks(tasks.filter((task) => task.id !== id));
-    } else {
-      // If it's the last line, just clear it instead of removing
-      setTasks([{ id: Date.now(), text: '', timerMinutes: '' }]);
-    }
-  };
+  const handleRemoveTaskLine = useCallback((id: number) => {
+    setTasks(t => {
+      if (t.length <= 1) return [{ id: Date.now(), text: '', timerMinutes: '' }];
+      return t.filter((task) => task.id !== id);
+    });
+  }, []);
 
-  // Update the state for a specific task line in the modal
-  const handleTaskChange = (
-    id: number,
-    field: keyof Omit<ModalTaskState, 'id'>, // 'text' or 'timerMinutes'
-    value: string
-  ): void => {
-    setTasks(tasks.map((task) => (task.id === id ? { ...task, [field]: value } : task)));
-  };
+  const handleTaskChange = useCallback((id: number, field: keyof Omit<ModalTaskState, 'id'>, value: string) => {
+    setTasks(t => t.map((task) => (task.id === id ? { ...task, [field]: value } : task)));
+  }, []);
 
-  // Handle form submission
-  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
-    e.preventDefault(); // Prevent default form submission
-    // Basic validation
+  const handleSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!patientName.trim() || !arrivalTime) return;
 
-    // Parse arrival time and set the date to today
     const now = new Date();
-    let arrivalDateTime = parse(arrivalTime, 'HH:mm', new Date()); // Parse time string
-    // Ensure the date part is set to today
+    let arrivalDateTime = parse(arrivalTime, 'HH:mm', new Date());
     arrivalDateTime.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
+    if (arrivalDateTime > now) arrivalDateTime = now;
 
-    // Prevent setting arrival time in the future (defaults to now if future time is selected)
-    if (arrivalDateTime > now) {
-      arrivalDateTime = now;
-    }
-
-    // Process the task lines from the modal state into the final Task structure
     const processedTasks: Task[] = tasks
-      .filter((task) => task.text.trim() !== '') // Ignore empty task lines
+      .filter((task) => task.text.trim() !== '')
       .map((task) => {
         const timerMinutesNum = parseInt(task.timerMinutes, 10);
-        // Validate timer input (must be a positive number within range)
         const isValidTimer = !isNaN(timerMinutesNum) && timerMinutesNum > 0 && timerMinutesNum <= 999;
-        // Calculate timer end date if valid, otherwise null
         const timerEndDate = isValidTimer ? addMinutes(new Date(), timerMinutesNum) : null;
-
         return {
-          id: `task-${task.id}-${Math.random().toString(36).substring(7)}`, // Generate unique task ID
-          text: task.text.trim(),
-          timerEnd: timerEndDate,
-          isTimerExpired: !!(timerEndDate && timerEndDate <= new Date()), // Check if expired immediately
-          completionStatus: 'incomplete',
-          createdAt: new Date(),
-          completedAt: null,
-          notes: '', // Initial tasks have no notes
-          isAcknowledged: false,
+          id: `task-${task.id}-${Math.random().toString(36).substring(7)}`, text: task.text.trim(),
+          timerEnd: timerEndDate, isTimerExpired: !!(timerEndDate && timerEndDate <= new Date()),
+          completionStatus: 'incomplete', createdAt: new Date(), completedAt: null, notes: '', isAcknowledged: false,
         };
       });
 
-    // Call the addPatient function passed via props with the new patient data
     addPatient({
-      id: `patient-${Date.now()}-${Math.random().toString(36).substring(7)}`, // Generate unique patient ID
-      name: patientName.trim(),
-      arrivalTime: arrivalDateTime,
-      tasks: processedTasks,
-      notes: patientNotes.trim(),
+      id: `patient-${Date.now()}-${Math.random().toString(36).substring(7)}`, name: patientName.trim(),
+      arrivalTime: arrivalDateTime, tasks: processedTasks, notes: patientNotes.trim(),
     });
 
-    // Reset the modal form fields
-    setPatientName('');
-    setArrivalTime(format(new Date(), 'HH:mm')); // Reset time to current
-    setTasks([{ id: Date.now(), text: '', timerMinutes: '' }]); // Reset to one empty task line
-    setPatientNotes('');
-    onClose(); // Close the modal
-  };
+    setPatientName(''); setArrivalTime(format(new Date(), 'HH:mm'));
+    setTasks([{ id: Date.now(), text: '', timerMinutes: '' }]); setPatientNotes('');
+    onClose();
+  }, [patientName, arrivalTime, tasks, patientNotes, addPatient, onClose]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 sm:max-w-[550px]">
+      <DialogContent className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>Add New Patient</DialogTitle>
-          <DialogDescription className="text-gray-600 dark:text-gray-400">
+          <DialogDescription>
             Enter patient details, arrival time, initial tasks, and optional notes.
           </DialogDescription>
-          {/* Close Button positioned absolutely */}
           <DialogClose asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full" // Added rounded-full
-              onClick={onClose}
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
+            <Button variant="ghost" size="icon" className="absolute top-3 right-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full h-8 w-8" onClick={onClose}>
+              <X className="h-4 w-4" /> <span className="sr-only">Close</span>
             </Button>
           </DialogClose>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
-            {/* Patient Name Input */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="patient-name" className="text-right text-gray-700 dark:text-gray-300">
-                Name/Title
-              </Label>
-              <Input
-                id="patient-name"
-                value={patientName}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setPatientName(e.target.value)}
-                className="col-span-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500" // Adjusted styling
-                placeholder="e.g., Bed 5 / Mr. Smith"
-                required
-              />
+            {/* Form fields (no changes) */}
+             <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="patient-name" className="text-right">Name/Title</Label>
+              <Input id="patient-name" value={patientName} onChange={(e) => setPatientName(e.target.value)} className="col-span-3" placeholder="e.g., Bed 5 / Mr. Smith" required />
             </div>
-            {/* Arrival Time Input */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="arrival-time" className="text-right text-gray-700 dark:text-gray-300">
-                Arrival Time
-              </Label>
-              <Input
-                id="arrival-time"
-                type="time"
-                value={arrivalTime}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setArrivalTime(e.target.value)}
-                className="col-span-3 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" // Adjusted styling
-                required
-              />
+              <Label htmlFor="arrival-time" className="text-right">Arrival Time</Label>
+              <Input id="arrival-time" type="time" value={arrivalTime} onChange={(e) => setArrivalTime(e.target.value)} className="col-span-3" required />
             </div>
-            {/* Patient Notes Input */}
             <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="patient-notes" className="text-right text-gray-700 dark:text-gray-300 pt-2">
-                Notes (Opt.)
-              </Label>
-              <textarea
-                id="patient-notes"
-                value={patientNotes}
-                onChange={(e) => setPatientNotes(e.target.value)}
-                rows={3}
-                className="col-span-3 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded p-1.5 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-1 focus:ring-[#008080] focus:outline-none resize-vertical" // Adjusted styling
-                placeholder="Add general patient notes..."
-              />
+              <Label htmlFor="patient-notes" className="text-right pt-2">Notes (Opt.)</Label>
+              <textarea id="patient-notes" value={patientNotes} onChange={(e) => setPatientNotes(e.target.value)} rows={3} placeholder="Add general patient notes..."
+                className="col-span-3 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded p-1.5 focus:ring-1 focus:ring-[#008080] focus:outline-none resize-vertical" />
             </div>
 
             {/* Initial Tasks Section */}
             <div className="col-span-4 mt-2">
-              <Label className="mb-2 block font-medium text-gray-700 dark:text-gray-300">Initial Tasks</Label>
+              <Label className="mb-2 block font-medium">Initial Tasks</Label>
               {tasks.map((task, index) => (
                 <div key={task.id} className="flex items-center gap-2 mb-2">
-                  {/* Task Description Input */}
-                  <Input
-                    type="text"
-                    placeholder={`Task ${index + 1} desc.`}
-                    value={task.text}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      handleTaskChange(task.id, 'text', e.target.value)
-                    }
-                    className="flex-grow h-8 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500" // Adjusted styling
-                  />
-                  {/* Task Timer Input */}
-                  <Input
-                    type="number"
-                    min="1"
-                    max="999"
-                    placeholder="Timer (min)"
-                    value={task.timerMinutes}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      handleTaskChange(task.id, 'timerMinutes', e.target.value)
-                    }
-                    className="w-24 h-8 text-xs px-1 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" // Adjusted styling and hide number spinners
-                  />
-                  {/* Remove Task Line Button */}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 h-8 w-8 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0" // Added flex-shrink-0
-                    onClick={() => handleRemoveTaskLine(task.id)}
-                    disabled={tasks.length <= 1 && task.text === '' && task.timerMinutes === ''} // Disable if it's the only empty line
-                    aria-label="Remove task line"
-                    title="Remove task line"
-                  >
+                  <Input type="text" placeholder={`Task ${index + 1} desc.`} value={task.text} onChange={(e) => handleTaskChange(task.id, 'text', e.target.value)} className="flex-grow h-9 text-sm" />
+                  <Input type="number" min="1" max="999" placeholder="Timer (min)" value={task.timerMinutes} onChange={(e) => handleTaskChange(task.id, 'timerMinutes', e.target.value)} className="w-24 h-9 text-xs px-1 dark:bg-gray-800 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                  <Button type="button" variant="ghost" size="icon" className="text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 h-8 w-8 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0" onClick={() => handleRemoveTaskLine(task.id)} disabled={tasks.length <= 1 && task.text === '' && task.timerMinutes === ''} aria-label="Remove task line" title="Remove task line">
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
-              {/* Add Task Line Button */}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAddTaskLine}
-                className="mt-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" // Adjusted styling
-              >
+              <Button type="button" variant="outline" size="sm" onClick={handleAddTaskLine} className="mt-2">
                 <Plus className="h-4 w-4 mr-2" /> Add Task Line
               </Button>
             </div>
           </div>
-          {/* Modal Footer with Cancel and Add Buttons */}
           <DialogFooter>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={onClose}
-              className="text-gray-800 bg-gray-200 hover:bg-gray-300 dark:text-gray-200 dark:bg-gray-600 dark:hover:bg-gray-500" // Adjusted styling
-            >
-              Cancel
-            </Button>
-            <Button type="submit" className="bg-[#008080] hover:bg-[#006666] text-white"> {/* Teal primary button */}
-              Add Patient
-            </Button>
+            <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+            <Button type="submit" variant="default">Add Patient</Button> {/* Use default variant */}
           </DialogFooter>
         </form>
       </DialogContent>
@@ -1240,13 +900,14 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
 
 
 // --- MAIN SIDEBAR COMPONENT ---
+// Renamed from 'Tasks' to 'PatientTrackerSidebar' for clarity
 const PatientTrackerSidebar: React.FC = () => {
   // Use mock context for sidebar visibility state
   const { state } = useContext(HomeContext);
   const { showSidePromptbar } = state;
 
   // Key for storing patient data in localStorage
-  const PATIENT_STORAGE_KEY = 'patientTrackerData_v2'; // Use a versioned key
+  const PATIENT_STORAGE_KEY = 'patientTrackerData_v3'; // Updated key version
 
   // State for the list of patients
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -1257,8 +918,10 @@ const PatientTrackerSidebar: React.FC = () => {
     typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
   );
 
+  // ***** MODIFICATION START *****
   // State to control the visibility of the attention list
   const [isAttentionListExpanded, setIsAttentionListExpanded] = useState<boolean>(false);
+  // ***** MODIFICATION END *****
 
   // Effect to load patient data from localStorage on initial mount
   useEffect(() => {
@@ -1278,7 +941,7 @@ const PatientTrackerSidebar: React.FC = () => {
       console.error('Error reading from localStorage:', err);
     }
     setPatients([]); // Default to empty array if load fails
-  }, []);
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   // Effect to save patient data to localStorage whenever the 'patients' state changes
   useEffect(() => {
@@ -1289,7 +952,7 @@ const PatientTrackerSidebar: React.FC = () => {
     } catch (err) {
       console.error('Error saving to localStorage:', err);
     }
-  }, [patients]);
+  }, [patients]); // Run this effect whenever the patients array changes
 
   // Effect to request notification permission if not already granted or denied
   useEffect(() => {
@@ -1298,138 +961,51 @@ const PatientTrackerSidebar: React.FC = () => {
         Notification.requestPermission().then(setNotificationPermission);
       }
     }
-  }, [notificationPermission]);
+  }, [notificationPermission]); // Re-run if notificationPermission state changes
 
   // --- CRUD Operation Callbacks (Memoized with useCallback) ---
   // [NO CHANGES IN THESE CALLBACKS]
   const addPatient = useCallback((newPatient: Patient) => {
-    setPatients((prev) =>
-      [...prev, newPatient].sort((a, b) => a.arrivalTime.getTime() - b.arrivalTime.getTime())
-    );
+    setPatients(prev => [...prev, newPatient].sort((a, b) => a.arrivalTime.getTime() - b.arrivalTime.getTime()));
   }, []);
   const removePatient = useCallback((patientId: string) => {
-    setPatients((prev) => prev.filter((p) => p.id !== patientId));
+    setPatients(prev => prev.filter(p => p.id !== patientId));
   }, []);
-  const updateTaskTimerState = useCallback(
-    (patientId: string, taskId: string | number, isExpired: boolean) => {
-      setPatients((prevPatients) =>
-        prevPatients.map((p) => {
-          if (p.id === patientId) {
-            const newTasks = p.tasks.map((t) => {
-              if (t.id === taskId && t.isTimerExpired !== isExpired) {
-                const newAcknowledged = isExpired ? false : t.isAcknowledged;
-                return { ...t, isTimerExpired: isExpired, isAcknowledged: newAcknowledged };
-              } return t;
-            });
-            return { ...p, tasks: newTasks };
-          } return p;
-        })
-      );
-    }, []);
-  const addTaskToPatient = useCallback(
-    (patientId: string, taskText: string, timerMinutes: string) => {
-      setPatients((prevPatients) =>
-        prevPatients.map((p) => {
-          if (p.id === patientId) {
-            const timerMinutesNum = parseInt(timerMinutes, 10);
-            const isValidTimer = !isNaN(timerMinutesNum) && timerMinutesNum > 0 && timerMinutesNum <= 999;
-            const timerEndDate = isValidTimer ? addMinutes(new Date(), timerMinutesNum) : null;
-            const newTask: Task = {
-              id: `task-${Date.now()}-${Math.random().toString(36).substring(7)}`,
-              text: taskText.trim(), timerEnd: timerEndDate, isTimerExpired: !!(timerEndDate && timerEndDate <= new Date()),
-              completionStatus: 'incomplete', createdAt: new Date(), completedAt: null, notes: '', isAcknowledged: false,
-            };
-            return { ...p, tasks: [...p.tasks, newTask] };
-          } return p;
-        })
-      );
-    }, []);
-  const updateTaskTimer = useCallback(
-    (patientId: string, taskId: string | number, newTimerMinutes: string | null) => {
-      setPatients((prevPatients) =>
-        prevPatients.map((p) => {
-          if (p.id === patientId) {
-            const newTasks = p.tasks.map((t) => {
-              if (t.id === taskId) {
-                let newTimerEnd: Date | null = null; let newIsTimerExpired = false;
-                if (newTimerMinutes !== null) {
-                  const timerMinutesNum = parseInt(newTimerMinutes, 10);
-                  if (!isNaN(timerMinutesNum) && timerMinutesNum > 0 && timerMinutesNum <= 999) {
-                    newTimerEnd = addMinutes(new Date(), timerMinutesNum);
-                    newIsTimerExpired = newTimerEnd <= new Date();
-                  }
-                }
-                return { ...t, timerEnd: newTimerEnd, isTimerExpired: newIsTimerExpired, isAcknowledged: false };
-              } return t;
-            });
-            return { ...p, tasks: newTasks };
-          } return p;
-        })
-      );
-    }, []);
+  const updateTaskTimerState = useCallback((patientId: string, taskId: string | number, isExpired: boolean) => {
+    setPatients(prev => prev.map(p => p.id === patientId ? { ...p, tasks: p.tasks.map(t => t.id === taskId && t.isTimerExpired !== isExpired ? { ...t, isTimerExpired: isExpired, isAcknowledged: isExpired ? false : t.isAcknowledged } : t) } : p));
+  }, []);
+  const addTaskToPatient = useCallback((patientId: string, taskText: string, timerMinutes: string) => {
+    setPatients(prev => prev.map(p => {
+      if (p.id === patientId) {
+        const timerMinutesNum = parseInt(timerMinutes, 10);
+        const isValidTimer = !isNaN(timerMinutesNum) && timerMinutesNum > 0 && timerMinutesNum <= 999;
+        const timerEndDate = isValidTimer ? addMinutes(new Date(), timerMinutesNum) : null;
+        const newTask: Task = { id: `task-${Date.now()}-${Math.random().toString(36).substring(7)}`, text: taskText.trim(), timerEnd: timerEndDate, isTimerExpired: !!(timerEndDate && timerEndDate <= new Date()), completionStatus: 'incomplete', createdAt: new Date(), completedAt: null, notes: '', isAcknowledged: false };
+        return { ...p, tasks: [...p.tasks, newTask] };
+      } return p;
+    }));
+  }, []);
+  const updateTaskTimer = useCallback((patientId: string, taskId: string | number, newTimerMinutes: string | null) => {
+    setPatients(prev => prev.map(p => p.id === patientId ? { ...p, tasks: p.tasks.map(t => { if (t.id === taskId) { let newTimerEnd: Date | null = null; let newIsTimerExpired = false; if (newTimerMinutes !== null) { const num = parseInt(newTimerMinutes, 10); if (!isNaN(num) && num > 0 && num <= 999) { newTimerEnd = addMinutes(new Date(), num); newIsTimerExpired = newTimerEnd <= new Date(); } } return { ...t, timerEnd: newTimerEnd, isTimerExpired: newIsTimerExpired, isAcknowledged: false }; } return t; }) } : p));
+  }, []);
   const removeTaskFromPatient = useCallback((patientId: string, taskId: string | number) => {
-    setPatients((prevPatients) =>
-      prevPatients.map((p) => {
-        if (p.id === patientId) {
-          const remainingTasks = p.tasks.filter((t) => t.id !== taskId);
-          return { ...p, tasks: remainingTasks };
-        } return p;
-      })
-    );
+    setPatients(prev => prev.map(p => p.id === patientId ? { ...p, tasks: p.tasks.filter(t => t.id !== taskId) } : p));
   }, []);
-  const updateTaskCompletion = useCallback(
-    (patientId: string, taskId: string | number, status: TaskCompletionStatus) => {
-      setPatients((prevPatients) =>
-        prevPatients.map((p) => {
-          if (p.id === patientId) {
-            const newTasks = p.tasks.map((t) => {
-              if (t.id === taskId) {
-                const isNowComplete = status === 'complete';
-                const completedTime = isNowComplete ? new Date() : null;
-                const newAcknowledged = isNowComplete ? true : t.isAcknowledged;
-                return { ...t, completionStatus: status, completedAt: completedTime, isAcknowledged: newAcknowledged };
-              } return t;
-            });
-            return { ...p, tasks: newTasks };
-          } return p;
-        })
-      );
-    }, []);
+  const updateTaskCompletion = useCallback((patientId: string, taskId: string | number, status: TaskCompletionStatus) => {
+    setPatients(prev => prev.map(p => p.id === patientId ? { ...p, tasks: p.tasks.map(t => t.id === taskId ? { ...t, completionStatus: status, completedAt: status === 'complete' ? new Date() : null, isAcknowledged: status === 'complete' ? true : t.isAcknowledged } : t) } : p));
+  }, []);
   const acknowledgeTaskTimer = useCallback((patientId: string, taskId: string | number) => {
-    setPatients((prevPatients) =>
-      prevPatients.map((p) => {
-        if (p.id === patientId) {
-          const newTasks = p.tasks.map((t) => {
-            if (t.id === taskId && t.isTimerExpired) {
-              return { ...t, isAcknowledged: true };
-            } return t;
-          });
-          return { ...p, tasks: newTasks };
-        } return p;
-      })
-    );
+    setPatients(prev => prev.map(p => p.id === patientId ? { ...p, tasks: p.tasks.map(t => t.id === taskId && t.isTimerExpired ? { ...t, isAcknowledged: true } : t) } : p));
   }, []);
   const updatePatientNotes = useCallback((patientId: string, notes: string) => {
-    setPatients((prevPatients) =>
-      prevPatients.map((p) => (p.id === patientId ? { ...p, notes: notes.trim() } : p))
-    );
+    setPatients(prev => prev.map(p => p.id === patientId ? { ...p, notes: notes.trim() } : p));
   }, []);
-  const updateTaskNotes = useCallback(
-    (patientId: string, taskId: string | number, notes: string) => {
-      setPatients((prevPatients) =>
-        prevPatients.map((p) => {
-          if (p.id === patientId) {
-            const newTasks = p.tasks.map((t) => {
-              if (t.id === taskId) {
-                return { ...t, notes: notes.trim() };
-              } return t;
-            });
-            return { ...p, tasks: newTasks };
-          } return p;
-        })
-      );
-    }, []);
+  const updateTaskNotes = useCallback((patientId: string, taskId: string | number, notes: string) => {
+    setPatients(prev => prev.map(p => p.id === patientId ? { ...p, tasks: p.tasks.map(t => t.id === taskId ? { ...t, notes: notes.trim() } : t) } : p));
+  }, []);
 
+
+  // ***** MODIFICATION START *****
   // Calculate patients needing attention (expired and unacknowledged tasks)
   const attentionPatients = useMemo(() => {
     return patients.filter(patient =>
@@ -1438,24 +1014,36 @@ const PatientTrackerSidebar: React.FC = () => {
   }, [patients]); // Re-calculate only when patients array changes
 
   // Function to scroll to a specific patient card
-  const scrollToPatient = (patientId: string) => {
+  const scrollToPatient = useCallback((patientId: string) => {
+    // Ensure this runs only in the browser
+    if (typeof document === 'undefined') return;
+
     const element = document.getElementById(`patient-card-${patientId}`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Add highlight effect
       element.classList.add('highlight-scroll');
       setTimeout(() => {
-        element.classList.remove('highlight-scroll');
-      }, 1500);
+        // Check if element still exists before removing class
+        if (document.getElementById(`patient-card-${patientId}`)) {
+           element.classList.remove('highlight-scroll');
+        }
+      }, 1500); // Remove highlight after 1.5 seconds
+    } else {
+        console.warn(`Element with id patient-card-${patientId} not found for scrolling.`);
     }
-  };
+  }, []); // No dependencies needed as it uses document directly
+  // ***** MODIFICATION END *****
+
 
   // --- Sidebar Width Calculation ---
-  const sidebarWidth = showSidePromptbar ? 'w-80 lg:w-96' : 'w-0';
+  // Adjusted width for better usability
+  const sidebarWidth = showSidePromptbar ? 'w-80 md:w-96' : 'w-0'; // Example: 320px default, 384px on medium+ screens
 
   return (
     // Main sidebar container div
     <div
-      className={`flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out bg-white dark:bg-gray-800 shadow-lg border-l border-gray-200 dark:border-gray-700 ${sidebarWidth}`}
+      className={`flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out bg-white dark:bg-gray-900 shadow-lg border-l border-gray-200 dark:border-gray-700 ${sidebarWidth}`}
     >
       {/* Render sidebar content only if showSidePromptbar is true */}
       {showSidePromptbar && (
@@ -1468,11 +1056,13 @@ const PatientTrackerSidebar: React.FC = () => {
             </Button>
           </div>
 
+          {/* ***** MODIFICATION START ***** */}
           {/* Attention Summary Section */}
           {attentionPatients.length > 0 && (
-            <div className="p-3 border-b border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 flex-shrink-0">
+            <div className="p-3 border-b border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-800/30 flex-shrink-0"> {/* Adjusted dark bg */}
+              {/* Header row with count and toggle button */}
               <div className="flex justify-between items-center">
-                <div className="flex items-center text-sm font-medium text-red-700 dark:text-red-400">
+                <div className="flex items-center text-sm font-medium text-red-700 dark:text-red-300"> {/* Adjusted dark text */}
                   <AlertTriangle className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span>
                     {attentionPatients.length} Patient{attentionPatients.length > 1 ? 's' : ''} require attention
@@ -1480,20 +1070,22 @@ const PatientTrackerSidebar: React.FC = () => {
                 </div>
                 <Button
                   variant="ghost" size="icon"
-                  className="h-6 w-6 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30"
+                  className="h-7 w-7 text-red-600 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-700/50 rounded-md" // Adjusted size/rounding
                   onClick={() => setIsAttentionListExpanded(!isAttentionListExpanded)}
                   title={isAttentionListExpanded ? "Hide list" : "Show list"}
                 >
                   {isAttentionListExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </Button>
               </div>
+
+              {/* Collapsible list of patient names */}
               {isAttentionListExpanded && (
                 <ul className="mt-2 pl-5 space-y-1 list-disc list-inside">
                   {attentionPatients.map(patient => (
                     <li key={patient.id} className="text-xs">
                       <button
                         onClick={() => scrollToPatient(patient.id)}
-                        className="text-red-700 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 underline hover:no-underline focus:outline-none focus:ring-1 focus:ring-red-500 rounded px-0.5"
+                        className="text-red-700 dark:text-red-300 hover:text-red-900 dark:hover:text-red-200 underline hover:no-underline focus:outline-none focus:ring-1 focus:ring-red-500 rounded px-0.5"
                         title={`Scroll to ${patient.name}`}
                       >
                         {patient.name}
@@ -1504,26 +1096,31 @@ const PatientTrackerSidebar: React.FC = () => {
               )}
             </div>
           )}
+          {/* ***** MODIFICATION END ***** */}
+
 
           {/* Main Content Area (Scrollable Patient List) */}
           <div className="flex-1 overflow-y-auto p-4">
             {patients.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400 text-center px-4">
-                <AlertTriangle className="w-10 h-10 mb-4 text-gray-400 dark:text-gray-500" />
+              // Placeholder when no patients are being tracked
+              <div className="flex flex-col items-center justify-center h-full text-center px-4 text-gray-500 dark:text-gray-400">
+                <AlertTriangle className="w-12 h-12 mb-4 text-gray-400 dark:text-gray-500" /> {/* Larger icon */}
                 <p className="font-medium">No patients being tracked.</p>
                 <p className="text-sm mt-1">Click &quot;Add Patient&quot; to start.</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              // Render a PatientCard for each patient in the list
+              <div className="space-y-4"> {/* Wrapper for spacing */}
                 {patients.map((patient) => (
+                  // ***** MODIFICATION START *****
+                  // Added id attribute to PatientCard for scroll-to functionality
                   <PatientCard
-                    key={patient.id} patient={patient}
-                    removePatient={removePatient} updateTaskTimerState={updateTaskTimerState}
-                    addTaskToPatient={addTaskToPatient} updateTaskTimer={updateTaskTimer}
-                    removeTaskFromPatient={removeTaskFromPatient} updateTaskCompletion={updateTaskCompletion}
-                    acknowledgeTaskTimer={acknowledgeTaskTimer} updatePatientNotes={updatePatientNotes}
-                    updateTaskNotes={updateTaskNotes}
+                    key={patient.id}
+                    id={`patient-card-${patient.id}`} // Added ID here
+                    patient={patient}
+                    {...{ removePatient, updateTaskTimerState, addTaskToPatient, updateTaskTimer, removeTaskFromPatient, updateTaskCompletion, acknowledgeTaskTimer, updatePatientNotes, updateTaskNotes }}
                   />
+                  // ***** MODIFICATION END *****
                 ))}
               </div>
             )}
@@ -1533,16 +1130,32 @@ const PatientTrackerSidebar: React.FC = () => {
           <AddPatientModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} addPatient={addPatient} />
 
           {/* Global Styles */}
+          {/* ***** MODIFICATION START ***** */}
+          {/* Added highlight-scroll animation and refined scrollbar styles */}
           <style jsx global>{`
-            @keyframes flash { 0%, 100% { background-color: transparent; } 50% { background-color: rgba(255, 0, 0, 0.1); } }
-            .animate-flash { animation: flash 1.5s infinite; }
+            /* Basic scrollbar styling for Firefox */
+            .overflow-y-auto { scrollbar-width: thin; scrollbar-color: #cbd5e1 #f1f5f9; } /* gray-300 track-gray-100 */
+            .dark .overflow-y-auto { scrollbar-color: #4b5563 #1f2937; } /* dark: gray-600 track-gray-800 */
+
+            /* Basic scrollbar styling for Webkit browsers */
+            .overflow-y-auto::-webkit-scrollbar { width: 8px; }
+            .overflow-y-auto::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+            .dark .overflow-y-auto::-webkit-scrollbar-track { background: #1f2937; }
+            .overflow-y-auto::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; border: 2px solid #f1f5f9; }
+            .dark .overflow-y-auto::-webkit-scrollbar-thumb { background-color: #4b5563; border-color: #1f2937; }
+            .overflow-y-auto::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+            .dark .overflow-y-auto::-webkit-scrollbar-thumb:hover { background-color: #6b7280; }
+
+            /* Animations */
+            @keyframes flash-bg { 0%, 100% { background-color: transparent; } 50% { background-color: rgba(239, 68, 68, 0.1); } }
+            .animate-flash-bg { animation: flash-bg 1.5s infinite; }
             @keyframes pulse-border { 0%, 100% { border-color: #ef4444; } 50% { border-color: #f87171; } }
+            .dark @keyframes pulse-border { 0%, 100% { border-color: #dc2626; } 50% { border-color: #ef4444; } } /* Dark mode border colors */
             .animate-pulse-border { animation: pulse-border 1.5s infinite; }
-            .overflow-y-auto::-webkit-scrollbar { display: none; }
-            .overflow-y-auto { -ms-overflow-style: none; scrollbar-width: none; }
-            @keyframes highlight { from { background-color: rgba(250, 204, 21, 0.4); } to { background-color: transparent; } }
+            @keyframes highlight { from { background-color: rgba(250, 204, 21, 0.4); } to { background-color: transparent; } } /* amber-300/40 */
             .highlight-scroll { animation: highlight 1.5s ease-out; }
           `}</style>
+          {/* ***** MODIFICATION END ***** */}
         </>
       )}
     </div>
@@ -1552,28 +1165,46 @@ const PatientTrackerSidebar: React.FC = () => {
 // --- App Component (Example Usage) ---
 // [NO CHANGES IN THIS COMPONENT]
 const App: React.FC = () => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [homeState, setHomeState] = useState({ showSidePromptbar: true });
+
+  useEffect(() => {
+    // Apply dark mode class to html element
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
   const dispatch = (action: any) => {
-    console.log("Dispatch called with:", action);
     if (action.type === 'TOGGLE_SIDEBAR') {
-        setHomeState(prev => ({ ...prev, showSidePromptbar: !prev.showSidePromptbar }));
+      setHomeState(prev => ({ ...prev, showSidePromptbar: !prev.showSidePromptbar }));
     }
   };
 
   return (
     <HomeContext.Provider value={{ state: homeState, dispatch }}>
-       <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-          <div className="flex-1 p-4">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Main Content Area</h1>
-            <p className="text-gray-700 dark:text-gray-300">This is where the main application content would go.</p>
-            <Button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="mt-4">
+       <div className={`flex h-screen ${isDarkMode ? 'dark' : ''}`}> {/* Apply dark class */}
+          {/* Mock Main Content Area */}
+          <div className="flex-1 p-6 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100"> {/* Adjusted background/text */}
+            <div className="flex justify-between items-center mb-4">
+                <h1 className="text-2xl font-bold">Main Content Area</h1>
+                <Button onClick={() => setIsDarkMode(!isDarkMode)} variant="outline" size="sm">
+                    Toggle {isDarkMode ? 'Light' : 'Dark'} Mode
+                </Button>
+            </div>
+            <p className="text-gray-700 dark:text-gray-300 mb-4">This is where the main application content would go.</p>
+            <Button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} variant="secondary">
                 Toggle Sidebar
             </Button>
           </div>
+          {/* Render the Patient Tracker Sidebar */}
           <PatientTrackerSidebar />
        </div>
     </HomeContext.Provider>
   );
 };
 
-export default App; // Export the App component for rendering
+// Export the main App component as default
+export default App; // Changed export name back to App for consistency if needed
