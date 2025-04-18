@@ -27,6 +27,7 @@ unstructured[md]==0.10.19
 PyPDF2==3.0.1
 pdfplumber
 python-multipart                   # for file uploads in FastAPI
+pdf2image
 
 # ── Data wrangling / ML ───────────────────────────────────────────────────────────────
 pandas==2.2.3
