@@ -40,6 +40,8 @@ import {
 } from 'date-fns';
 
 // --- Mock HomeContext ---
+// Using a mock context as the original was not provided in the initial code.
+// Replace with your actual context import if available.
 const HomeContext = React.createContext<any>({
   state: {
     showSidePromptbar: true, // Default to showing the sidebar for standalone demo
@@ -72,7 +74,10 @@ interface Patient {
 }
 
 // --- Mock shadcn/ui Components ---
-// [NO CHANGES IN THIS SECTION]
+// These are simplified versions for demonstration purposes.
+// NOTE: Styles have been adjusted for better visibility in light/dark modes
+// and use a teal primary color (#008080).
+
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
@@ -84,9 +89,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyle =
       'inline-flex items-center justify-center rounded-md text-sm font-medium ' +
       'ring-offset-background transition-colors focus-visible:outline-none ' +
-      'focus-visible:ring-2 focus-visible:ring-[#008080] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-gray-900 dark:focus-visible:ring-[#008080]';
+      'focus-visible:ring-2 focus-visible:ring-[#008080] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-gray-900 dark:focus-visible:ring-[#008080]'; // Adjusted focus ring for dark mode
     const variants: Record<NonNullable<ButtonProps['variant']>, string> = {
-      default: 'bg-[#008080] text-white hover:bg-[#006666] dark:hover:bg-[#005959]',
+      default: 'bg-[#008080] text-white hover:bg-[#006666] dark:hover:bg-[#005959]', // Teal primary
       destructive: 'bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800',
       outline: 'border border-gray-300 bg-white hover:bg-gray-100 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100',
       secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600',
@@ -115,12 +120,12 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, type, ...props }, ref) => {
   const baseStyle =
-    'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 ' +
+    'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 ' + // Light mode background
     'text-sm text-gray-900 ring-offset-background file:border-0 file:bg-transparent file:text-sm ' +
     'file:font-medium placeholder:text-gray-500 focus-visible:outline-none ' +
-    'focus-visible:ring-2 focus-visible:ring-[#008080] focus-visible:ring-offset-2 ' +
+    'focus-visible:ring-2 focus-visible:ring-[#008080] focus-visible:ring-offset-2 ' + // Teal focus ring
     'disabled:cursor-not-allowed disabled:opacity-50 ' +
-    'dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400 dark:ring-offset-gray-900 dark:focus-visible:ring-[#008080]';
+    'dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400 dark:ring-offset-gray-900 dark:focus-visible:ring-[#008080]'; // Dark mode styles
   return <input type={type} className={`${baseStyle} ${className ?? ''}`} ref={ref} {...props} />;
 });
 Input.displayName = 'Input';
@@ -131,13 +136,13 @@ interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
 const Label = React.forwardRef<HTMLLabelElement, LabelProps>(({ className, ...props }, ref) => (
   <label
     ref={ref}
-    className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-700 dark:text-gray-300 ${className ?? ''}`}
+    className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-700 dark:text-gray-300 ${className ?? ''}`} // Adjusted text colors
     {...props}
   />
 ));
 Label.displayName = 'Label';
 
-// Basic Dialog (Modal)
+// Basic Dialog (Modal) - Enhanced for better styling
 interface DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -145,13 +150,21 @@ interface DialogProps {
 }
 const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) =>
   open ? (
-    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md border border-gray-200 dark:border-gray-700 transform transition-all scale-100 opacity-100">
+    // Overlay
+    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in"> {/* Added backdrop blur and animation */}
+      {/* Dialog Container */}
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md border border-gray-200 dark:border-gray-700 transform transition-all scale-100 opacity-100"> {/* Added transform */}
         {children}
       </div>
+      {/* Simple CSS for fade-in animation */}
       <style jsx global>{`
-        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-        .animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.2s ease-out forwards;
+        }
       `}</style>
     </div>
   ) : null;
@@ -179,7 +192,7 @@ const DialogClose: React.FC<DialogCloseProps> = ({ children, onClick }) => {
 };
 
 
-// Basic Card
+// Basic Card - Enhanced Styling
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> { className?: string; }
 const Card = React.forwardRef<HTMLDivElement, CardProps>(({ className, ...props }, ref) => (
   <div ref={ref} className={`rounded-lg border bg-white dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 shadow-md dark:shadow-lg dark:shadow-black/20 border-gray-200 dark:border-gray-700/50 ${className ?? ''}`} {...props} />
@@ -223,7 +236,6 @@ const parsePatientsWithDates = (jsonData: string): Patient[] | null => {
 };
 
 // --- TaskItem component ---
-// [NO CHANGES IN THIS COMPONENT]
 interface TaskItemProps {
   task: Task;
   patientId: string;
@@ -232,13 +244,13 @@ interface TaskItemProps {
   updateTaskTimer: (patientId: string, taskId: string | number, newTimerMinutes: string | null) => void;
   removeTask: (patientId: string, taskId: string | number) => void;
   updateTaskCompletion: ( patientId: string, taskId: string | number, status: TaskCompletionStatus ) => void;
-  acknowledgeTaskTimer: (patientId: string, taskId: string | number) => void;
+  acknowledgeTaskTimer: (patientId: string, taskId: string | number) => void; // Correct name here
   updateTaskNotes: (patientId: string, taskId: string | number, notes: string) => void;
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({
   task, patientId, patientName, updateTaskTimerState, updateTaskTimer, removeTask,
-  updateTaskCompletion, acknowledgeTaskTimer, updateTaskNotes,
+  updateTaskCompletion, acknowledgeTaskTimer, updateTaskNotes, // Correct name used here
 }) => {
   const [isTimerExpired, setIsTimerExpired] = useState<boolean>(task.isTimerExpired);
   const [timeRemaining, setTimeRemaining] = useState<string>('');
@@ -325,7 +337,6 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
 
 // --- PatientCard ---
-// [NO CHANGES IN THIS COMPONENT]
 interface PatientCardProps {
   id: string; // Added id prop
   patient: Patient;
@@ -398,7 +409,6 @@ const PatientCard: React.FC<PatientCardProps> = ({
 
 
 // --- AddPatientModal ---
-// [NO CHANGES IN THIS COMPONENT]
 interface ModalTaskState { id: number; text: string; timerMinutes: string; }
 interface AddPatientModalProps { isOpen: boolean; onClose: () => void; addPatient: (newPatient: Patient) => void; }
 const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addPatient }) => {
@@ -424,12 +434,10 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
         <DialogHeader>
           <DialogTitle>Add New Patient</DialogTitle>
           <DialogDescription> Enter patient details, arrival time, initial tasks, and optional notes. </DialogDescription>
-          {/* ***** MODIFICATION START ***** */}
-          {/* Removed DialogClose wrapper as Button already has onClick */}
+          {/* Removed DialogClose wrapper */}
           <Button variant="ghost" size="icon" className="absolute top-3 right-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full h-8 w-8" onClick={onClose}>
              <X className="h-4 w-4" /> <span className="sr-only">Close</span>
           </Button>
-          {/* ***** MODIFICATION END ***** */}
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
@@ -531,25 +539,9 @@ const PatientTrackerSidebar: React.FC = () => {
   );
 };
 
-// --- App Component (Example Usage) ---
-const App: React.FC = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [homeState, setHomeState] = useState({ showSidePromptbar: true });
-  useEffect(() => { if (isDarkMode) { document.documentElement.classList.add('dark'); } else { document.documentElement.classList.remove('dark'); } }, [isDarkMode]);
-  const dispatch = (action: any) => { if (action.type === 'TOGGLE_SIDEBAR') { setHomeState(prev => ({ ...prev, showSidePromptbar: !prev.showSidePromptbar })); } };
+// --- App Component (Example Usage) --- REMOVED ---
 
-  return (
-    <HomeContext.Provider value={{ state: homeState, dispatch }}>
-       <div className={`flex h-screen ${isDarkMode ? 'dark' : ''}`}>
-          <div className="flex-1 p-6 bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-            <div className="flex justify-between items-center mb-4"> <h1 className="text-2xl font-bold">Main Content Area</h1> <Button onClick={() => setIsDarkMode(!isDarkMode)} variant="outline" size="sm"> Toggle {isDarkMode ? 'Light' : 'Dark'} Mode </Button> </div>
-            <p className="text-gray-700 dark:text-gray-300 mb-4">This is where the main application content would go.</p>
-            <Button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} variant="secondary"> Toggle Sidebar </Button>
-          </div>
-          <PatientTrackerSidebar />
-       </div>
-    </HomeContext.Provider>
-  );
-};
-
-export default App;
+// ***** MODIFICATION START *****
+// Export the main sidebar component as default
+export default PatientTrackerSidebar;
+// ***** MODIFICATION END *****
