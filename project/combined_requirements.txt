@@ -15,7 +15,7 @@ sentence-transformers==2.2.2
 transformers==4.51.0
 tokenizers==0.21.2          # has macOS‑arm64 / py312 wheels
 nltk==3.8.1
-huggingface_hub==0.13.3
+huggingface_hub==0.30.2
 langchain_core
 python-multipart
 
