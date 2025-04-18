@@ -1,33 +1,28 @@
-# combined_requirements.txt  ── unified stack for Python 3.12   (ARM & x86 wheels only)
-
-# ────── FastAPI layer ────────────────────────────────────────────────────────────
+# ────────── project/combined_requirements.txt ──────────
 fastapi==0.110.2
-uvicorn[standard]==0.29.0          # httptools/uvloop/websockets wheels exist
+uvicorn[standard]==0.29.0
 
-# ────── RAG‑backend (my_rag_app) ────────────────────────────────────────────────
 openai>=1.2.0
-qdrant-client==1.13.3              # first series with Py3.12 wheels
-unstructured==0.10.19              # first unstructured with Py3.12/mac‑arm64 wheel
+qdrant-client==1.13.3
+unstructured==0.10.19
 PyPDF2==3.0.1
+pandas==2.2.3
 
-pandas==2.2.3                      # shared analytics layer
-sentence-transformers==2.2.2
+# ↓ switch to wheel‑ready build
+sentence-transformers==3.4.1
+
 transformers==4.51.0
-tokenizers==0.21.2                 # wheel; satisfies transformers (<0.22,>=0.21)
-
+tokenizers==0.21.2
 nltk==3.8.1
-huggingface_hub==0.30.2            # >=0.16.4 needed by tokenizers 0.21.*
-langchain_core                     # no pin; pulls wheels only
-python-multipart                   # form uploads
+huggingface_hub==0.30.2
+langchain_core
+python-multipart
 
-# ────── Predictive‑backend (ML model inferencing) ───────────────────────────────
-xgboost==2.1.4                     # official arm64 wheel
+xgboost==2.1.4
 scikit-learn==1.4.2
 joblib==1.4.2
 numpy==1.26.3
-
 python-dotenv==1.0.1
-pdfplumber                         # optional helper for unstructured
-python-magic==0.4.27               # MIME detection (Alpine‑friendly)
-
-# ────── End of file ─────────────────────────────────────────────────────────────
+pdfplumber
+python-magic==0.4.27
+# ────────────────────────────────────────────────────────
