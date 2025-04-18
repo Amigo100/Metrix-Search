@@ -1,168 +1,127 @@
 # predictive_backend/app/search_logic.py
 """
-Semantic‑search helper – **does NOT interfere** with ML‑prediction code.
+Semantic‑search helper – DOES NOT interfere with the ML endpoints.
 
-▪ Embeds the query with OpenAI
-▪ Retrieves top‑k chunks from Qdrant  (default collection = "policy_documents")
-▪ Builds an LLM answer and returns citations that already contain a backend URL
-  you can open from the front‑end.
-
-The public function is   perform_rag_search(query: str, ...)
-so existing imports from predictive_backend.app.main continue to work.
+1. Embed query with OpenAI
+2. Similarity‑search in Qdrant (collection = policy_documents)
+3. Ask GPT‑4 to answer, citing the numbered chunks
 """
+
 from __future__ import annotations
 
-import os
-import logging
-import urllib.parse
+import os, logging, urllib.parse
 from typing import List, Dict, Any, Optional
-
 from openai import OpenAI, APIError, RateLimitError
 
-# ---------------------------------------------------------------------------
-# 🔧  FIXED: correct package‑level import for shared Qdrant client helper
-# ---------------------------------------------------------------------------
+# ✔  FIXED absolute path – matches folder layout in § 1
 from predictive_backend.app.qdrant_client import get_qdrant_client
 
-# ────────────────────────────────────────────────────────────────
-# Config & logging
-# ────────────────────────────────────────────────────────────────
+# ───────────────────────── CONFIG ──────────────────────────
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    logger.error("OPENAI_API_KEY not found in environment.")
-    raise ValueError("OPENAI_API_KEY must be set for semantic search.")
+OPENAI_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_KEY:
+    raise RuntimeError("OPENAI_API_KEY must be set")
 
-EMBEDDING_MODEL           = "text-embedding-ada-002"
-CHAT_MODEL                = "gpt-4"
-DEFAULT_QDRANT_COLLECTION = "policy_documents"   # ← matches ingest script
-DEFAULT_SEARCH_LIMIT      = 5
+COLLECTION   = os.getenv("QDRANT_COLLECTION_NAME", "policy_documents")
+EMBED_MODEL  = "text-embedding-ada-002"
+CHAT_MODEL   = "gpt-4"
+SEARCH_LIMIT = 5
 
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
-logger.info("OpenAI client initialised.")
+openai = OpenAI(api_key=OPENAI_KEY)
+log.info("OpenAI client ready")
 
-# ────────────────────────────────────────────────────────────────
-# Main function
-# ────────────────────────────────────────────────────────────────
-def perform_rag_search(
-    query: str,
-    collection: str = DEFAULT_QDRANT_COLLECTION,
-    limit: int     = DEFAULT_SEARCH_LIMIT
-) -> Dict[str, Any]:
+# ───────────────────────── RAG SEARCH ──────────────────────
+def perform_rag_search(query: str,
+                       collection: str = COLLECTION,
+                       limit: int = SEARCH_LIMIT) -> Dict[str, Any]:
     """
-    Returns:
-        {
-          "answer": str,
-          "citations": [ {source_id, document_title, page_number, heading,
-                          qdrant_id, score, url}, ... ],
-          "error": Optional[str]
-        }
+    Returns { answer, citations[], error }
     """
     try:
-        qc = get_qdrant_client()  # ⇢ shared across predictive features
+        qc = get_qdrant_client()
 
-        # 1) embed the query --------------------------------------------------
-        logger.info("Embedding query...")
+        # 1️⃣ embed -----------------------------------------------------------
         try:
-            resp = openai_client.embeddings.create(
-                model=EMBEDDING_MODEL, input=query
-            )
-            query_vec = resp.data[0].embedding
+            emb = openai.embeddings.create(model=EMBED_MODEL, input=query)
+            vec = emb.data[0].embedding
         except (APIError, RateLimitError) as e:
-            msg = f"Embedding API error: {e}"
-            logger.error(msg, exc_info=True)
+            msg = f"OpenAI embedding error: {e}"
+            log.error(msg, exc_info=True)
             return {"answer": "", "citations": [], "error": msg}
 
-        # 2) similarity search -----------------------------------------------
-        logger.info(f"Qdrant search in '{collection}' limit={limit}")
+        # 2️⃣ search ----------------------------------------------------------
         try:
             hits = qc.search(
                 collection_name=collection,
-                query_vector=query_vec,
+                query_vector=vec,
                 limit=limit,
                 with_payload=True,
             )
         except Exception as e:
             msg = f"Qdrant search failed: {e}"
-            logger.error(msg, exc_info=True)
+            log.error(msg, exc_info=True)
             return {"answer": "", "citations": [], "error": msg}
 
         if not hits:
-            return {
-                "answer": "No relevant information found in the policy documents.",
-                "citations": [],
-                "error": None,
-            }
+            return {"answer": "No matching policies found.",
+                    "citations": [], "error": None}
 
-        # 3) build context & citations ---------------------------------------
-        context_chunks: List[str] = []
-        citations:      List[Dict[str, Any]] = []
+        # 3️⃣ context ‑‑> citations ------------------------------------------
+        ctx, cites = [], []
+        for i, h in enumerate(hits, 1):
+            pl   = h.payload or {}
+            text = pl.get("content") or pl.get("text") or "[No text]"
+            doc  = pl.get("document_title", "Unknown Document")
+            page = pl.get("page_number")
+            head = pl.get("heading", "N/A")
 
-        for idx, h in enumerate(hits, 1):
-            pl  = h.payload or {}
-            chunk_text = pl.get("content") or pl.get("text") or "[No text]"
-            title      = pl.get("document_title", "Unknown Document")
-            page       = pl.get("page_number")
-            heading    = pl.get("heading", "N/A")
+            ctx.append(f"[{i}] {text}")
 
-            context_chunks.append(f"[{idx}] {chunk_text}")
-
-            # generate backend PDF URL (best‑effort)
+            # build backend URL
             url = None
-            if title != "Unknown Document":
-                try:
-                    fn = title.replace(" ", "_")
-                    if not fn.lower().endswith(".pdf"):
-                        fn += ".pdf"
-                    url = f"/predictive/api/documents/view/{urllib.parse.quote(fn)}"
-                except Exception as e:
-                    logger.debug("URL generation failed for %s: %s", title, e)
+            if doc != "Unknown Document":
+                fn = doc.replace(" ", "_")
+                if not fn.lower().endswith(".pdf"):
+                    fn += ".pdf"
+                url = f"/predictive/api/documents/view/{urllib.parse.quote(fn)}"
 
-            citations.append(
-                {
-                    "source_id": idx,
-                    "document_title": title,
-                    "page_number": page,
-                    "heading": heading,
-                    "qdrant_id": h.id,
-                    "score": h.score,
-                    "url": url,
-                }
-            )
+            cites.append({
+                "source_id"    : i,
+                "document_title": doc,
+                "page_number"  : page,
+                "heading"      : head,
+                "qdrant_id"    : h.id,
+                "score"        : h.score,
+                "url"          : url,
+            })
 
-        # 4) ask the LLM ------------------------------------------------------
-        system_prompt = """
-You are a helpful assistant who answers questions based ONLY on the
-provided context from internal hospital policy documents.
+        # 4️⃣ LLM answer ------------------------------------------------------
+        sys_prompt = (
+            "You are a helpful assistant who answers ONLY from the "
+            "provided context. Cite sources using [numbers]. "
+            "If the answer is not in context say so. "
+            "Then suggest 1‑3 follow‑up questions on new lines."
+        )
+        user_msg = f"Context:\n{'\n\n'.join(ctx)}\n\nQuestion: {query}"
 
-• Cite sources using the numbers I provide (e.g. [1]).
-• If the context lacks an answer, state that clearly.
-• After your answer, suggest 1‑3 follow‑up questions the user might ask,
-  each on its own line.
-""".strip()
-
-        user_msg = f"Context:\n{chr(10).join(context_chunks)}\n\nQuestion: {query}"
-
-        logger.info("Calling OpenAI ChatCompletion...")
         try:
-            chat_resp = openai_client.chat.completions.create(
+            chat = openai.chat.completions.create(
                 model=CHAT_MODEL,
                 messages=[
-                    {"role": "system", "content": system_prompt},
+                    {"role": "system", "content": sys_prompt},
                     {"role": "user",   "content": user_msg},
                 ],
             )
-            answer_text = chat_resp.choices[0].message.content.strip()
+            answer = chat.choices[0].message.content.strip()
         except (APIError, RateLimitError) as e:
-            msg = f"ChatCompletion API error: {e}"
-            logger.error(msg, exc_info=True)
-            return {"answer": "[Error generating answer]", "citations": citations, "error": msg}
+            msg = f"ChatCompletion error: {e}"
+            log.error(msg, exc_info=True)
+            return {"answer": "[LLM error]", "citations": cites, "error": msg}
 
-        # 5) return -----------------------------------------------------------
-        return {"answer": answer_text, "citations": citations, "error": None}
+        return {"answer": answer, "citations": cites, "error": None}
 
-    except Exception as e:
-        logger.error("Uncaught error in perform_rag_search: %s", e, exc_info=True)
-        return {"answer": "", "citations": [], "error": str(e)}
+    except Exception as ex:
+        log.error("perform_rag_search crashed: %s", ex, exc_info=True)
+        return {"answer": "", "citations": [], "error": str(ex)}
