@@ -309,9 +309,11 @@ const Tasks: React.FC = () => {
           <div className="flex justify-between items-center p-4 shadow-sm border-b border-gray-200 flex-shrink-0"> {/* Adjusted shadow */}
             <h2 className="text-lg font-semibold text-black">Patient Tracker</h2>
             <Button
-               variant="outline" size="sm"
+               variant="outline" // Keep variant
+               size="sm"      // Keep size
                onClick={() => setIsModalOpen(true)}
-               className="bg-[#008080] hover:bg-[#006666] border-[#008080] text-white" // Adjusted hover color
+               // Original conflicting class - likely overridden by bg/border/text anyway
+               className="bg-[#008080] hover:bg-[#008080] border-[#008080] text-black"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Patient
