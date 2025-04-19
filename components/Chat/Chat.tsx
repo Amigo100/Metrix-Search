@@ -1,5 +1,9 @@
 // file: /components/Chat/Chat.tsx
 // -----------------------------------------------------------------------------
+//  Detailed template–aware prompts, collapsible analysis cards,
+//  improved landing instructions, and build‑safe ErrorBanner component.
+// -----------------------------------------------------------------------------
+
 import {
   ChevronDown,
   ChevronUp,
@@ -30,26 +34,22 @@ import remarkGfm from 'remark-gfm';
 
 import HomeContext from '@/pages/api/home/home.context';
 import { throttle } from '@/utils/data/throttle';
+import { Message } from '@/types/chat';
 
-// Children
 import { ChatInput } from './ChatInput';
 import { ChatTextToSpeech } from './ChatTextToSpeech';
 import { ChatStartOfficeVisit } from './ChatStartOfficeVisit';
 
-// Modals
 import { ProfileModal } from '@/components/Modals/ProfileModal';
 import { TemplatesModal } from '@/components/Modals/TemplatesModal';
 import { HelpModal } from '@/components/Modals/HelpModal';
 import { SettingsModal } from '@/components/Modals/SettingsModal';
 
-import { Message } from '@/types/chat';
-
-// PDF
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
-/* ───────────────────────────────────────────────────────── constants ─── */
+/* ─────────────────────────────────────────── constants ─── */
 const primaryButtonStyles =
   'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-teal-600 to-teal-800 hover:from-teal-500 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-300 ease-in-out shadow-md disabled:opacity-70 disabled:cursor-not-allowed';
 const secondaryButtonStyles =
@@ -60,8 +60,10 @@ const ghostButtonStyles =
 const SCRIBE_DISCLAIMER_TEXT =
   'Metrix AI Clinical Scribe generates documentation based on input. Always review and verify documentation for accuracy and completeness before finalising in patient records. This tool does not replace clinical judgment.';
 
-/* ───────────────────────────────────────────────────────── helpers ─── */
-const ErrorMessage = ({ msg }: { msg: string | null }) =>
+/* ─────────────────────────────────────────── helpers ─── */
+
+// *** RENAMED: ErrorMessage → ErrorBanner ***
+const ErrorBanner = ({ msg }: { msg: string | null }) =>
   msg ? (
     <div className="px-4 pt-4 md:px-6">
       <div className="flex items-center space-x-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm max-w-3xl mx-auto">
@@ -106,7 +108,7 @@ const Disclaimer = () => (
   </div>
 );
 
-/* ───────────────────────────────────────────── component ─── */
+/* ───────────────────────────────────────── component ─── */
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -152,7 +154,7 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props): JSX.Elem
   const [showModels, setShowModels] = useState(false);
   const [lastOutputType, setLastOutputType] = useState<OutputType>(null);
 
-  /* ─────────── refs & scrolling ─────────── */
+  /* refs & scrolling */
   const containerRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -321,7 +323,9 @@ ${doc}`.trim();
     ? clinicalDoc.replace(/---\n[\s\S]*$/, '').trim().split(/\s+/).length
     : 0;
 
-  /* ─────────────────────────── render JS ────────────── */
+  /* ─────────── UI blocks (Landing, TranscriptBlock, DocPanel, AnalysisColumn) ─────────── */
+  // … identical to previous message …
+
   /* landing screen */
   const Landing = (
     <>
@@ -346,7 +350,6 @@ ${doc}`.trim();
     </>
   );
 
-  /* transcript header */
   const TranscriptBlock = (
     <div className="px-4 md:px-6 pt-3 mb-4">
       <div className="flex items-center justify-between mb-2">
@@ -363,7 +366,6 @@ ${doc}`.trim();
     </div>
   );
 
-  /* clinical document panel */
   const DocPanel = (
     <div className="flex-1 md:w-3/5 lg:w-2/3 flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
       <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-2">
@@ -448,7 +450,6 @@ ${doc}`.trim();
     </div>
   );
 
-  /* analysis column */
   const AnalysisColumn = (
     <div className="w-full md:w-2/5 lg:w-1/3 flex flex-col gap-4 overflow-y-auto">
       {/* Errors */}
@@ -525,23 +526,24 @@ ${doc}`.trim();
     </div>
   );
 
-  /* ─────────── mainContent selection ─────────── */
-  const mainContent: ReactNode = !transcript && !loading && !modelError ? (
-    Landing
-  ) : (
-    <>
-      <ErrorMessage msg={modelError?.message ?? null} />
+  /* mainContent selection */
+  const mainContent: ReactNode =
+    !transcript && !loading && !modelError ? (
+      Landing
+    ) : (
+      <>
+        <ErrorBanner msg={modelError ? (modelError as any).message ?? null : null} />
 
-      {transcript && TranscriptBlock}
+        {transcript && TranscriptBlock}
 
-      <div className="flex flex-col md:flex-row gap-6 md:gap-8 flex-grow px-4 md:px-6 pb-4 overflow-hidden">
-        {DocPanel}
-        {AnalysisColumn}
-      </div>
+        <div className="flex flex-col md:flex-row gap-6 md:gap-8 flex-grow px-4 md:px-6 pb-4 overflow-hidden">
+          {DocPanel}
+          {AnalysisColumn}
+        </div>
 
-      <Disclaimer />
-    </>
-  );
+        <Disclaimer />
+      </>
+    );
 
   /* ─────────── JSX return ─────────── */
   return (
@@ -619,7 +621,7 @@ ${doc}`.trim();
             <ChatInput
               stopConversationRef={stopConversationRef}
               textareaRef={inputRef}
-              onSend={(m) => (transcript ? createDocument(m.content) : createDocument(m.content))}
+              onSend={(m) => createDocument(m.content)}
               onRegenerate={regenerate}
               onScrollDownClick={() => endRef.current?.scrollIntoView({ behavior: 'smooth' })}
               showScrollDownButton={
