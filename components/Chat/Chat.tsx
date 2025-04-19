@@ -1,7 +1,6 @@
 // /components/Chat/Chat.tsx
 // -----------------------------------------------------------------------------
-// ❶ Header logo back   ❷ Better prompts   ❸ Guaranteed sign‑off
-// ❹ Extra card for follow‑ups with paging arrows   ❺ All type errors solved
+// v2.3 – sign‑off enforced, tighter prompts, template‑aware recommendations
 // -----------------------------------------------------------------------------
 
 import {
@@ -165,6 +164,7 @@ interface ChatMsg {
   content: string;
 }
 
+/* -------------------------------------------------------------------------- */
 export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   const { t } = useTranslation('chat');
 
@@ -248,7 +248,7 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   ======================================================================== */
 
   const appendSignOff = (doc: string): string => {
-    const signoff = userSignOff || '[Your Sign‑off]';
+    const signoff = userSignOff || 'Dr James Deighton MBBS';
     return `${doc.replace(/\s*$/, '')}\n\n---\n${signoff}`;
   };
 
@@ -339,14 +339,22 @@ Return only the completed note.`.trim();
       setLastOutputType('errors');
       const errorPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-Highlight word‑level mismatches between **Transcript** and **Clinical Document** that are likely transcription errors.
+TASK:
+  Detect **possible transcription mistakes** by comparing the exact words in
+  the transcript with medically‑plausible terms in the clinical document.
 
-Return:
+CRITERIA:
+  • Only include a pair if the words differ by 1‑2 letters OR are homophones.  
+  • A candidate must exist in the transcript; don't invent.  
+  • Max 10 pairs.
+
+FORMAT (Markdown):
 ## Potential Transcription Errors
-* TranscriptWord » LikelyCorrect (short reason)
-* …
-(≤10 items, or state “None.”)
-No other text.`.trim();
+* wrongWord → likelyCorrectWord (short reason)
+
+If you find none, output exactly:
+
+None.`.trim();
 
       const errorRes = await axios.post(ASK_RAG_URL, {
         message: errorPrompt,
@@ -373,12 +381,15 @@ No other text.`.trim();
       setLastOutputType('terms');
       const termPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-Identify content present in the **Clinical Document** that is not stated verbatim in the **Transcript** (i.e. inferred or re‑worded).
+Identify elements present in the **Clinical Document** that are not stated
+verbatim in the **Transcript** (i.e. inferred, paraphrased or summarised).
 
-Return:
+Return Markdown:
+
 ## Inferred Clinical Terms
-* bullet list (≤10).
-No commentary.`.trim();
+* "transcript excerpt" → "document phrase"
+
+Include ≤10 lines.  If none, write 'None.'.`.trim();
 
       const termRes = await axios.post(ASK_RAG_URL, {
         message: termPrompt,
@@ -403,23 +414,42 @@ No commentary.`.trim();
   const handleRecommendations = async (doc: string) => {
     try {
       setLastOutputType('recs');
+
+      /* note‑type specific section headings */
+      const noteType = activeTemplateName.toLowerCase();
+      let recSections = '';
+      if (noteType.includes('triage')) {
+        recSections = `### Examination\n* …\n\n### Imaging\n* …\n\n### Laboratory\n* …\n\n### Disposition\n* …`;
+      } else if (noteType.includes('discharge')) {
+        recSections = `### Follow‑up\n* …\n\n### Safety‑netting\n* …\n\n### Patient Advice\n* …`;
+      } else {
+        recSections = `### Plan\n* …`;
+      }
+
       const recPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-Analyse the **${activeTemplateName}** below and give clinical next‑steps relevant to its context.
+Using the information in the following **${activeTemplateName}**, draft concrete,
+practical next‑steps.
 
-Return:
+INSTRUCTIONS
+• Use only headings appropriate for this note type.  
+• Bullet each point; keep each point ≤1 sentence.  
+• No QA or transcription advice.
+
+Return Markdown:
+
 ## Recommendations
-* 5‑8 concise clinical bullets.
-* Discharge note → focus on safety‑netting & follow‑up.
-* Triage note → focus on immediate investigations & senior review triggers.
-No disclaimers or QA tips.`.trim();
+${recSections}
+
+Clinical Document:
+------------------
+${doc}`.trim();
 
       const recRes = await axios.post(ASK_RAG_URL, {
         message: recPrompt,
         history: [],
         mode: 'analysis',
         model_name: activeModelName,
-        extra_inputs: { document: doc },
       });
 
       setAnalysisRecs(recRes.data.response || 'No recommendations.');
