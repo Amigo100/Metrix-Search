@@ -334,7 +334,7 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
     // AddPatientModal JSX using *internal* mock Dialog, Button, Input etc.
     // Using original styling
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-neutral-50 text-black sm:max-w-[550px]">
+      <DialogContent className="bg-neutral-50 text-black sm:max-w-3xl"> {/* Changed sm:max-w-[550px] to sm:max-w-3xl */}
         <DialogHeader>
            <DialogTitle>Add New Patient</DialogTitle>
            <DialogDescription className="text-black"> Enter patient details, arrival time, initial tasks, and optional notes. </DialogDescription>
