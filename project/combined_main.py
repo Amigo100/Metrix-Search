@@ -1,33 +1,31 @@
-# ────────────────── project/combined_main.py ───────────────────
+# ───────────────────── project/combined_main.py ─────────────────────
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# existing sub‑apps
-from my_rag_app.main import app as rag_app
-from predictive_backend.app.main import app as predictive_app
-
-# NEW: semantic‑search router
-from semantic_search.router import semantic_router          # ← added
+# NOTE: all imports are now *package‑relative* so Python can find them
+from .my_rag_app.main import app as rag_app
+from .predictive_backend.app.main import app as predictive_app
+from .semantic_search.router import semantic_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Base FastAPI application
 combined_app = FastAPI(
     title="Unified Clinical Platform",
     description=(
         "Single service hosting the RAG chatbot, Predictive Analytics, "
         "and Policy Semantic Search."
     ),
-    version="1.1.0",                                         # ← bumped
+    version="1.1.0",
 )
 
-# Explicit origins + any *.vercel.app preview URL
+# explicit origins + any *.vercel.app preview URL
 allowed_origins = [
     "http://localhost:3000",
     "https://fast-api-platform-clean-ozlq.vercel.app",
 ]
+
 combined_app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
@@ -37,10 +35,10 @@ combined_app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount/attach sub‑apps
-combined_app.mount("/rag",        rag_app)
+# mount / include sub‑apps
+combined_app.mount("/rag", rag_app)
 combined_app.mount("/predictive", predictive_app)
-combined_app.include_router(semantic_router, prefix="/semantic")   # ← added
+combined_app.include_router(semantic_router, prefix="/semantic")
 
 @combined_app.get("/")
 def root_check():
@@ -49,4 +47,4 @@ def root_check():
         "message": "Unified service for RAG + Predictive + Semantic Search",
         "allowed_origins": allowed_origins,
     }
-# ────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────────
