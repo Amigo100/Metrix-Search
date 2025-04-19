@@ -191,7 +191,7 @@ function PolicySearchPage() {
         </div>
       </div>
 
-      <footer className="text-center mt-12 text-xs text-gray-500">
+      <footer className="text-center mt-12 text-xs text-gray-499">
         Metrix AI Policy Search | © {new Date().getFullYear()}
       </footer>
     </div>
