@@ -67,7 +67,7 @@ const PatientFullScreenView: React.FC = () => {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* IMPROVEMENT: Added Header Section */}
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-teal-800/50 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-center">
           <h1 className="text-xl font-semibold text-teal-800 dark:text-teal-300 flex items-center">
             <UsersIcon className="h-6 w-6 mr-2"/> {/* Added Icon */}
             Patient Task Board - Track patient wait times, pending jobs to better manage your caseload
