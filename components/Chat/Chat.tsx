@@ -1,7 +1,8 @@
 // file: /components/Chat/Chat.tsx
 // -----------------------------------------------------------------------------
-// v2.4 – fixes blank inferred‑terms, follow‑up paging, copy confirmation,
-//         ensures sign‑off always appended
+// v2.5 – refined prompts (real errors & inferences), native copy alert,
+//         “regenerate” button in document toolbar, follow‑up paging fixed,
+//         sign‑off always appended
 // -----------------------------------------------------------------------------
 
 import {
@@ -12,6 +13,7 @@ import {
   Copy,
   Download,
   Edit,
+  RotateCcw,
   AlertTriangle,
   Info,
   Loader2,
@@ -165,7 +167,6 @@ interface ChatMsg {
   content: string;
 }
 
-/* -------------------------------------------------------------------------- */
 export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   const { t } = useTranslation('chat');
 
@@ -340,19 +341,26 @@ Return only the completed note.`.trim();
       setLastOutputType('errors');
       const errorPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-TASK: Detect likely transcription mistakes (minor misspellings / homophones).
+TASK: List **actual** word-level mismatches likely due to speech‑to‑text errors.
 
-Return Markdown:
+CONDITIONS for each pair:
+• 'wrongWord' appears in the Transcript (case-insensitive).  
+• 'likelyCorrectWord' appears in the Clinical Document.  
+• Omit generic advice.
 
+FORMAT:
 ## Potential Transcription Errors
 * wrongWord → likelyCorrectWord (short reason)
-(Max 10 lines.  If none, write 'None.')
+
+If none, output exactly:
+
+None.
 
 Transcript:
 -----------
 ${rawTranscript}
 
-Clinical Document:
+Clinical Document:
 ------------------
 ${doc}`.trim();
 
@@ -380,20 +388,20 @@ ${doc}`.trim();
       setLastOutputType('terms');
       const termPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-Identify concepts that were **inferred or re‑phrased** (in doc but not verbatim
-in transcript).
+Highlight information **derived or paraphrased** (not verbatim) from the
+transcript. Ignore simple abbreviation expansions unless forming new content.
 
-Return Markdown:
-
+FORMAT:
 ## Inferred Clinical Terms
-* "transcript excerpt" → "document phrase"
-(≤10 lines or 'None.')
+* "snippet from transcript" → "phrase in document"
+
+Max 10 lines or 'None.'
 
 Transcript:
 -----------
 ${rawTranscript}
 
-Clinical Document:
+Clinical Document:
 ------------------
 ${doc}`.trim();
 
@@ -432,14 +440,14 @@ ${doc}`.trim();
 
       const recPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-Using the information in this **${activeTemplateName}**, draft specific next‑steps.
+Draft specific next‑steps relevant for **${activeTemplateName}**. No QA tips.
 
 Return Markdown:
 
 ## Recommendations
 ${headings}
 
-Clinical Document:
+Clinical Document:
 ------------------
 ${doc}`.trim();
 
@@ -483,7 +491,7 @@ ${doc}`.trim();
       setChatHistory(prev => [...prev, { role: 'assistant', content: answer }]);
       setFollowUpResponses(prev => {
         const next = [...prev, answer];
-        setFuIndex(next.length - 1); // show the newest answer
+        setFuIndex(next.length - 1);
         return next;
       });
     } catch (err: any) {
@@ -611,26 +619,19 @@ ${doc}`.trim();
                 <div className="flex items-center gap-2">
                   <button
                     className={ghostButtonStyles}
+                    title="Regenerate document"
+                    onClick={handleRegenerate}
+                  >
+                    <RotateCcw size={16} />
+                  </button>
+                  <button
+                    className={ghostButtonStyles}
                     title="Copy"
                     onClick={() =>
                       navigator.clipboard
                         .writeText(clinicalDoc)
-                        .then(() => {
-                          dispatch({
-                            type: 'change',
-                            field: 'modelError',
-                            value: { message: 'Copied!' },
-                          });
-                          setTimeout(
-                            () =>
-                              dispatch({
-                                type: 'change',
-                                field: 'modelError',
-                                value: null,
-                              }),
-                            1000,
-                          );
-                        })
+                        .then(() => alert('Copied to clipboard!'))
+                        .catch(() => alert('Copy failed'))
                     }
                   >
                     <Copy size={16} />
