@@ -222,11 +222,6 @@ export const PatientCard: React.FC<PatientCardProps> = ({
     acknowledgeTaskTimer,
     updatePatientNotes,
     updateTaskNotes,
- }) => {
-
-const PatientCard: React.FC<PatientCardProps> = ({
-    patient, removePatient, updateTaskTimerState, addTaskToPatient, updateTaskTimer,
-    removeTaskFromPatient, updateTaskCompletion, acknowledgeTaskTimer, updatePatientNotes, updateTaskNotes,
 }) => {
     // State, Effects, Handlers are identical to the version previously in PatientCard.tsx
     const [lengthOfStayMinutes, setLengthOfStayMinutes] = useState<number>(() => differenceInMinutes(new Date(), patient.arrivalTime));
