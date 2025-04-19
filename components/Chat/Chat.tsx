@@ -1,11 +1,14 @@
-// file: /components/Chat/Chat.tsx
+// /components/Chat/Chat.tsx
 // -----------------------------------------------------------------------------
-// Fixed compile errors + retains new features (collapsible cards, chat, etc.)
+// ❶ Header logo back   ❷ Better prompts   ❸ Guaranteed sign‑off
+// ❹ Extra card for follow‑ups with paging arrows   ❺ All type errors solved
 // -----------------------------------------------------------------------------
 
 import {
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Copy,
   Download,
   Edit,
@@ -15,7 +18,6 @@ import {
   X,
   FileText,
   Trash2,
-  Send,
 } from 'lucide-react';
 import React, {
   MutableRefObject,
@@ -64,7 +66,22 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 const ASK_RAG_URL = `${API_BASE_URL}/rag/ask_rag`;
 
-/* --------------------- helper components ----------------------- */
+/* ---------------------- helper components ---------------------- */
+const ScribeHeader = () => (
+  <header className="flex flex-col items-center justify-center text-center pt-6 pb-4 md:pt-8 md:pb-6 px-4">
+    <img
+      src="/MetrixAI.png"
+      alt="Metrix Logo"
+      width={56}
+      height={56}
+      className="mb-3"
+    />
+    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+      Clinical Scribe Assistant
+    </h1>
+  </header>
+);
+
 const ErrorBanner = ({ err }: { err: string | null }) =>
   err ? (
     <div className="px-4 pt-4 md:px-6">
@@ -97,6 +114,7 @@ interface CardProps {
   loadingShown: boolean;
   content: string;
   emptyText: string;
+  extraHeader?: ReactNode;
 }
 const Card: React.FC<CardProps> = ({
   title,
@@ -105,15 +123,19 @@ const Card: React.FC<CardProps> = ({
   loadingShown,
   content,
   emptyText,
+  extraHeader,
 }) => (
   <div className="flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex-shrink-0">
     <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-2">
       <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
         <Info size={16} /> {title}
       </h3>
-      <button onClick={toggle} className={ghostButtonStyles}>
-        {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-      </button>
+      <div className="flex items-center gap-1">
+        {extraHeader}
+        <button onClick={toggle} className={ghostButtonStyles}>
+          {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+        </button>
+      </div>
     </div>
     {!collapsed && (
       <div className="flex-1 overflow-auto p-4 text-sm">
@@ -138,7 +160,6 @@ interface Props {
 }
 type OutputType = 'doc' | 'errors' | 'terms' | 'recs' | 'chat' | null;
 
-/* chat history type that includes 'system' */
 interface ChatMsg {
   role: 'user' | 'assistant' | 'system';
   content: string;
@@ -172,9 +193,12 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   const [collapsedErr, setCollapsedErr] = useState(false);
   const [collapsedTerms, setCollapsedTerms] = useState(false);
   const [collapsedRecs, setCollapsedRecs] = useState(false);
+  const [collapsedFU, setCollapsedFU] = useState(false);
 
   const [chatHistory, setChatHistory] = useState<ChatMsg[]>([]);
   const [followUpLoading, setFollowUpLoading] = useState(false);
+  const [followUpResponses, setFollowUpResponses] = useState<string[]>([]);
+  const [fuIndex, setFuIndex] = useState<number>(0);
 
   const [isTranscriptExpanded, setIsTranscriptExpanded] = useState(true);
   const [isEditingDoc, setIsEditingDoc] = useState(false);
@@ -198,17 +222,14 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   }, 250);
 
   useEffect(() => {
-    if (
-      loading ||
-      followUpLoading ||
-      lastOutputType === 'doc' ||
-      lastOutputType === 'errors' ||
-      lastOutputType === 'terms' ||
-      lastOutputType === 'recs'
-    )
-      return;
-    throttledScrollDown();
-  }, [analysisRecs, followUpLoading, throttledScrollDown]);
+    if (!loading && !followUpLoading) throttledScrollDown();
+  }, [
+    analysisRecs,
+    followUpResponses,
+    followUpLoading,
+    loading,
+    throttledScrollDown,
+  ]);
 
   useEffect(() => {
     const area = chatContainerRef.current;
@@ -226,6 +247,11 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
      Helpers
   ======================================================================== */
 
+  const appendSignOff = (doc: string): string => {
+    const signoff = userSignOff || '[Your Sign‑off]';
+    return `${doc.replace(/\s*$/, '')}\n\n---\n${signoff}`;
+  };
+
   /* -------- STEP 1: create clinical document -------- */
   const handleCreateDocFromTranscript = async (text: string) => {
     try {
@@ -236,10 +262,13 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
       setAnalysisErrors('');
       setAnalysisTerms('');
       setAnalysisRecs('');
+      setFollowUpResponses([]);
+      setFuIndex(0);
       setChatHistory([]);
       setCollapsedErr(false);
       setCollapsedTerms(false);
       setCollapsedRecs(false);
+      setCollapsedFU(false);
       setIsTranscriptExpanded(true);
       setLastOutputType('doc');
 
@@ -249,7 +278,7 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
 
       const docPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-You are a helpful clinical scribe.  Return **Markdown**.
+You are a helpful clinical scribe. Return **Markdown**.
 
 Template:
 ---------
@@ -275,7 +304,7 @@ Return only the completed note.`.trim();
       });
 
       const rawDoc = (docRes.data.response as string) || '';
-      const finalDoc = `${rawDoc}\n\n---\n${userSignOff || ''}`.trim();
+      const finalDoc = appendSignOff(rawDoc);
 
       setClinicalDoc(finalDoc);
       setIsEditingDoc(false);
@@ -310,12 +339,14 @@ Return only the completed note.`.trim();
       setLastOutputType('errors');
       const errorPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-Compare **Transcript** vs **Clinical Document** and list any likely discrepancies.
+Highlight word‑level mismatches between **Transcript** and **Clinical Document** that are likely transcription errors.
 
 Return:
 ## Potential Transcription Errors
-* bullet list of items (max 10).
-* DO NOT give generic advice, instructions or disclaimers.`.trim();
+* TranscriptWord » LikelyCorrect (short reason)
+* …
+(≤10 items, or state “None.”)
+No other text.`.trim();
 
       const errorRes = await axios.post(ASK_RAG_URL, {
         message: errorPrompt,
@@ -325,7 +356,7 @@ Return:
         extra_inputs: { transcript: rawTranscript, document: doc },
       });
 
-      setAnalysisErrors(errorRes.data.response || 'No obvious discrepancies.');
+      setAnalysisErrors(errorRes.data.response || 'None.');
       await handleInferTerms(doc, rawTranscript);
     } catch (err: any) {
       dispatch({
@@ -346,7 +377,8 @@ Identify content present in the **Clinical Document** that is not stated verbati
 
 Return:
 ## Inferred Clinical Terms
-* bullet list (≤10).`.trim();
+* bullet list (≤10).
+No commentary.`.trim();
 
       const termRes = await axios.post(ASK_RAG_URL, {
         message: termPrompt,
@@ -373,12 +405,14 @@ Return:
       setLastOutputType('recs');
       const recPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-Based on this **${activeTemplateName}**, suggest next steps.
+Analyse the **${activeTemplateName}** below and give clinical next‑steps relevant to its context.
 
 Return:
 ## Recommendations
-* 5‑8 concise bullets relevant to the context.
-* Clinical guidance only – no transcript QA tips or disclaimers.`.trim();
+* 5‑8 concise clinical bullets.
+* Discharge note → focus on safety‑netting & follow‑up.
+* Triage note → focus on immediate investigations & senior review triggers.
+No disclaimers or QA tips.`.trim();
 
       const recRes = await axios.post(ASK_RAG_URL, {
         message: recPrompt,
@@ -388,14 +422,7 @@ Return:
         extra_inputs: { document: doc },
       });
 
-      const recText = recRes.data.response || 'No recommendations.';
-      setAnalysisRecs(recText);
-
-      /* extend chat history */
-      setChatHistory(prev => [
-        ...prev,
-        { role: 'assistant', content: `Recommendations:\n${recText}` },
-      ]);
+      setAnalysisRecs(recRes.data.response || 'No recommendations.');
     } catch (err: any) {
       dispatch({
         type: 'change',
@@ -414,7 +441,7 @@ Return:
     const newHistory: ChatMsg[] = [...chatHistory, { role: 'user', content: question }];
     setChatHistory(newHistory);
     setFollowUpLoading(true);
-    setLastOutputType('chat');
+    setCollapsedFU(false);
 
     try {
       const resp = await axios.post(ASK_RAG_URL, {
@@ -426,7 +453,8 @@ Return:
 
       const answer = resp.data.response || 'Sorry, no answer.';
       setChatHistory(prev => [...prev, { role: 'assistant', content: answer }]);
-      setAnalysisRecs(answer); // show latest answer in recs panel
+      setFollowUpResponses(prev => [...prev, answer]);
+      setFuIndex(prev => prev + 1);
     } catch (err: any) {
       dispatch({
         type: 'change',
@@ -461,6 +489,8 @@ Return:
     setAnalysisErrors('');
     setAnalysisTerms('');
     setAnalysisRecs('');
+    setFollowUpResponses([]);
+    setFuIndex(0);
     setChatHistory([]);
     setFollowUpLoading(false);
     setIsEditingDoc(false);
@@ -621,9 +651,7 @@ Return:
                   className={secondaryButtonStyles}
                   onClick={() => {
                     const cleaned = editDocText.replace(/\n?---\n[\s\S]*$/, '');
-                    const savedDoc = `${cleaned}\n\n---\n${
-                      userSignOff || ''
-                    }`.trim();
+                    const savedDoc = appendSignOff(cleaned);
                     setClinicalDoc(savedDoc);
                     setIsEditingDoc(false);
                   }}
@@ -672,6 +700,45 @@ Return:
               }
               content={analysisRecs}
               emptyText="No recommendations."
+            />
+
+            {/* d) Follow‑ups */}
+            <Card
+              title="Follow‑up Responses"
+              collapsed={collapsedFU}
+              toggle={() => setCollapsedFU(p => !p)}
+              loadingShown={followUpLoading}
+              content={followUpResponses[fuIndex] || ''}
+              emptyText="No follow‑up responses."
+              extraHeader={
+                followUpResponses.length > 1 && !collapsedFU ? (
+                  <div className="flex items-center gap-1">
+                    <button
+                      disabled={fuIndex === 0}
+                      onClick={() => setFuIndex(i => Math.max(0, i - 1))}
+                      className={ghostButtonStyles}
+                      title="Previous"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+                    <span className="text-xs text-gray-500">
+                      {fuIndex + 1}/{followUpResponses.length}
+                    </span>
+                    <button
+                      disabled={fuIndex === followUpResponses.length - 1}
+                      onClick={() =>
+                        setFuIndex(i =>
+                          Math.min(followUpResponses.length - 1, i + 1),
+                        )
+                      }
+                      className={ghostButtonStyles}
+                      title="Next"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                ) : null
+              }
             />
           </div>
         </div>
@@ -765,6 +832,7 @@ Return:
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto flex flex-col"
       >
+        <ScribeHeader />
         {mainContent}
         <div ref={messagesEndRef} className="h-1 flex-shrink-0" />
       </div>
