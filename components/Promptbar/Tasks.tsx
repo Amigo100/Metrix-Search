@@ -249,8 +249,6 @@ const PatientCard: React.FC<PatientCardProps> = ({
     const completedTasks = patient.tasks.filter((t) => t.completionStatus === 'complete');
 
     return (
-        // PatientCard JSX using *internal* mock Card, Button, Input
-        // Using original styling including size="icon"
        <Card className={`mb-4 border-2 ${borderColor} ${bgColor} transition-colors duration-500 flex flex-col`}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-base font-medium text-black">{patient.name}</CardTitle>
@@ -259,9 +257,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
             <CardContent className="flex-1 flex flex-col">
                 <div className="text-xs text-black mb-2"> <Clock className="inline h-3 w-3 mr-1" /> Length of Stay: <span className="font-semibold text-black">{lengthOfStayFormatted}</span> <span className="ml-2 text-black"> (Arrival: {format(patient.arrivalTime, 'HH:mm')}) </span> </div>
                 <div className="mb-2">
-                   <div className="flex items-center justify-between">
-                        <div className="text-xs text-black font-medium flex items-center"> Notes: <Button variant="ghost" size="icon" className={`h-6 w-6 ml-1 ${patient.notes ? 'text-blue-400' : 'text-black'}`} onClick={() => setIsEditingPatientNotes((prev) => !prev)} title={patient.notes ? 'Edit/View Notes' : 'Add Notes'} > <MessageSquare className="h-4 w-4" /> </Button> </div>
-                   </div>
+                   <div className="flex items-center justify-between"> <div className="text-xs text-black font-medium flex items-center"> Notes: <Button variant="ghost" size="icon" className={`h-6 w-6 ml-1 ${patient.notes ? 'text-blue-400' : 'text-black'}`} onClick={() => setIsEditingPatientNotes((prev) => !prev)} title={patient.notes ? 'Edit/View Notes' : 'Add Notes'} > <MessageSquare className="h-4 w-4" /> </Button> </div> </div>
                    {isEditingPatientNotes && ( <div className="mt-1 flex items-center gap-2 w-full"> <textarea ref={patientNotesTextareaRef} value={editPatientNotes} onChange={(e) => setEditPatientNotes(e.target.value)} onKeyDown={handlePatientNotesKeyDown} rows={2} className="flex-grow text-xs bg-neutral-50 border border-gray-300 rounded p-1.5 text-gray-700 placeholder-gray-400 focus:ring-1 focus:ring-ring focus:outline-none resize-none" placeholder="Add patient notes..." /> <Button variant="ghost" size="icon" className="h-6 w-6 text-green-400 hover:text-green-300" onClick={handlePatientNotesSubmit} title="Save Notes"> <Save className="h-4 w-4" /> </Button> <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-gray-200" onClick={() => setIsEditingPatientNotes(false)} title="Cancel Edit"> <X className="h-4 w-4" /> </Button> </div> )}
                    {!isEditingPatientNotes && patient.notes && ( <div className="mt-1 text-xs text-black italic break-words"> Note: {patient.notes} </div> )}
                 </div>
@@ -269,19 +265,13 @@ const PatientCard: React.FC<PatientCardProps> = ({
                     <div>
                         <h4 className="text-sm font-medium text-black mb-1">Pending Tasks:</h4>
                         {pendingTasks.length === 0 ? ( <p className="text-xs text-black italic">No pending tasks.</p> ) : (
-                            pendingTasks.map((task) => (
-                                // Renders the *internal* TaskItem
-                                <TaskItem key={task.id} task={task} patientId={patient.id} patientName={patient.name} updateTaskTimerState={updateTaskTimerState} updateTaskTimer={updateTaskTimer} removeTask={removeTaskFromPatient} updateTaskCompletion={updateTaskCompletion} acknowledgeTimer={acknowledgeTaskTimer} updateTaskNotes={updateTaskNotes} />
-                            ))
+                            pendingTasks.map((task) => ( <TaskItem key={task.id} task={task} patientId={patient.id} patientName={patient.name} updateTaskTimerState={updateTaskTimerState} updateTaskTimer={updateTaskTimer} removeTask={removeTaskFromPatient} updateTaskCompletion={updateTaskCompletion} acknowledgeTimer={acknowledgeTaskTimer} updateTaskNotes={updateTaskNotes} /> ))
                         )}
                     </div>
                     {completedTasks.length > 0 && (
                         <div className="mt-2 border-t border-gray-700/50 pt-2">
                             <h4 className="text-sm font-medium text-black mb-1">Completed Tasks:</h4>
-                            {completedTasks.map((task) => (
-                               // Renders the *internal* TaskItem
-                               <TaskItem key={task.id} task={task} patientId={patient.id} patientName={patient.name} updateTaskTimerState={updateTaskTimerState} updateTaskTimer={updateTaskTimer} removeTask={removeTaskFromPatient} updateTaskCompletion={updateTaskCompletion} acknowledgeTimer={acknowledgeTaskTimer} updateTaskNotes={updateTaskNotes} />
-                            ))}
+                            {completedTasks.map((task) => ( <TaskItem key={task.id} task={task} patientId={patient.id} patientName={patient.name} updateTaskTimerState={updateTaskTimerState} updateTaskTimer={updateTaskTimer} removeTask={removeTaskFromPatient} updateTaskCompletion={updateTaskCompletion} acknowledgeTimer={acknowledgeTaskTimer} updateTaskNotes={updateTaskNotes} /> ))}
                         </div>
                     )}
                 </div>
@@ -295,7 +285,8 @@ const PatientCard: React.FC<PatientCardProps> = ({
             </CardContent>
        </Card>
     );
-};
+    // === END OF FIX ===
+ };
 // ===-----------------------------------===
 // === End: Restored PatientCard Component ===
 // ===-----------------------------------===
