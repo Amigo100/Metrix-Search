@@ -1,8 +1,17 @@
+// file: /pages/semantic_search.tsx
+'use client';
+
 import React, { useState } from 'react';
-import { Send, Loader2, AlertTriangle, Search as SearchIcon } from 'lucide-react';
+import {
+  Send,
+  Loader2,
+  AlertTriangle,
+  Search as SearchIcon,
+} from 'lucide-react';
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import PageHeader from '@/components/PageHeader';
 
-/* ──────────────── Types ───────────────── */  
+/* ──────────────── Types ───────────────── */
 interface Citation {
   source_id: number;
   document_title: string;
@@ -29,7 +38,8 @@ const inputCls =
   'flex-grow block w-full rounded-full border border-gray-300 bg-white py-2.5 px-5 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 placeholder-gray-400 text-base';
 const errAlert =
   'bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-4 flex items-center gap-2';
-const linkCls = 'text-teal-600 hover:text-teal-700 hover:underline text-sm';
+const linkCls =
+  'text-teal-600 hover:text-teal-700 hover:underline text-sm';
 
 /* ───────────────── Component ──────────────── */
 function PolicySearchPage() {
@@ -85,10 +95,20 @@ function PolicySearchPage() {
           />
         </div>
 
+        {/* explanatory banner */}
+        <div className="bg-teal-50 border border-teal-200 text-teal-900 rounded-lg p-4 mt-6 flex items-start gap-2">
+          <InformationCircleIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
+          <p className="text-sm">
+            Enter a question to search <strong>internal hospital policies,
+            guidelines, and SOPs</strong>. Metrix AI uses semantic search to
+            surface the most locally relevant information in seconds.
+          </p>
+        </div>
+
         {/* form */}
         <form
           onSubmit={handleSearch}
-          className="flex flex-col sm:flex-row items-center gap-3 mb-6 max-w-3xl mx-auto"
+          className="flex flex-col sm:flex-row items-center gap-3 mb-6 max-w-3xl mx-auto mt-6"
         >
           <div className="relative flex-grow w-full sm:w-auto">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -189,9 +209,16 @@ function PolicySearchPage() {
             </div>
           )}
         </div>
+
+        {/* disclaimer */}
+        <p className="max-w-4xl mx-auto mt-12 text-xs text-gray-600 dark:text-gray-400 text-center">
+          <strong>Disclaimer:</strong> Always double‑check retrieved information
+          against the official policy documents and apply your own clinical
+          judgment.
+        </p>
       </div>
 
-      <footer className="text-center mt-12 text-xs text-gray-499">
+      <footer className="text-center mt-12 text-xs text-gray-500">
         Metrix AI Policy Search | © {new Date().getFullYear()}
       </footer>
     </div>
