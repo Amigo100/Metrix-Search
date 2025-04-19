@@ -332,8 +332,7 @@ Return only the completed note.`.trim();
     }
   };
 
-  /* STEP 2 transcription errors – NEW free‑text prompt below               */
-
+ /* -------- STEP 2: transcription errors – ROBUST NEW PROMPT -------------- */
   const handleTranscriptionErrors = async (
     doc: string,
     rawTranscript: string,
@@ -344,30 +343,53 @@ Return only the completed note.`.trim();
       const errorPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
 
-You are reviewing a **clinical speech transcript** that was converted to text.
-Identify words or short phrases that look like they were *mis‑heard* or
-*misspelled* by the speech‑to‑text system.
+You are an expert clinical scribe QA assistant.
 
-Look for:
-• Nonsense medical words (“troponone” instead of “troponin”).  
-• Real words that make no sense in context (“zest pain” instead of “chest pain”).  
-• Incorrect homophones (“elusive” vs “illusive”) that break clinical meaning.
+**Definition – Potential Transcription Error**  
+A word or short phrase in the *Transcript* that is probably mis‑heard or
+mis‑spelled by ASR (automatic speech recognition).
 
-For each suspect term, suggest the single most likely correction.
+Key signals  
+• Non‑dictionary or non‑medical tokens (“troponone”).  
+• Homophones that break clinical meaning (“zest pain” for “chest pain”).  
+• Context mismatch (random brand names, wrong anatomy).  
+• Near‑miss Levenshtein distance to common clinical terms (“tropinin”).
 
-Return:
+What is **NOT** an error  
+× Correct medical jargon.  
+× Standard abbreviation expansions (NKDA → No Known Drug Allergies).  
+× Arbitrary guesses not present in the transcript.  
+× Copying words from the Clinical Document.
+
+**Algorithm (internal)**  
+1. Tokenise Transcript, flag rare/out‑of‑vocabulary items.  
+2. For each candidate, generate up to 3 plausible corrections.  
+3. Score:  
+   • Edit distance ≤ 2 OR phonetic similarity.  
+   • Correction appears in a medical lexicon **or** in the Clinical Document.  
+4. Keep top 1 correction per wrongWord.  
+5. Discard if confidence < 0.4.  
+6. Return max 8 items, sorted by confidence ↓.
+
+**Output**  
+If any issues found:
 
 ## Potential Transcription Errors
-wrongWord > possibleCorrection
-(one line per issue, up to 8 lines)
+wrongWord > likelyCorrection
 
-If you find **no issues**, return:
+(one line per issue, no bullet symbols)
+
+If **none**, output only:
 
 None.
 
 Transcript:
 -----------
-${rawTranscript}`.trim();
+${rawTranscript}
+
+Clinical Document: (for context only)
+------------------
+${doc}`.trim();
 
       const errorRes = await axios.post(ASK_RAG_URL, {
         message: errorPrompt,
@@ -386,6 +408,7 @@ ${rawTranscript}`.trim();
       });
     }
   };
+
   /* -------- STEP 3: inferred terms – IMPROVED “Heidi‑style” prompt ----- */
   const handleInferTerms = async (doc: string, rawTranscript: string) => {
     try {
