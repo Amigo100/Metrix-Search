@@ -1,7 +1,6 @@
 // file: /pages/api/home/home.tsx
 
-// Added useContext
-import React, { useEffect, useRef, useState, useContext } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react'; // Added useContext
 import { useQuery } from 'react-query';
 
 import { GetServerSideProps } from 'next';
@@ -66,42 +65,24 @@ const Home = ({
   const { getModelsError } = useErrorService();
   const [initialRender, setInitialRender] = useState<boolean>(true);
 
-  // --- REMOVED Redundant State Creation ---
-  // const contextValue = useCreateReducer<HomeInitialState>({
-  //   initialState,
-  // });
-
-  // --- ADDED: Consume context from the REAL provider in _app.tsx ---
+  // --- Consume context from the REAL provider in _app.tsx ---
   const {
     state, // Get the shared state
     dispatch, // Get the shared dispatch
     handleNewConversation, // Get the shared handler
-    // Note: other handlers (handleCreateFolder etc.) are likely called by
-    // Chatbar/Promptbar which consume context directly. If Home needs them
-    // directly for props, destructure them here too.
-    // handleCreateFolder,
-    // handleDeleteFolder,
-    // handleUpdateFolder,
-    // handleSelectConversation,
-    // handleUpdateConversation,
-    // Patient handlers are available but likely not needed directly here
+    // Add other handlers if needed directly by this component's props
   } = useContext(HomeContext);
 
   // Destructure needed state variables from the *shared* state
   const {
       apiKey,
       lightMode,
-      // folders, // Likely used by Chatbar/Promptbar directly
-      // conversations, // Likely used by Chatbar/Promptbar directly
       selectedConversation,
-      // prompts, // Likely used by Promptbar directly
-      // temperature, // Likely used by Chat directly
   } = state;
-
 
   const stopConversationRef = useRef<boolean>(false);
 
-  // Use react-query to fetch models (remains the same)
+  // Use react-query to fetch models
   const { data, error, refetch } = useQuery(
     ['GetModels', apiKey, serverSideApiKeyIsSet], // Depends on apiKey from shared state
     ({ signal }) => {
@@ -126,27 +107,16 @@ const Home = ({
     }); // Uses shared dispatch
   }, [dispatch, error, getModelsError]); // dispatch dependency is stable
 
-  // --- REMOVED Redundant Handler Definitions ---
-  // const handleSelectConversation = ...
-  // const handleCreateFolder = ...
-  // const handleDeleteFolder = ...
-  // const handleUpdateFolder = ...
-  // const handleNewConversation = ... (now obtained from context)
-  // const handleUpdateConversation = ...
 
   // --- OTHER EFFECTS (now use shared dispatch) ---
 
   useEffect(() => {
-    // This effect seems specific to initial mobile layout, keep it but use shared dispatch
     if (window.innerWidth < 640) {
       dispatch({ type: 'change', field: 'showChatbar', value: false });
     }
-    // This dependency might cause re-runs if selectedConversation changes often.
-    // Consider if this logic should only run once on mount or be elsewhere.
   }, [selectedConversation, dispatch]); // Added dispatch dependency
 
   useEffect(() => {
-    // This effect sets initial state based on props, keep it but use shared dispatch
     if (defaultModelId) {
       dispatch({ type: 'change', field: 'defaultModelId', value: defaultModelId });
     }
@@ -160,12 +130,10 @@ const Home = ({
         type: 'change', field: 'serverSidePluginKeysSet', value: serverSidePluginKeysSet,
       });
     }
-    // Removed dispatch from dependencies as it's stable; props dependency is correct
   }, [defaultModelId, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
 
-  // ON LOAD Effect - simplified as much logic should be in Provider now
+  // ON LOAD Effect - simplified as most logic should be in Provider
   useEffect(() => {
-    // Keep settings load, API key logic (as it uses props), maybe plugin keys
     const settings = getSettings();
     if (settings.theme) {
       dispatch({ type: 'change', field: 'lightMode', value: settings.theme });
@@ -181,13 +149,11 @@ const Home = ({
       }
     }
 
-    // Plugin keys logic might still be relevant here if server-side props control it
     const pluginKeys = localStorage.getItem('pluginKeys');
     if (serverSidePluginKeysSet) {
       dispatch({ type: 'change', field: 'pluginKeys', value: [] });
       localStorage.removeItem('pluginKeys');
     } else if (pluginKeys) {
-      // Make sure pluginKeys are parsed correctly if they are stored as JSON
       try {
         dispatch({ type: 'change', field: 'pluginKeys', value: JSON.parse(pluginKeys) });
       } catch {
@@ -195,7 +161,6 @@ const Home = ({
       }
     }
 
-    // UI flags based on localStorage can remain here if desired
     if (window.innerWidth < 640) {
       dispatch({ type: 'change', field: 'showChatbar', value: false });
       dispatch({ type: 'change', field: 'showSidePromptbar', value: false });
@@ -206,46 +171,89 @@ const Home = ({
     }
     const showSidePromptbar = localStorage.getItem('showSidePromptbar');
     if (showSidePromptbar) {
-      dispatch({ type: 'change', field: 'showSidePromptbar', value: showSidePromptbar === 'false'}); // Assuming 'false' means closed
+      dispatch({ type: 'change', field: 'showSidePromptbar', value: showSidePromptbar === 'false'});
     }
 
-    // *** Ideally, loading folders, prompts, conversations, selectedConversation
-    // *** from localStorage should happen ONCE in the HomeContextProvider.
-    // *** Keeping them here duplicates that logic and might cause conflicts/race conditions.
-    // *** Recommended: Remove the sections below loading these from localStorage here.
+    // NOTE: Loading folders, prompts, conversations etc. from localStorage
+    // is ideally handled solely within HomeContextProvider now.
+    // Leaving this effect minimal here.
 
-    // --- Start Optional Removal ---
-    // const folders = localStorage.getItem('folders');
-    // if (folders) {
-    //   dispatch({ type: 'change', field: 'folders', value: JSON.parse(folders) });
-    // }
-    // const prompts = localStorage.getItem('prompts');
-    // if (prompts) {
-    //   dispatch({ type: 'change', field: 'prompts', value: JSON.parse(prompts) });
-    // }
-    // const conversationHistory = localStorage.getItem('conversationHistory');
-    // if (conversationHistory) {
-    //   // ... parsing/cleaning ...
-    //   dispatch({ type: 'change', field: 'conversations', value: cleanedConversationHistory });
-    // }
-    // const selectedConversationLS = localStorage.getParameter('selectedConversation');
-    // if (selectedConversationLS) {
-    //    // ... parsing/cleaning ...
-    //   dispatch({ type: 'change', field: 'selectedConversation', value: cleanedSelectedConversation });
-    // } else if (!state.selectedConversation) { // Check if selectedConversation is already set by provider
-    //    // Logic to set a default new conversation might be needed if nothing loaded
-    //    // This part highly depends on how the provider handles initial state
-    // }
-    // --- End Optional Removal ---
+  }, [openaiApiKey, serverSideApiKeyIsSet, serverSidePluginKeysSet, defaultModelId, dispatch]); // Added dispatch here as it's used
 
-
-  // Only run ONCE on mount - dependencies should reflect values needed *only* for initialization
-  // Dispatch is stable and doesn't need to be listed.
-  }, [openaiApiKey, serverSideApiKeyIsSet, serverSidePluginKeysSet, defaultModelId]);
-
-
-  // --- REMOVED Provider Wrapper ---
   return (
-    <> {/* Use Fragment or other container if needed */}
+    <> {/* Opening Fragment */}
       <Head>
-        <title>Metrix AI - The
+        <title>Metrix AI - The Intelligent Clinical Scribe Platform</title>
+        <meta name="description" content="Smarter algorithms for smarter working" />
+        <meta name="viewport" content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no"/>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <Script src="https://www.googletagmanager.com/gtag/js?id=G-S2RT6C3E5G" strategy="afterInteractive" />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-S2RT6C3E5G');
+        `}
+      </Script>
+
+      {selectedConversation && (
+        <main
+          className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`} // lightMode from shared state
+        >
+          <div className="fixed top-0 w-full sm:hidden">
+            <Navbar
+              selectedConversation={selectedConversation} // from shared state
+              onNewConversation={handleNewConversation} // from shared context
+            />
+          </div>
+          <div className="flex h-full w-full pt-[48px] sm:pt-0">
+            {/* These components presumably consume context internally */}
+            <Chatbar />
+            <div className="flex flex-1">
+              <Chat stopConversationRef={stopConversationRef} />
+            </div>
+            <Promptbar />
+          </div>
+        </main>
+      )}
+      {!selectedConversation && (
+          <div>Loading Conversation...</div> // Or some other placeholder
+      )}
+    </> // <-- FIX APPLIED HERE: Added Closing Fragment Tag
+  );
+};
+
+export default Home;
+
+// getServerSideProps remains the same
+export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
+   const defaultModelId =
+     (process.env.DEFAULT_MODEL &&
+       Object.values(OpenAIModelID).includes(
+         process.env.DEFAULT_MODEL as OpenAIModelID
+       ) &&
+       process.env.DEFAULT_MODEL) ||
+     fallbackModelID;
+
+   let serverSidePluginKeysSet = false;
+   const googleApiKey = process.env.GOOGLE_API_KEY;
+   const googleCSEId = process.env.GOOGLE_CSE_ID;
+   if (googleApiKey && googleCSEId) {
+     serverSidePluginKeysSet = true;
+   }
+
+   return {
+     props: {
+       serverSideApiKeyIsSet: !!process.env.OPENAI_API_KEY,
+       openaiApiKey: process.env.OPENAI_API_KEY || '',
+       defaultModelId,
+       serverSidePluginKeysSet,
+       ...(await serverSideTranslations(locale ?? 'en', [
+         'common', 'chat', 'sidebar', 'markdown', 'promptbar', 'settings',
+       ])),
+     },
+   };
+};
