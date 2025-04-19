@@ -57,14 +57,14 @@ Label.displayName = 'Label';
 interface DialogProps { open: boolean; onOpenChange: (open: boolean) => void; children: React.ReactNode; }
 // === FIX #2 APPLIED HERE ===
 const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) =>
-  open ? (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      {/* Changed max-w-md to max-w-3xl */}
-      <div className="bg-card rounded-lg shadow-lg w-full max-w-3xl">
-        {children}
-      </div>
-    </div>
-  ) : null;
+ open ? (
+   <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+     {/* Changed max-w-md to max-w-3xl */}
+     <div className="bg-card rounded-lg shadow-lg w-full max-w-3xl">
+       {children}
+     </div>
+   </div>
+ ) : null;
 // === END OF FIX #2 ===
 
 interface DialogContentProps { children: React.ReactNode; className?: string; }
@@ -106,7 +106,6 @@ const getBackgroundColor = (minutes: number): string => { /* ... */ };
 interface TaskItemProps { /* ... */ }
 const TaskItem: React.FC<TaskItemProps> = ({ /* ...props... */ }) => {
   // ... TaskItem implementation using internal mock Buttons/Inputs ...
-  // ... Includes original opacity logic restored previously ...
   const [isTimerExpired, setIsTimerExpired] = useState<boolean>(task.isTimerExpired);
   const [timeRemaining, setTimeRemaining] = useState<string>('');
   const [isEditingTimer, setIsEditingTimer] = useState<boolean>(false);
@@ -157,7 +156,6 @@ const TaskItem: React.FC<TaskItemProps> = ({ /* ...props... */ }) => {
 interface PatientCardProps { /* ... */ }
 const PatientCard: React.FC<PatientCardProps> = ({ /* ...props... */ }) => {
   // ... PatientCard implementation using internal mock Card/Button/Input & internal TaskItem ...
-  // ... Includes previous fix passing all props down to TaskItem ...
     const [lengthOfStayMinutes, setLengthOfStayMinutes] = useState<number>(() => differenceInMinutes(new Date(), patient.arrivalTime));
     const [lengthOfStayFormatted, setLengthOfStayFormatted] = useState<string>('');
     const [newTaskText, setNewTaskText] = useState<string>('');
@@ -176,38 +174,12 @@ const PatientCard: React.FC<PatientCardProps> = ({ /* ...props... */ }) => {
 
     return (
        <Card className={`mb-4 border-2 ${borderColor} ${bgColor} transition-colors duration-500 flex flex-col`}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-base font-medium text-black">{patient.name}</CardTitle>
-                <Button variant="ghost" size="icon" className="h-6 w-6 text-black hover:text-red-500" onClick={() => removePatient(patient.id)} > <X className="h-4 w-4" /> </Button>
-            </CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between pb-2"> <CardTitle className="text-base font-medium text-black">{patient.name}</CardTitle> <Button variant="ghost" size="icon" className="h-6 w-6 text-black hover:text-red-500" onClick={() => removePatient(patient.id)} > <X className="h-4 w-4" /> </Button> </CardHeader>
             <CardContent className="flex-1 flex flex-col">
                 <div className="text-xs text-black mb-2"> <Clock className="inline h-3 w-3 mr-1" /> Length of Stay: <span className="font-semibold text-black">{lengthOfStayFormatted}</span> <span className="ml-2 text-black"> (Arrival: {format(patient.arrivalTime, 'HH:mm')}) </span> </div>
-                <div className="mb-2">
-                   <div className="flex items-center justify-between"> <div className="text-xs text-black font-medium flex items-center"> Notes: <Button variant="ghost" size="icon" className={`h-6 w-6 ml-1 ${patient.notes ? 'text-blue-400' : 'text-black'}`} onClick={() => setIsEditingPatientNotes((prev) => !prev)} title={patient.notes ? 'Edit/View Notes' : 'Add Notes'} > <MessageSquare className="h-4 w-4" /> </Button> </div> </div>
-                   {isEditingPatientNotes && ( <div className="mt-1 flex items-center gap-2 w-full"> <textarea ref={patientNotesTextareaRef} value={editPatientNotes} onChange={(e) => setEditPatientNotes(e.target.value)} onKeyDown={handlePatientNotesKeyDown} rows={2} className="flex-grow text-xs bg-neutral-50 border border-gray-300 rounded p-1.5 text-gray-700 placeholder-gray-400 focus:ring-1 focus:ring-ring focus:outline-none resize-none" placeholder="Add patient notes..." /> <Button variant="ghost" size="icon" className="h-6 w-6 text-green-400 hover:text-green-300" onClick={handlePatientNotesSubmit} title="Save Notes"> <Save className="h-4 w-4" /> </Button> <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-gray-200" onClick={() => setIsEditingPatientNotes(false)} title="Cancel Edit"> <X className="h-4 w-4" /> </Button> </div> )}
-                   {!isEditingPatientNotes && patient.notes && ( <div className="mt-1 text-xs text-black italic break-words"> Note: {patient.notes} </div> )}
-                </div>
-                <div className="flex-1 mt-2 border-t border-gray-700 pt-2 overflow-y-auto">
-                    <div>
-                        <h4 className="text-sm font-medium text-black mb-1">Pending Tasks:</h4>
-                        {pendingTasks.length === 0 ? ( <p className="text-xs text-black italic">No pending tasks.</p> ) : (
-                            pendingTasks.map((task) => ( <TaskItem key={task.id} task={task} patientId={patient.id} patientName={patient.name} updateTaskTimerState={updateTaskTimerState} updateTaskTimer={updateTaskTimer} removeTask={removeTaskFromPatient} updateTaskCompletion={updateTaskCompletion} acknowledgeTimer={acknowledgeTaskTimer} updateTaskNotes={updateTaskNotes} /> ))
-                        )}
-                    </div>
-                    {completedTasks.length > 0 && (
-                        <div className="mt-2 border-t border-gray-700/50 pt-2">
-                            <h4 className="text-sm font-medium text-black mb-1">Completed Tasks:</h4>
-                            {completedTasks.map((task) => ( <TaskItem key={task.id} task={task} patientId={patient.id} patientName={patient.name} updateTaskTimerState={updateTaskTimerState} updateTaskTimer={updateTaskTimer} removeTask={removeTaskFromPatient} updateTaskCompletion={updateTaskCompletion} acknowledgeTimer={acknowledgeTaskTimer} updateTaskNotes={updateTaskNotes} /> ))}
-                        </div>
-                    )}
-                </div>
-                <div className="mt-3 pt-3 border-t border-gray-700/50">
-                    <form onSubmit={handleAddTaskSubmit} className="flex items-center gap-2">
-                        <Input type="text" placeholder="Add Task" value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)} onKeyDown={handleNewTaskKeyDown} className="flex-grow h-8 text-sm" />
-                        <Input type="number" min="1" max="999" placeholder="Min" value={newTaskTimerMinutes} onChange={(e) => setNewTaskTimerMinutes(e.target.value)} onKeyDown={handleNewTaskKeyDown} className="w-16 h-8 text-xs" />
-                        <Button type="submit" variant="ghost" size="icon" className="h-8 w-8 text-black hover:bg-gray-100" disabled={newTaskText.trim() === ''} title="Add Task" > <Plus className="h-4 w-4" /> </Button>
-                    </form>
-                </div>
+                <div className="mb-2"> <div className="flex items-center justify-between"> <div className="text-xs text-black font-medium flex items-center"> Notes: <Button variant="ghost" size="icon" className={`h-6 w-6 ml-1 ${patient.notes ? 'text-blue-400' : 'text-black'}`} onClick={() => setIsEditingPatientNotes((prev) => !prev)} title={patient.notes ? 'Edit/View Notes' : 'Add Notes'} > <MessageSquare className="h-4 w-4" /> </Button> </div> </div> {isEditingPatientNotes && ( <div className="mt-1 flex items-center gap-2 w-full"> <textarea ref={patientNotesTextareaRef} value={editPatientNotes} onChange={(e) => setEditPatientNotes(e.target.value)} onKeyDown={handlePatientNotesKeyDown} rows={2} className="flex-grow text-xs bg-neutral-50 border border-gray-300 rounded p-1.5 text-gray-700 placeholder-gray-400 focus:ring-1 focus:ring-ring focus:outline-none resize-none" placeholder="Add patient notes..." /> <Button variant="ghost" size="icon" className="h-6 w-6 text-green-400 hover:text-green-300" onClick={handlePatientNotesSubmit} title="Save Notes"> <Save className="h-4 w-4" /> </Button> <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-gray-200" onClick={() => setIsEditingPatientNotes(false)} title="Cancel Edit"> <X className="h-4 w-4" /> </Button> </div> )} {!isEditingPatientNotes && patient.notes && ( <div className="mt-1 text-xs text-black italic break-words"> Note: {patient.notes} </div> )} </div>
+                <div className="flex-1 mt-2 border-t border-gray-700 pt-2 overflow-y-auto"> <div> <h4 className="text-sm font-medium text-black mb-1">Pending Tasks:</h4> {pendingTasks.length === 0 ? ( <p className="text-xs text-black italic">No pending tasks.</p> ) : ( pendingTasks.map((task) => ( <TaskItem key={task.id} task={task} patientId={patient.id} patientName={patient.name} updateTaskTimerState={updateTaskTimerState} updateTaskTimer={updateTaskTimer} removeTask={removeTaskFromPatient} updateTaskCompletion={updateTaskCompletion} acknowledgeTimer={acknowledgeTaskTimer} updateTaskNotes={updateTaskNotes} /> )) )} </div> {completedTasks.length > 0 && ( <div className="mt-2 border-t border-gray-700/50 pt-2"> <h4 className="text-sm font-medium text-black mb-1">Completed Tasks:</h4> {completedTasks.map((task) => ( <TaskItem key={task.id} task={task} patientId={patient.id} patientName={patient.name} updateTaskTimerState={updateTaskTimerState} updateTaskTimer={updateTaskTimer} removeTask={removeTaskFromPatient} updateTaskCompletion={updateTaskCompletion} acknowledgeTimer={acknowledgeTaskTimer} updateTaskNotes={updateTaskNotes} /> ))} </div> )} </div>
+                <div className="mt-3 pt-3 border-t border-gray-700/50"> <form onSubmit={handleAddTaskSubmit} className="flex items-center gap-2"> <Input type="text" placeholder="Add Task" value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)} onKeyDown={handleNewTaskKeyDown} className="flex-grow h-8 text-sm" /> <Input type="number" min="1" max="999" placeholder="Min" value={newTaskTimerMinutes} onChange={(e) => setNewTaskTimerMinutes(e.target.value)} onKeyDown={handleNewTaskKeyDown} className="w-16 h-8 text-xs" /> <Button type="submit" variant="ghost" size="icon" className="h-8 w-8 text-black hover:bg-gray-100" disabled={newTaskText.trim() === ''} title="Add Task" > <Plus className="h-4 w-4" /> </Button> </form> </div>
             </CardContent>
        </Card>
     );
@@ -217,7 +189,7 @@ const PatientCard: React.FC<PatientCardProps> = ({ /* ...props... */ }) => {
 interface ModalTaskState { /* ... */ }
 interface AddPatientModalProps { /* ... */ }
 const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addPatientHandler }) => {
-  // ... AddPatientModal implementation using internal mock Dialog/Button/Input/Label ...
+  // ... AddPatientModal state and handlers ...
    const [patientName, setPatientName] = useState<string>('');
    const [arrivalTime, setArrivalTime] = useState<string>(format(new Date(), 'HH:mm'));
    const [tasks, setTasks] = useState<ModalTaskState[]>([{ id: Date.now(), text: '', timerMinutes: '' }]);
@@ -233,6 +205,7 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
     };
 
   return (
+    // AddPatientModal JSX using internal mock Dialog, Button, Input etc.
     <Dialog open={isOpen} onOpenChange={onClose}>
        {/* === FIX #1 APPLIED HERE === */}
       <DialogContent className="bg-neutral-50 text-black sm:max-w-3xl"> {/* Changed to sm:max-w-3xl */}
@@ -244,14 +217,12 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
-             {/* Inputs/Labels/Tasks using original styles */}
             <div className="grid grid-cols-4 items-center gap-4"> <Label htmlFor="patient-name" className="text-right text-black"> Name/Title </Label> <Input id="patient-name" value={patientName} onChange={(e: ChangeEvent<HTMLInputElement>) => setPatientName(e.target.value)} className="col-span-3 bg-neutral-50 border-gray-600 text-black placeholder-black" placeholder="e.g., Bed 5 / Mr. Smith" required /> </div>
             <div className="grid grid-cols-4 items-center gap-4"> <Label htmlFor="arrival-time" className="text-right text-black"> Arrival Time </Label> <Input id="arrival-time" type="time" value={arrivalTime} onChange={(e: ChangeEvent<HTMLInputElement>) => setArrivalTime(e.target.value)} className="col-span-3 bg-neutral-50 border-gray-600 text-black" required /> </div>
             <div className="grid grid-cols-4 items-start gap-4"> <Label htmlFor="patient-notes" className="text-right text-black pt-2"> Notes (Opt.) </Label> <textarea id="patient-notes" value={patientNotes} onChange={(e) => setPatientNotes(e.target.value)} rows={3} className="col-span-3 text-sm bg-neutral-50 border border-gray-600 rounded p-1.5 text-black placeholder-black focus:ring-1 focus:ring-ring focus:outline-none resize-vertical" placeholder="Add general patient notes..." /> </div>
             <div className="col-span-4 mt-2"> <Label className="mb-2 block font-medium text-black">Initial Tasks</Label> {tasks.map((task, index) => ( <div key={task.id} className="flex items-center gap-2 mb-2"> <Input type="text" placeholder={`Task ${index + 1} desc.`} value={task.text} onChange={(e) => handleTaskChange(task.id, 'text', e.target.value)} className="flex-grow bg-neutral-50 border-gray-600 text-black placeholder-black" /> <Input type="number" min="1" max="999" placeholder="Timer (min)" value={task.timerMinutes} onChange={(e) => handleTaskChange(task.id, 'timerMinutes', e.target.value)} className="w-24 bg-neutral-50 border-gray-600 text-black placeholder-black [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" /> <Button type="button" variant="ghost" size="icon" className="text-red-500 hover:bg-red-900/50 h-8 w-8 disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => handleRemoveTask(task.id)} disabled={tasks.length <= 1} aria-label="Remove task" > <X className="h-4 w-4" /> </Button> </div> ))} <Button type="button" variant="outline" size="sm" onClick={handleAddTask} className="mt-2 border-gray-600 text-black hover:bg-neutral-50" > <Plus className="h-4 w-4 mr-2" /> Add Task Line </Button> </div>
           </div>
           <DialogFooter className="border-t border-gray-700 pt-4">
-            {/* Using DialogClose with corrected Button variant */}
              <DialogClose asChild>
                  <Button type="button" variant="outline" className="text-black bg-neutral-50 hover:bg-gray-100 border-gray-300" > Cancel </Button>
              </DialogClose>
