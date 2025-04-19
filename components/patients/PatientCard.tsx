@@ -126,8 +126,6 @@ const TaskItem: React.FC<TaskItemProps> = ({ // Component definition remains the
   };
   const handleSnooze = () => { updateTaskTimer(patientId, task.id, '15'); };
 
-
-  // === FIX APPLIED HERE ===
   const getCompletionIcon = (): JSX.Element => { // Added return type annotation previously
     switch (task.completionStatus) {
       case 'in-progress':
@@ -142,8 +140,6 @@ const TaskItem: React.FC<TaskItemProps> = ({ // Component definition remains the
     // This line should technically be unreachable given the switch logic and type definition
     // return <Square className="h-4 w-4 text-gray-500" />;
   };
-  // === END OF FIX ===
-
 
   // Styling Logic (Using reverted original styles)
   let taskItemClasses = 'flex flex-col py-1.5 group';
@@ -197,7 +193,7 @@ export interface PatientCardProps { // Interface remains same
     updateTaskNotes: (patientId: string, taskId: string | number, notes: string) => void;
 }
 
-const PatientCard: React.FC<PatientCardProps> = ({ // Component definition remains same
+const PatientCard: React.FC<PatientCardProps> = ({
     patient, removePatient, updateTaskTimerState, addTaskToPatient, updateTaskTimer,
     removeTaskFromPatient, updateTaskCompletion, acknowledgeTaskTimer, updatePatientNotes, updateTaskNotes,
 }) => {
@@ -220,7 +216,6 @@ const PatientCard: React.FC<PatientCardProps> = ({ // Component definition remai
     const bgColor = getBackgroundColor(lengthOfStayMinutes);
     const pendingTasks = patient.tasks.filter((t) => t.completionStatus !== 'complete');
     const completedTasks = patient.tasks.filter((t) => t.completionStatus === 'complete');
-
 
     return (
         <Card className={`mb-4 border-2 ${borderColor} ${bgColor} transition-colors duration-500 flex flex-col`}>
@@ -290,14 +285,44 @@ const PatientCard: React.FC<PatientCardProps> = ({ // Component definition remai
                         {pendingTasks.length === 0 ? (
                             <p className="text-xs text-black italic">No pending tasks.</p> /* Original color */
                         ) : (
-                            pendingTasks.map((task) => ( <TaskItem key={task.id} task={task} /* ...props... */ /> )) // Props remain the same
+                            pendingTasks.map((task) => (
+                                // === FIX APPLIED HERE (Pending Tasks) ===
+                                <TaskItem
+                                    key={task.id}
+                                    task={task}
+                                    patientId={patient.id} // Pass patient ID
+                                    patientName={patient.name} // Pass patient Name
+                                    updateTaskTimerState={updateTaskTimerState} // Pass handler
+                                    updateTaskTimer={updateTaskTimer} // Pass handler
+                                    removeTask={removeTaskFromPatient} // Pass handler (note prop name change)
+                                    updateTaskCompletion={updateTaskCompletion} // Pass handler
+                                    acknowledgeTimer={acknowledgeTaskTimer} // Pass handler
+                                    updateTaskNotes={updateTaskNotes} // Pass handler
+                                />
+                                // === END OF FIX ===
+                            ))
                         )}
                     </div>
                     {/* Completed tasks */}
                     {completedTasks.length > 0 && (
                         <div className="mt-2 border-t border-gray-700/50 pt-2"> {/* Original border color */}
                             <h4 className="text-sm font-medium text-black mb-1">Completed Tasks:</h4> {/* Original color */}
-                            {completedTasks.map((task) => ( <TaskItem key={task.id} task={task} /* ...props... */ /> ))}
+                            {completedTasks.map((task) => (
+                                // === FIX APPLIED HERE (Completed Tasks) ===
+                                <TaskItem
+                                    key={task.id}
+                                    task={task}
+                                    patientId={patient.id} // Pass patient ID
+                                    patientName={patient.name} // Pass patient Name
+                                    updateTaskTimerState={updateTaskTimerState} // Pass handler
+                                    updateTaskTimer={updateTaskTimer} // Pass handler
+                                    removeTask={removeTaskFromPatient} // Pass handler
+                                    updateTaskCompletion={updateTaskCompletion} // Pass handler
+                                    acknowledgeTimer={acknowledgeTaskTimer} // Pass handler
+                                    updateTaskNotes={updateTaskNotes} // Pass handler
+                                />
+                                // === END OF FIX ===
+                             ))}
                         </div>
                     )}
                 </div>
