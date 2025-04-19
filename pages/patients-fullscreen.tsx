@@ -1,22 +1,20 @@
-// pages/patients-fullscreen.tsx (Example Path)
 'use client';
 
 import React, { useContext } from 'react';
-import HomeContext from '@/pages/api/home/home.context'; // Verify path
+import HomeContext from '@/pages/api/home/home.context';
 
-// --- UPDATED IMPORTS ---
-// Import PatientCard from Tasks.tsx where it's now defined and exported
-import { PatientCard } from '@/components/Promptbar/Tasks'; // <= UPDATED PATH
-// Import types from the centralized location
-import type { Patient } from '@/types/patient'; // <= UPDATED PATH (Only Patient type needed here directly)
-// IMPROVEMENT: Import an icon for the header
-import { UsersIcon } from '@heroicons/react/24/outline'; // Example icon
+import { PatientCard } from '@/components/Promptbar/Tasks';
+import type { Patient } from '@/types/patient';
+
+import { UsersIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+
+/* -------------------------------------------------------------------------- */
+/*  Component                                                                 */
+/* -------------------------------------------------------------------------- */
 
 const PatientFullScreenView: React.FC = () => {
-  // Consume shared state and handlers from HomeContext
   const {
     state,
-    // Destructure all handler functions needed by PatientCard
     removePatient,
     updateTaskTimerState,
     addTaskToPatient,
@@ -28,66 +26,90 @@ const PatientFullScreenView: React.FC = () => {
     updateTaskNotes,
   } = useContext(HomeContext);
 
-  // Access patients array
   const patients: Patient[] = state?.patients || [];
 
-  // --- IMPROVED Loading State ---
-  // Simple check if context handlers/state are ready (can be refined based on actual loading logic)
-  const isLoading = !state || !removePatient; // Example loading condition
+  /* ------------------------------- loading -------------------------------- */
 
+  const isLoading = !state || !removePatient;
   if (isLoading) {
     return (
-      // IMPROVEMENT: Themed background and text for loading state
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
-        {/* Optional: Add a spinner here */}
-        <svg className="animate-spin h-8 w-8 text-teal-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <svg
+          className="animate-spin h-8 w-8 text-teal-600 mb-4"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
         </svg>
-        <p className="text-gray-700 dark:text-gray-300">{/* Adjust text if needed */}Loading patient data...</p>
+        <p className="text-gray-700 dark:text-gray-300">Loading patient data…</p>
       </div>
     );
   }
 
-  // --- IMPROVED Empty State ---
+  /* -------------------------------- empty --------------------------------- */
+
   if (patients.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
-         {/* Optional: Add an icon for empty state */}
-         <UsersIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-4"/>
-        <p className="text-gray-700 dark:text-gray-300">{/* Adjust text if needed */}No patients are currently being tracked.</p>
-        {/* Optional: Add a button/link to add the first patient if applicable from this view */}
-        {/* <button className="mt-4 inline-flex items-center rounded-md bg-teal-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-700 ...">Add Patient</button> */}
+        <UsersIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+        <p className="text-gray-700 dark:text-gray-300">
+          No patients are currently being tracked.
+        </p>
       </div>
     );
   }
 
+  /* ------------------------------- content -------------------------------- */
+
   return (
-    // --- IMPROVEMENT: Main container with themed background and structure ---
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      {/* IMPROVEMENT: Added Header Section */}
+      {/* ── Header ────────────────────────────────────────────────────────── */}
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-teal-800/50 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <h1 className="text-xl font-semibold text-teal-800 dark:text-teal-300 flex items-center">
-            <UsersIcon className="h-6 w-6 mr-2"/> {/* Added Icon */}
-            Patient Task Board - Track patient wait times, pending jobs to better manage your caseload
+            <UsersIcon className="h-6 w-6 mr-2" />
+            Patient Task Board – track wait‑times &amp; pending jobs
           </h1>
-          {/* Potential location for Add Patient, Filter, Sort controls */}
+        </div>
+
+        {/* ░░ Semantic‑search info banner ░░ */}
+        <div className="bg-teal-50 dark:bg-teal-900/40 border-t border-b border-teal-200 dark:border-teal-700 text-teal-800 dark:text-teal-200 text-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-start gap-2">
+            <InformationCircleIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <p>
+              <strong>Document Search:</strong> use the&nbsp;sidebar’s
+              “Search Docs” tab to query local hospital&nbsp;policies,
+              guidelines, and SOPs with semantic search – returning the most
+              relevant, <em>site‑specific</em> information in seconds.
+            </p>
+          </div>
+          <p className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-2 text-xs italic text-gray-600 dark:text-gray-300">
+            Always verify retrieved content against the official source and apply your own
+            clinical judgment.
+          </p>
         </div>
       </header>
 
-      {/* --- Main Content Area --- */}
+      {/* ── Main grid ─────────────────────────────────────────────────────── */}
       <main className="p-4 sm:p-6 lg:p-8">
-        {/* Responsive Grid Container - IMPROVEMENT: Adjusted gap potentially */}
         <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {/* Map over the patients array from context */}
-          {patients.map((patient) => (
-            // Render the imported PatientCard (originating from Tasks.tsx)
-            // Its internal styling (including color-coding) is preserved.
+          {patients.map(patient => (
             <PatientCard
               key={patient.id}
               patient={patient}
-              // Pass all necessary handlers down
               removePatient={removePatient}
               updateTaskTimerState={updateTaskTimerState}
               addTaskToPatient={addTaskToPatient}
