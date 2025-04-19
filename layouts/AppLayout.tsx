@@ -1,8 +1,5 @@
 // file: /layouts/AppLayout.tsx
-// -----------------------------------------------------------------------------
-// ➊ Only change: added a “Patient Tasks” link that points to
-//    /patients-fullscreen in the top‑bar navigation.
-// -----------------------------------------------------------------------------
+'use client';
 
 import React, { useContext } from 'react';
 import Link from 'next/link';
@@ -33,8 +30,9 @@ export default function AppLayout({
   const { state, dispatch } = useContext(HomeContext);
   const { openModal, showSidePromptbar, showChatbar } = state;
 
-  const headerHeight = '80px';
+  const headerHeight = 80; // px
 
+  /* ───── toggle helpers ───── */
   const handleTogglePromptbar = () => {
     dispatch({
       type: 'change',
@@ -47,12 +45,22 @@ export default function AppLayout({
     );
   };
 
+  const handleToggleChatbar = () => {
+    dispatch({
+      type: 'change',
+      field: 'showChatbar',
+      value: !showChatbar,
+    });
+    localStorage.setItem('showChatbar', JSON.stringify(!showChatbar));
+  };
+
+  /* ───── layout ───── */
   return (
-    <div className="w-full h-screen flex flex-col bg-white dark:bg-[#343541] text-black dark:text-black">
+    <div className="w-full h-screen flex flex-col bg-white dark:bg-[#343541] text-black dark:text-black relative">
       {/* ───────────────── Header ───────────────── */}
       <header
         className="sticky top-0 z-30 bg-white text-gray-800 px-4 shadow-md border-b border-gray-200 flex items-center justify-between overflow-hidden"
-        style={{ height: headerHeight, minHeight: headerHeight }}
+        style={{ height: headerHeight }}
       >
         {/* Logo */}
         <div className="flex items-center space-x-3 flex-none">
@@ -101,16 +109,40 @@ export default function AppLayout({
             </Link>
           </nav>
         </div>
-
-        {/* Toggle Promptbar */}
-        <div className="flex-none">
-          {showSidePromptbar ? (
-            <CloseSidebarButton side="right" onClick={handleTogglePromptbar} />
-          ) : (
-            <OpenSidebarButton side="right" onClick={handleTogglePromptbar} />
-          )}
-        </div>
       </header>
+
+      {/* ───────────────── Sidebar toggle buttons ───────────────── */}
+      {/* left (chat) */}
+      <div
+        className="absolute z-30"
+        style={{
+          top: headerHeight - 18, // align with bottom border of header
+          left: showChatbar ? 210 : 0, // inside edge of chatbar
+          transition: 'left 0.3s ease',
+        }}
+      >
+        {showChatbar ? (
+          <CloseSidebarButton side="left" onClick={handleToggleChatbar} />
+        ) : (
+          <OpenSidebarButton side="left" onClick={handleToggleChatbar} />
+        )}
+      </div>
+
+      {/* right (prompt bar) */}
+      <div
+        className="absolute z-30"
+        style={{
+          top: headerHeight - 18,
+          right: showSidePromptbar ? 250 : 0,
+          transition: 'right 0.3s ease',
+        }}
+      >
+        {showSidePromptbar ? (
+          <CloseSidebarButton side="right" onClick={handleTogglePromptbar} />
+        ) : (
+          <OpenSidebarButton side="right" onClick={handleTogglePromptbar} />
+        )}
+      </div>
 
       {/* ───────────────── Main Row ───────────────── */}
       <div className="flex flex-1 overflow-hidden">
