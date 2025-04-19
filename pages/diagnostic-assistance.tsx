@@ -243,7 +243,7 @@ function DiagnosticAssistancePage() {
         <PageHeader title="Metrix AI Assistant" />
 
         <p className="text-lg text-gray-700 -mt-2 mb-8 max-w-xl text-center">
-          Select a request type or ask anything below.
+          Select a sample request type or enter clinical questions below. Get advice on diagnoses, examinations, investigation plans and management. 
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 w-full max-w-3xl">
