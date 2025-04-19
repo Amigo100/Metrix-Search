@@ -2,6 +2,7 @@
 // ———————————————————————————————————————————————————————————————
 // Global “home” state used by Chat, modals, etc.
 // Restored template logic + added userContext / userSignOff fields
+// Added patient tracking state
 // ———————————————————————————————————————————————————————————————
 
 import { Conversation, Message } from '@/types/chat';
@@ -10,6 +11,7 @@ import { FolderInterface } from '@/types/folder';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 import { PluginKey } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
+import { Patient } from '@/types/patient'; // <= ADDED: Import Patient type
 
 console.log('home.state.tsx file loaded, initialising global state.');
 
@@ -28,13 +30,14 @@ export interface HomeInitialState {
   currentMessage: Message | undefined;
   prompts: Prompt[];
   temperature: number;
+  patients: Patient[]; // <= ADDED: Field for patient tracking data
 
   /* UI panes */
   showChatbar: boolean;
-  showSidePromptbar: boolean;
+  showSidePromptbar: boolean; // This likely controls the visibility of the Tasks.tsx component
   currentFolder: FolderInterface | undefined;
 
-  /* misc flags / values */
+  /* misc flags / values */
   messageError: boolean;
   searchTerm: string;
   defaultModelId: OpenAIModelID | undefined;
@@ -56,9 +59,9 @@ export interface HomeInitialState {
   /* modal routing */
   openModal: 'profile' | 'templates' | 'help' | 'predictive analytics' | 'settings' | null;
 
-  /* 🔹 NEW 🔹 personalised context  */
+  /* 🔹 NEW 🔹 personalised context  */
   userContext: string;   // e.g. "ED Registrar @ Whanganui; concise notes preferred"
-  userSignOff: string;   // e.g. "Dr James Deighton MBBS"
+  userSignOff: string;   // e.g. "Dr James Deighton MBBS"
 
   /* analytics */
   hasChatOutput?: boolean;
@@ -77,6 +80,7 @@ export const initialState: HomeInitialState = {
   conversations: [],
   selectedConversation: undefined,
   currentMessage: undefined,
+  patients: [], // <= ADDED: Initial empty array for patients
 
   /* ---------------- templates (unchanged) --------------- */
   prompts: [
@@ -84,7 +88,7 @@ export const initialState: HomeInitialState = {
       id: 'temp-1-discharge-summary',
       name: 'Discharge Summary',
       description: 'A structured template for detailed discharge summary documentation.',
-      content: `Chief Complaint: 
+      content: `Chief Complaint:
 
 Duration (If Applicable):
 
@@ -232,7 +236,7 @@ Plan & Follow-up:`,
 
   /* UI flags */
   showChatbar: true,
-  showSidePromptbar: false,
+  showSidePromptbar: false, // Note: This likely controls the visibility of Tasks.tsx
 
   currentFolder: undefined,
   messageError: false,
