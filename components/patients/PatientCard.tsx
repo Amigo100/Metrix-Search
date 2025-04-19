@@ -234,57 +234,74 @@ const TaskItem: React.FC<TaskItemProps> = ({
     <div className={taskItemClasses}>
       {/* Main row */}
       <div className="flex items-center space-x-2 w-full">
-        {/* === FIX APPLIED HERE === */}
-        <Button // Usage remains PascalCase
+        <Button // Completion Toggle Button
           variant="ghost"
-          // size="icon" // Removed prop causing the error
-          className="h-6 w-6 flex-shrink-0" // Rely on className for size
+          // size="icon" // Removed previously
+          className="h-6 w-6 flex-shrink-0"
           onClick={handleCompletionToggle}
           title={`Status: ${task.completionStatus}. Click to change.`}
         >
           {getCompletionIcon()}
         </Button>
-        {/* === END OF FIX === */}
 
         <span className={`flex-1 cursor-default ${taskTextStyle}`}>{task.text}</span>
+
+        {/* Timer / Acknowledge / Edit Timer section */}
         <div className="flex items-center space-x-1 flex-shrink-0">
-          {isEditingTimer ? (
+          {isEditingTimer ? ( // Timer Editing UI
             <>
-              <Input // Usage remains PascalCase
+              <Input
                 ref={timerInputRef} type="number" min="0" max="999"
                 value={editTimerMinutes} onChange={handleTimerInputChange} onKeyDown={handleTimerInputKeyDown}
                 className="w-14 h-6 text-xs px-1" placeholder="Min"
               />
-              <Button variant="ghost" size="sm" className="h-6 w-6 text-green-500 hover:text-green-600" onClick={handleTimerEditSubmit} title="Save Timer"> <Save className="h-3 w-3" /> </Button> {/* Ensure size="sm" or similar is used if needed */}
-              <Button variant="ghost" size="sm" className="h-6 w-6 text-gray-500 hover:text-gray-600" onClick={() => setIsEditingTimer(false)} title="Cancel Edit"> <X className="h-3 w-3" /> </Button> {/* Ensure size="sm" or similar is used if needed */}
+              <Button variant="ghost" size="sm" className="h-6 w-6 text-green-500 hover:text-green-600" onClick={handleTimerEditSubmit} title="Save Timer"> <Save className="h-3 w-3" /> </Button>
+              <Button variant="ghost" size="sm" className="h-6 w-6 text-gray-500 hover:text-gray-600" onClick={() => setIsEditingTimer(false)} title="Cancel Edit"> <X className="h-3 w-3" /> </Button>
             </>
-          ) : (
+          ) : ( // Timer Display/Action UI
             <>
+              {/* Acknowledge / Snooze Buttons */}
               {isTimerExpired && !task.isAcknowledged && task.completionStatus !== 'complete' && (
                 <>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 text-yellow-500 hover:text-yellow-600" onClick={() => acknowledgeTimer(patientId, task.id)} title="Acknowledge Timer"> <BellOff className="h-4 w-4" /> </Button> {/* Ensure size="sm" or similar is used if needed */}
-                  <Button variant="ghost" size="sm" className="h-6 w-6 text-blue-500 hover:text-blue-600" onClick={handleSnooze} title="Snooze 15 min"> <AlarmClockOff className="h-4 w-4" /> </Button> {/* Ensure size="sm" or similar is used if needed */}
+                  <Button variant="ghost" size="sm" className="h-6 w-6 text-yellow-500 hover:text-yellow-600" onClick={() => acknowledgeTimer(patientId, task.id)} title="Acknowledge Timer"> <BellOff className="h-4 w-4" /> </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 text-blue-500 hover:text-blue-600" onClick={handleSnooze} title="Snooze 15 min"> <AlarmClockOff className="h-4 w-4" /> </Button>
                 </>
               )}
+              {/* Timer Display Span */}
               {task.timerEnd && task.completionStatus !== 'complete' && (
                 <span className={timerTextStyle}> <Clock className="inline h-3 w-3 mr-1" /> {isTimerExpired ? 'Expired' : timeRemaining} </span>
               )}
+
+              {/* === FIX APPLIED IN THIS BLOCK (Regenerated for syntax safety) === */}
+              {/* Edit/Add Timer Button */}
               {task.completionStatus !== 'complete' && (
-                 <Button variant="ghost" size="sm" className="h-6 w-6 text-gray-400 hover:text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setIsEditingTimer(true)} title={task.timerEnd ? 'Edit Timer' : 'Add Timer'} > {task.timerEnd ? <Edit3 className="h-3 w-3" /> : <Clock className="h-3 w-3" />} </Button> {/* Ensure size="sm" or similar is used if needed */}
+                  <Button
+                      variant="ghost"
+                      size="sm" // Use allowed size
+                      className="h-6 w-6 text-gray-400 hover:text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => setIsEditingTimer(true)}
+                      title={task.timerEnd ? 'Edit Timer' : 'Add Timer'}
+                  >
+                      {task.timerEnd ? <Edit3 className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                  </Button>
               )}
+              {/* === END OF FIX BLOCK === */}
             </>
           )}
         </div>
-        <Button variant="ghost" size="sm" className={`h-6 w-6 ml-1 flex-shrink-0 ${task.notes ? 'text-blue-500' : 'text-gray-400'} hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity`} onClick={() => setIsEditingNotes((prev) => !prev)} title={task.notes ? 'Edit/View Notes' : 'Add Notes'} > <MessageSquare className="h-3 w-3" /> </Button> {/* Ensure size="sm" or similar is used if needed */}
-        <Button variant="ghost" size="sm" className="h-6 w-6 text-red-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" onClick={() => removeTask(patientId, task.id)} title="Remove Task" > <Trash2 className="h-3 w-3" /> </Button> {/* Ensure size="sm" or similar is used if needed */}
+
+        {/* Notes Button */}
+        <Button variant="ghost" size="sm" className={`h-6 w-6 ml-1 flex-shrink-0 ${task.notes ? 'text-blue-500' : 'text-gray-400'} hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity`} onClick={() => setIsEditingNotes((prev) => !prev)} title={task.notes ? 'Edit/View Notes' : 'Add Notes'} > <MessageSquare className="h-3 w-3" /> </Button>
+        {/* Remove Task Button */}
+        <Button variant="ghost" size="sm" className="h-6 w-6 text-red-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" onClick={() => removeTask(patientId, task.id)} title="Remove Task" > <Trash2 className="h-3 w-3" /> </Button>
       </div>
 
       {/* Notes editing section */}
       {isEditingNotes && (
         <div className="mt-1.5 pl-8 pr-2 flex items-center gap-2 w-full">
           <textarea ref={notesTextareaRef} value={editNotes} onChange={handleNotesInputChange} onKeyDown={handleNotesKeyDown} placeholder="Add task notes..." rows={2} className="flex-grow text-xs bg-white border border-gray-300 rounded p-1.5 text-gray-700 placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:outline-none resize-none" />
-          <Button variant="ghost" size="sm" className="h-6 w-6 text-green-500 hover:text-green-600 self-start" onClick={handleNotesEditSubmit} title="Save Notes"> <Save className="h-4 w-4" /> </Button> {/* Ensure size="sm" or similar is used if needed */}
-          <Button variant="ghost" size="sm" className="h-6 w-6 text-gray-500 hover:text-gray-600 self-start" onClick={() => setIsEditingNotes(false)} title="Cancel Edit"> <X className="h-4 w-4" /> </Button> {/* Ensure size="sm" or similar is used if needed */}
+          <Button variant="ghost" size="sm" className="h-6 w-6 text-green-500 hover:text-green-600 self-start" onClick={handleNotesEditSubmit} title="Save Notes"> <Save className="h-4 w-4" /> </Button>
+          <Button variant="ghost" size="sm" className="h-6 w-6 text-gray-500 hover:text-gray-600 self-start" onClick={() => setIsEditingNotes(false)} title="Cancel Edit"> <X className="h-4 w-4" /> </Button>
         </div>
       )}
       {!isEditingNotes && task.notes && ( <div className="mt-1 pl-8 pr-2 text-xs text-gray-600 italic w-full break-words"> Note: {task.notes} </div> )}
@@ -379,7 +396,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
     <Card className={`mb-4 border-2 ${borderColor} ${bgColor} transition-colors duration-500 flex flex-col`}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-base font-medium text-gray-900">{patient.name}</CardTitle>
-        <Button variant="ghost" size="sm" className="h-6 w-6 text-gray-500 hover:text-red-600" onClick={() => removePatient(patient.id)} > <X className="h-4 w-4" /> </Button> {/* Ensure size="sm" or similar used if needed */}
+        <Button variant="ghost" size="sm" className="h-6 w-6 text-gray-500 hover:text-red-600" onClick={() => removePatient(patient.id)} > <X className="h-4 w-4" /> </Button>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         <div className="text-xs text-gray-700 mb-2">
@@ -390,14 +407,14 @@ const PatientCard: React.FC<PatientCardProps> = ({
         <div className="mb-2">
            <div className="flex items-center justify-between">
                 <div className="text-xs text-gray-800 font-medium flex items-center"> Notes:
-                   <Button variant="ghost" size="sm" className={`h-6 w-6 ml-1 ${patient.notes ? 'text-blue-500' : 'text-gray-500'} hover:text-blue-600`} onClick={() => setIsEditingPatientNotes((prev) => !prev)} title={patient.notes ? 'Edit/View Notes' : 'Add Notes'} > <MessageSquare className="h-4 w-4" /> </Button> {/* Ensure size="sm" or similar used if needed */}
+                   <Button variant="ghost" size="sm" className={`h-6 w-6 ml-1 ${patient.notes ? 'text-blue-500' : 'text-gray-500'} hover:text-blue-600`} onClick={() => setIsEditingPatientNotes((prev) => !prev)} title={patient.notes ? 'Edit/View Notes' : 'Add Notes'} > <MessageSquare className="h-4 w-4" /> </Button>
                 </div>
            </div>
            {isEditingPatientNotes && (
               <div className="mt-1 flex items-center gap-2 w-full">
                  <textarea ref={patientNotesTextareaRef} value={editPatientNotes} onChange={(e) => setEditPatientNotes(e.target.value)} onKeyDown={handlePatientNotesKeyDown} rows={2} className="flex-grow text-xs bg-white border border-gray-300 rounded p-1.5 text-gray-700 placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:outline-none resize-none" placeholder="Add patient notes..." />
-                 <Button variant="ghost" size="sm" className="h-6 w-6 text-green-500 hover:text-green-600" onClick={handlePatientNotesSubmit} title="Save Notes"> <Save className="h-4 w-4" /> </Button> {/* Ensure size="sm" or similar used if needed */}
-                 <Button variant="ghost" size="sm" className="h-6 w-6 text-gray-500 hover:text-gray-600" onClick={() => setIsEditingPatientNotes(false)} title="Cancel Edit"> <X className="h-4 w-4" /> </Button> {/* Ensure size="sm" or similar used if needed */}
+                 <Button variant="ghost" size="sm" className="h-6 w-6 text-green-500 hover:text-green-600" onClick={handlePatientNotesSubmit} title="Save Notes"> <Save className="h-4 w-4" /> </Button>
+                 <Button variant="ghost" size="sm" className="h-6 w-6 text-gray-500 hover:text-gray-600" onClick={() => setIsEditingPatientNotes(false)} title="Cancel Edit"> <X className="h-4 w-4" /> </Button>
               </div>
            )}
            {!isEditingPatientNotes && patient.notes && ( <div className="mt-1 text-xs text-gray-600 italic break-words"> Note: {patient.notes} </div> )}
@@ -420,7 +437,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
           <form onSubmit={handleAddTaskSubmit} className="flex items-center gap-2">
             <Input type="text" placeholder="Add Task" value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)} onKeyDown={handleNewTaskKeyDown} className="flex-grow h-8 text-sm" />
             <Input type="number" min="1" max="999" placeholder="Min" value={newTaskTimerMinutes} onChange={(e) => setNewTaskTimerMinutes(e.target.value)} onKeyDown={handleNewTaskKeyDown} className="w-16 h-8 text-xs" />
-            <Button type="submit" variant="ghost" size="sm" className="h-8 w-8 text-gray-600 hover:bg-gray-100" disabled={newTaskText.trim() === ''} title="Add Task" > <Plus className="h-4 w-4" /> </Button> {/* Ensure size="sm" or similar used if needed */}
+            <Button type="submit" variant="ghost" size="sm" className="h-8 w-8 text-gray-600 hover:bg-gray-100" disabled={newTaskText.trim() === ''} title="Add Task" > <Plus className="h-4 w-4" /> </Button>
           </form>
         </div>
       </CardContent>
@@ -429,4 +446,4 @@ const PatientCard: React.FC<PatientCardProps> = ({
 };
 PatientCard.displayName = 'PatientCard';
 
-export { PatientCard };
+export { PatientCard }; // Export only PatientCard
