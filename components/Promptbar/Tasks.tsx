@@ -37,7 +37,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label'; // Needed by AddPatientModal
 import {
   Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
-} from '../ui/Dialog'; // Needed by AddPatientModal (Using relative path)
+} from '@/components/ui/Dialog'; // Needed by AddPatientModal
 
 // --- Import Moved Core Component ---
 import { PatientCard } from '@/components/patients/PatientCard'; // <== UPDATED PATH
