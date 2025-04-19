@@ -1,6 +1,7 @@
-// /components/Chat/Chat.tsx
+// file: /components/Chat/Chat.tsx
 // -----------------------------------------------------------------------------
-// v2.3 – sign‑off enforced, tighter prompts, template‑aware recommendations
+// v2.4 – fixes blank inferred‑terms, follow‑up paging, copy confirmation,
+//         ensures sign‑off always appended
 // -----------------------------------------------------------------------------
 
 import {
@@ -225,6 +226,8 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
     if (!loading && !followUpLoading) throttledScrollDown();
   }, [
     analysisRecs,
+    analysisTerms,
+    analysisErrors,
     followUpResponses,
     followUpLoading,
     loading,
@@ -247,10 +250,8 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
      Helpers
   ======================================================================== */
 
-  const appendSignOff = (doc: string): string => {
-    const signoff = userSignOff || 'Dr James Deighton MBBS';
-    return `${doc.replace(/\s*$/, '')}\n\n---\n${signoff}`;
-  };
+  const appendSignOff = (doc: string): string =>
+    `${doc.replace(/\s*$/, '')}\n\n---\n${userSignOff || 'Dr James Deighton MBBS'}`;
 
   /* -------- STEP 1: create clinical document -------- */
   const handleCreateDocFromTranscript = async (text: string) => {
@@ -339,29 +340,27 @@ Return only the completed note.`.trim();
       setLastOutputType('errors');
       const errorPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-TASK:
-  Detect **possible transcription mistakes** by comparing the exact words in
-  the transcript with medically‑plausible terms in the clinical document.
+TASK: Detect likely transcription mistakes (minor misspellings / homophones).
 
-CRITERIA:
-  • Only include a pair if the words differ by 1‑2 letters OR are homophones.  
-  • A candidate must exist in the transcript; don't invent.  
-  • Max 10 pairs.
+Return Markdown:
 
-FORMAT (Markdown):
 ## Potential Transcription Errors
 * wrongWord → likelyCorrectWord (short reason)
+(Max 10 lines.  If none, write 'None.')
 
-If you find none, output exactly:
+Transcript:
+-----------
+${rawTranscript}
 
-None.`.trim();
+Clinical Document:
+------------------
+${doc}`.trim();
 
       const errorRes = await axios.post(ASK_RAG_URL, {
         message: errorPrompt,
         history: [],
         mode: 'analysis',
         model_name: activeModelName,
-        extra_inputs: { transcript: rawTranscript, document: doc },
       });
 
       setAnalysisErrors(errorRes.data.response || 'None.');
@@ -381,22 +380,28 @@ None.`.trim();
       setLastOutputType('terms');
       const termPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-Identify elements present in the **Clinical Document** that are not stated
-verbatim in the **Transcript** (i.e. inferred, paraphrased or summarised).
+Identify concepts that were **inferred or re‑phrased** (in doc but not verbatim
+in transcript).
 
 Return Markdown:
 
 ## Inferred Clinical Terms
 * "transcript excerpt" → "document phrase"
+(≤10 lines or 'None.')
 
-Include ≤10 lines.  If none, write 'None.'.`.trim();
+Transcript:
+-----------
+${rawTranscript}
+
+Clinical Document:
+------------------
+${doc}`.trim();
 
       const termRes = await axios.post(ASK_RAG_URL, {
         message: termPrompt,
         history: [],
         mode: 'analysis',
         model_name: activeModelName,
-        extra_inputs: { transcript: rawTranscript, document: doc },
       });
 
       setAnalysisTerms(termRes.data.response || 'None.');
@@ -415,33 +420,26 @@ Include ≤10 lines.  If none, write 'None.'.`.trim();
     try {
       setLastOutputType('recs');
 
-      /* note‑type specific section headings */
       const noteType = activeTemplateName.toLowerCase();
-      let recSections = '';
+      let headings = '';
       if (noteType.includes('triage')) {
-        recSections = `### Examination\n* …\n\n### Imaging\n* …\n\n### Laboratory\n* …\n\n### Disposition\n* …`;
+        headings = `### Examination\n* …\n\n### Imaging\n* …\n\n### Laboratory\n* …\n\n### Disposition\n* …`;
       } else if (noteType.includes('discharge')) {
-        recSections = `### Follow‑up\n* …\n\n### Safety‑netting\n* …\n\n### Patient Advice\n* …`;
+        headings = `### Follow‑up\n* …\n\n### Safety‑netting\n* …\n\n### Patient Advice\n* …`;
       } else {
-        recSections = `### Plan\n* …`;
+        headings = `### Plan\n* …`;
       }
 
       const recPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-Using the information in the following **${activeTemplateName}**, draft concrete,
-practical next‑steps.
-
-INSTRUCTIONS
-• Use only headings appropriate for this note type.  
-• Bullet each point; keep each point ≤1 sentence.  
-• No QA or transcription advice.
+Using the information in this **${activeTemplateName}**, draft specific next‑steps.
 
 Return Markdown:
 
 ## Recommendations
-${recSections}
+${headings}
 
-Clinical Document:
+Clinical Document:
 ------------------
 ${doc}`.trim();
 
@@ -483,8 +481,11 @@ ${doc}`.trim();
 
       const answer = resp.data.response || 'Sorry, no answer.';
       setChatHistory(prev => [...prev, { role: 'assistant', content: answer }]);
-      setFollowUpResponses(prev => [...prev, answer]);
-      setFuIndex(prev => prev + 1);
+      setFollowUpResponses(prev => {
+        const next = [...prev, answer];
+        setFuIndex(next.length - 1); // show the newest answer
+        return next;
+      });
     } catch (err: any) {
       dispatch({
         type: 'change',
@@ -611,7 +612,26 @@ ${doc}`.trim();
                   <button
                     className={ghostButtonStyles}
                     title="Copy"
-                    onClick={() => navigator.clipboard.writeText(clinicalDoc)}
+                    onClick={() =>
+                      navigator.clipboard
+                        .writeText(clinicalDoc)
+                        .then(() => {
+                          dispatch({
+                            type: 'change',
+                            field: 'modelError',
+                            value: { message: 'Copied!' },
+                          });
+                          setTimeout(
+                            () =>
+                              dispatch({
+                                type: 'change',
+                                field: 'modelError',
+                                value: null,
+                              }),
+                            1000,
+                          );
+                        })
+                    }
                   >
                     <Copy size={16} />
                   </button>
@@ -741,7 +761,7 @@ ${doc}`.trim();
               content={followUpResponses[fuIndex] || ''}
               emptyText="No follow‑up responses."
               extraHeader={
-                followUpResponses.length > 1 && !collapsedFU ? (
+                followUpResponses.length > 0 && !collapsedFU ? (
                   <div className="flex items-center gap-1">
                     <button
                       disabled={fuIndex === 0}
