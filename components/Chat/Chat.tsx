@@ -1,12 +1,8 @@
-
 // file: /components/Chat/Chat.tsx
-// COMPLETE, UNABBREVIATED VERSION — adds personalised context + sign‑off
 // -----------------------------------------------------------------------------
-// ❶ Reads `userContext`   +   `userSignOff` from the global HomeContext.
-// ❷ Injects `userContext` at the top of the LLM prompt when creating a document.
-// ❸ Appends `userSignOff` to every generated clinical document (and preserves
-//    it when the user edits / saves the note).
-// ❹ All API calls use NEXT_PUBLIC_API_BASE_URL.
+// ❶ Retains personalised context + sign‑off logic
+// ❷ Adds structured analysis layout  (errors | inferred terms | recommendations)
+// ❸ Keeps original colour palette  (teal gradient / slate‑grey text)
 // -----------------------------------------------------------------------------
 
 import {
@@ -161,8 +157,8 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
       prompts,
       textInputContent,
       openModal,
-      userContext, // NEW
-      userSignOff, // NEW
+      userContext,
+      userSignOff,
     },
     dispatch,
   } = useContext(HomeContext);
@@ -171,13 +167,21 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   const [transcript, setTranscript] = useState('');
   const [clinicalDoc, setClinicalDoc] = useState('');
   const [analysis, setAnalysis] = useState('');
+
+  // ====  UPDATE 1: split analysis into three dedicated strings ==========
+  const [analysisErrors, setAnalysisErrors] = useState('');       // NEW
+  const [analysisTerms, setAnalysisTerms] = useState('');         // NEW
+  const [analysisRecs, setAnalysisRecs] = useState('');           // NEW
+  // =====================================================================
+
   const [isTranscriptExpanded, setIsTranscriptExpanded] = useState(true);
   const [isEditingDoc, setIsEditingDoc] = useState(false);
   const [editDocText, setEditDocText] = useState('');
   const [activeTemplateName, setActiveTemplateName] =
     useState('ED Triage Note');
   const [activeModelName, setActiveModelName] = useState('GPT-4');
-  const [showTemplatesDropdown, setShowTemplatesDropdown] = useState(false);
+  const [showTemplatesDropdown, setShowTemplatesDropdown] =
+    useState(false);
   const [showModelsDropdown, setShowModelsDropdown] = useState(false);
   const [lastOutputType, setLastOutputType] = useState<OutputType>(null);
 
@@ -208,6 +212,32 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
     return () => area.removeEventListener('scroll', handler);
   }, []);
 
+  // ====  UPDATE 2: whenever raw analysis changes, extract the sections ===
+  useEffect(() => {
+    if (!analysis) {
+      setAnalysisErrors('');
+      setAnalysisTerms('');
+      setAnalysisRecs('');
+      return;
+    }
+
+    const sections = { err: '', terms: '', recs: '' };
+    // Very simple split by Markdown headings – will work as long as
+    // the LLM uses the mandated headings.
+    analysis
+      .split(/\n(?=##\s)/) // split at every `## Heading`
+      .forEach((chunk) => {
+        if (/transcription error/i.test(chunk)) sections.err = chunk.trim();
+        else if (/inferred/i.test(chunk)) sections.terms = chunk.trim();
+        else if (/recommendation/i.test(chunk)) sections.recs = chunk.trim();
+      });
+
+    setAnalysisErrors(sections.err);
+    setAnalysisTerms(sections.terms);
+    setAnalysisRecs(sections.recs);
+  }, [analysis]);
+  // ======================================================================
+
   /* ========================================================================
      Helpers
   ======================================================================== */
@@ -220,6 +250,9 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
 
       setClinicalDoc('');
       setAnalysis('');
+      setAnalysisErrors('');          // NEW
+      setAnalysisTerms('');           // NEW
+      setAnalysisRecs('');            // NEW
       setIsTranscriptExpanded(true);
       setLastOutputType(null);
 
@@ -231,8 +264,7 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
       /* ---- build prompt with userContext ---- */
       const docPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-You are a helpful clinical scribe AI. Return output in **Markdown**
-(headings bold/** or #, bullet lists *, -).
+You are a helpful clinical scribe AI. Return output in **Markdown** (headings bold/** or #, bullet lists *, -).
 
 Template:
 ---------
@@ -286,13 +318,19 @@ Instructions: Fill the template. Ensure the final answer is Markdown.
       if (!loading) dispatch({ type: 'change', field: 'loading', value: true });
       dispatch({ type: 'change', field: 'modelError', value: null });
 
+      // ====  UPDATE 3: enforce deterministic headings for easier parsing ===
       const analysisPrompt = `
 You are a clinical summariser focusing on:
-1) **Potential transcription errors** (list)
-2) **Inferred clinical terms** (list)
+1) **Potential Transcription Errors** (list)
+2) **Inferred Clinical Terms** (list)
 3) **Recommendations** (headings / lists)
 
-Return result in **Markdown**.
+Return the result in **Markdown** with the EXACT headings below
+so the UI can split your answer:
+
+## Potential Transcription Errors
+## Inferred Clinical Terms
+## Recommendations
 
 Transcript:
 -----------
@@ -302,6 +340,7 @@ Clinical Document:
 ------------------
 ${doc}
       `.trim();
+      // ===================================================================
 
       const res = await axios.post(ASK_RAG_URL, {
         message: analysisPrompt,
@@ -359,6 +398,9 @@ ${doc}
     setTranscript('');
     setClinicalDoc('');
     setAnalysis('');
+    setAnalysisErrors('');          // NEW
+    setAnalysisTerms('');           // NEW
+    setAnalysisRecs('');            // NEW
     setIsEditingDoc(false);
     setEditDocText('');
     setLastOutputType(null);
@@ -367,7 +409,7 @@ ${doc}
   };
 
   /* ========================================================================
-     JSX sections (unchanged except we preserve sign‑off when saving edits)
+     JSX sections
   ======================================================================== */
 
   const hasTranscript = Boolean(transcript);
@@ -378,7 +420,7 @@ ${doc}
   /* ----------------------- mainContent decision ------------------------ */
   let mainContent: ReactNode;
   if (!hasTranscript && !loading && !modelError) {
-    /* -------- initial screen -------- */
+    /* -------- initial screen (unchanged) -------- */
     mainContent = (
       <>
         <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
@@ -560,34 +602,97 @@ ${doc}
             )}
           </div>
 
-          {/* ---------------- analysis panel --------------- */}
-          <div className="w-full md:w-2/5 lg:w-1/3 flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden min-h-[300px]">
-            <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-2">
-              <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <Info size={16} />
-                AI Analysis
-              </h3>
+          {/* ----------------------------------------------------------------
+             ====  UPDATE 4: NEW three‑column analysis layout  ====
+             --------------------------------------------------------------- */}
+          <div className="w-full md:w-2/5 lg:w-1/3 flex flex-col gap-4">
+            {/* Section a) Potential transcription errors */}
+            <div className="flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden min-h-[140px]">
+              <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-2">
+                <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <Info size={16} />
+                  Potential Transcription Errors
+                </h3>
+              </div>
+              <div className="flex-1 overflow-auto p-4 text-sm">
+                {loading && lastOutputType === 'analysis' && (
+                  <LoadingIndicator text="Analyzing…" />
+                )}
+
+                {!loading && analysisErrors && (
+                  <ReactMarkdown
+                    className="prose prose-sm max-w-none"
+                    remarkPlugins={[remarkGfm]}
+                  >
+                    {analysisErrors}
+                  </ReactMarkdown>
+                )}
+
+                {!loading && !analysisErrors && (
+                  <InfoPlaceholder text="No errors detected." />
+                )}
+              </div>
             </div>
 
-            <div className="flex-1 overflow-auto p-4 text-sm">
-              {loading && lastOutputType === 'analysis' && (
-                <LoadingIndicator text="Analyzing…" />
-              )}
+            {/* Section b) Inferred clinical terms */}
+            <div className="flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden min-h-[140px]">
+              <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-2">
+                <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <Info size={16} />
+                  Inferred Clinical Terms
+                </h3>
+              </div>
+              <div className="flex-1 overflow-auto p-4 text-sm">
+                {loading && lastOutputType === 'analysis' && (
+                  <LoadingIndicator text="Analyzing…" />
+                )}
 
-              {!loading && analysis && (
-                <ReactMarkdown
-                  className="prose prose-sm max-w-none"
-                  remarkPlugins={[remarkGfm]}
-                >
-                  {analysis}
-                </ReactMarkdown>
-              )}
+                {!loading && analysisTerms && (
+                  <ReactMarkdown
+                    className="prose prose-sm max-w-none"
+                    remarkPlugins={[remarkGfm]}
+                  >
+                    {analysisTerms}
+                  </ReactMarkdown>
+                )}
 
-              {!loading && !analysis && (
-                <InfoPlaceholder text="No analysis yet." />
-              )}
+                {!loading && !analysisTerms && (
+                  <InfoPlaceholder text="No inferred terms." />
+                )}
+              </div>
+            </div>
+
+            {/* Section c) Recommendations */}
+            <div className="flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden min-h-[140px]">
+              <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-2">
+                <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <Info size={16} />
+                  Recommendations
+                </h3>
+              </div>
+              <div className="flex-1 overflow-auto p-4 text-sm">
+                {loading && lastOutputType === 'analysis' && (
+                  <LoadingIndicator text="Analyzing…" />
+                )}
+
+                {!loading && analysisRecs && (
+                  <ReactMarkdown
+                    className="prose prose-sm max-w-none"
+                    remarkPlugins={[remarkGfm]}
+                  >
+                    {analysisRecs}
+                  </ReactMarkdown>
+                )}
+
+                {!loading && !analysisRecs && (
+                  <InfoPlaceholder text="No recommendations." />
+                )}
+              </div>
             </div>
           </div>
+          {/* ----------------------------------------------------------------
+             ====  END UPDATE 4  ====
+             --------------------------------------------------------------- */}
         </div>
 
         <ScribeDisclaimer />
@@ -672,7 +777,10 @@ ${doc}
       </div>
 
       {/* scrollable content */}
-      <div ref={chatContainerRef} className="flex-1 overflow-y-auto flex flex-col">
+      <div
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto flex flex-col"
+      >
         <ScribeHeader />
         {mainContent}
         <div ref={messagesEndRef} className="h-1 flex-shrink-0" />
