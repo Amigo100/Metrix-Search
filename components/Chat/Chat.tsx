@@ -332,27 +332,42 @@ Return only the completed note.`.trim();
     }
   };
 
-  /* -------- STEP 2: transcription errors – NEW PROMPT --- */
+  /* STEP 2 transcription errors – NEW free‑text prompt below               */
+
   const handleTranscriptionErrors = async (
     doc: string,
     rawTranscript: string,
   ) => {
     try {
       setLastOutputType('errors');
+
       const errorPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
 
-You are reviewing a clinical speech transcript (e.g. ED note, chest‑pain
-consult) that has been converted to text.
+You are reviewing a **clinical speech transcript** that was converted to text.
+Identify words or short phrases that look like they were *mis‑heard* or
+*misspelled* by the speech‑to‑text system.
 
-TASK  
-Review the transcript. Identify words/phrases in the Transcript that are probably mis‑heard or
-mis‑spelled, such as Non‑medical gibberish (e.g. "troponone", "clab stat"), Real words that make no sense in context (e.g. "zest pain" in a cardiac case), Wrong homophones (e.g. "allusive" vs "elusive").  
-Once possible errors are identified, review the context in which these errors appear and suggest possible corrections. Take care not to make-up transcription errors, ensuring accuracy and do not simply expand abbreviations that otherwise appear correct. Simply note any terms that appear to have likely been incorrectly transcribed, including mis-spelt words or correctly spelt words that do not fit the context. Suggest likely corrections based on the context of the transcript. Return these line-by-line i.e. error >>> likely correction
+Look for:
+• Nonsense medical words (“troponone” instead of “troponin”).  
+• Real words that make no sense in context (“zest pain” instead of “chest pain”).  
+• Incorrect homophones (“elusive” vs “illusive”) that break clinical meaning.
+
+For each suspect term, suggest the single most likely correction.
+
+Return:
+
+## Potential Transcription Errors
+wrongWord > possibleCorrection
+(one line per issue, up to 8 lines)
+
+If you find **no issues**, return:
+
+None.
 
 Transcript:
 -----------
-${rawTranscript}
+${rawTranscript}`.trim();
 
       const errorRes = await axios.post(ASK_RAG_URL, {
         message: errorPrompt,
@@ -371,7 +386,6 @@ ${rawTranscript}
       });
     }
   };
-
   /* -------- STEP 3: inferred terms – NEW STRICTER PROMPT --------------- */
   const handleInferTerms = async (doc: string, rawTranscript: string) => {
     try {
