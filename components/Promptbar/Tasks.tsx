@@ -198,17 +198,31 @@ const TaskItem: React.FC<TaskItemProps> = ({
 // === (Copied from PatientCard.tsx)       ===
 // ===-------------------------------------===
 interface PatientCardProps {
-    patient: Patient;
+    patient: Patient; // Use the imported Patient type
     removePatient: (patientId: string) => void;
     updateTaskTimerState: (patientId: string, taskId: string | number, isExpired: boolean) => void;
     addTaskToPatient: (patientId: string, taskText: string, timerMinutes: string) => void;
     updateTaskTimer: (patientId: string, taskId: string | number, newTimerMinutes: string | null) => void;
     removeTaskFromPatient: (patientId: string, taskId: string | number) => void;
-    updateTaskCompletion: ( patientId: string, taskId: string | number, status: TaskCompletionStatus ) => void;
+    updateTaskCompletion: ( patientId: string, taskId: string | number, status: TaskCompletionStatus ) => void; // Use imported type
     acknowledgeTaskTimer: (patientId: string, taskId: string | number) => void;
     updatePatientNotes: (patientId: string, notes: string) => void;
     updateTaskNotes: (patientId: string, taskId: string | number, notes: string) => void;
 }
+
+// 2. Define and export the component AFTER the interface, using the interface for props type
+export const PatientCard: React.FC<PatientCardProps> = ({
+    patient,
+    removePatient,
+    updateTaskTimerState,
+    addTaskToPatient,
+    updateTaskTimer,
+    removeTaskFromPatient,
+    updateTaskCompletion,
+    acknowledgeTaskTimer,
+    updatePatientNotes,
+    updateTaskNotes,
+ }) => {
 
 const PatientCard: React.FC<PatientCardProps> = ({
     patient, removePatient, updateTaskTimerState, addTaskToPatient, updateTaskTimer,
