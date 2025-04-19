@@ -1,7 +1,9 @@
-// /components/Chat/Chat.tsx
+// file: /components/Chat/Chat.tsx
 // -----------------------------------------------------------------------------
-// 3 isolated analysis calls → clean cards; strict prompts; user sign‑off kept;
-// build‑safe ChatInput props.
+// • Three strict analysis calls with hard‑gated prompts
+// • Conditional template‑aware recommendations
+// • Automatic user‑sign‑off append
+// • Build‑safe ChatInput props
 // -----------------------------------------------------------------------------
 
 import {
@@ -39,7 +41,7 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
-/* ───────────────────────── helpers ───────────────────── */
+/* ── UI helpers ─────────────────────────────────────────── */
 const ErrorBanner = ({ msg }: { msg: string | null }) =>
   msg ? (
     <div className="px-4 pt-4">
@@ -55,18 +57,18 @@ const Loading = ({ text }: { text: string }) => (
   </div>
 );
 
-/* ───────────────────────── component ─────────────────── */
+/* ── component ──────────────────────────────────────────── */
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
-
 export const Chat = memo(function Chat({ stopConversationRef }: Props): JSX.Element {
+  /* global ctx */
   const {
     state: { modelError, loading, prompts, userContext, userSignOff },
     dispatch,
   } = useContext(HomeContext);
 
-  /* state */
+  /* local state */
   const [transcript, setTranscript] = useState('');
   const [clinicalDoc, setClinicalDoc] = useState('');
   const [errorsTxt, setErrorsTxt] = useState('');
@@ -77,10 +79,10 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props): JSX.Elem
   const [termsOpen, setTermsOpen] = useState(true);
   const [recsOpen, setRecsOpen] = useState(true);
 
-  const activeTemplate = 'ED Triage Note';
+  const activeTemplate = 'ED Triage Note'; // could be stateful dropdown
   const activeModel = 'GPT-4';
 
-  /* scroll support */
+  /* scrolling */
   const containerRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -101,37 +103,36 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props): JSX.Elem
   const API = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
   const ask = (message: string, mode: 'scribe' | 'analysis') =>
     axios.post(`${API}/rag/ask_rag`, { message, mode, model_name: activeModel })
-         .then(r => r.data.response as string);
+         .then(r => (r.data.response as string).trim());
 
-  /* Prompt builders */
-  const docPrompt = (raw: string) => {
-    const tpl = prompts.find(p => p.name === activeTemplate)?.content ?? '';
-    return `
+  /* ── Prompt builders ───────────────────────────── */
+  const docPrompt = (raw: string, tplContent: string) => `
 You are a clinical scribe generating a **${activeTemplate}**.
 
-Output **Markdown only**. Use the template headings exactly.
+Output **Markdown only** and replicate the template headings exactly.
 
 Template:
 ---------
-${tpl}
+${tplContent}
 
 Transcript:
 -----------
 ${raw}
 
 ${userContext ? `User Context:\n${userContext}` : ''}`.trim();
-  };
 
   const errPrompt = (doc: string, raw: string) => `
-Identify words/phrases in the *transcript* that were likely mis‑transcribed
-when creating the *document*.  
+Compare each word/phrase in the **transcript** against the **document**.
+List items where spelling/term differs significantly (≥2 letters),
+or where a drug/dose looks wrong.
 
-Return **ONLY** a numbered Markdown list, one line each:
+Return **ONLY** a numbered list in Markdown:
 
 1. misheard >>> likely?
 2. ...
 
-No headings, no additional commentary.
+If no mismatches, return the single word **NONE**.
+If you output anything else you will be graded 0.
 
 Transcript:
 -----------
@@ -142,15 +143,15 @@ Document:
 ${doc}`.trim();
 
   const termsPrompt = (doc: string, raw: string) => `
-List clinical diagnoses, medications, or key terms **implied but not explicitly
-written** in the document.
+Identify clinical diagnoses, medications or key terms that are **inferred**
+(not verbatim) in the document compared with the transcript.
 
 Return **ONLY** Markdown bullets:
 
-- Term — reason
+- Term — brief rationale
 - ...
 
-No other sections, no recommendations.
+If none, return **NONE**.
 
 Transcript:
 -----------
@@ -160,13 +161,18 @@ Document:
 ---------
 ${doc}`.trim();
 
-  const recsPrompt = (doc: string) => `
-You are the treating doctor. Note type = **${activeTemplate}**.
+  const recsPrompt = (doc: string) => {
+    const adviceBlock =
+      activeTemplate.toLowerCase().includes('triage')
+        ? `Focus on **initial work‑up**: investigations, bedside exams, scoring tools, early imaging, initial management.`
+        : `Focus on **discharge planning**: follow‑up, home meds, patient education / safety‑net.`;
+    return `
+You are the treating doctor.
 
-Provide additional recommendations **not already covered** in the plan.
+${adviceBlock}
 
-Return Markdown with EXACTLY these five headings
-(in this order) and bulleted items under each:
+Return Markdown with these EXACT headings only (in this order) and bullet
+points under each. Do NOT add any other sections or re‑state errors/terms.
 
 ### Investigations
 ### Scoring Tools
@@ -174,15 +180,14 @@ Return Markdown with EXACTLY these five headings
 ### Management / Follow‑up
 ### Safety‑net
 
-Do NOT output 'Inferred Terms' or 'Potential Errors'. Do NOT add extra headings.
-
-Base suggestions strictly on the document content; avoid irrelevant advice.
+If a heading has no items write "- None".
 
 Document:
 ---------
 ${doc}`.trim();
+  };
 
-  /* flows */
+  /* ── analysis pipeline ─────────────────────────── */
   const analyseAll = async (doc: string, raw: string) => {
     dispatch({ type: 'change', field: 'loading', value: true });
     try {
@@ -191,16 +196,18 @@ ${doc}`.trim();
         ask(termsPrompt(doc, raw), 'analysis'),
         ask(recsPrompt(doc),       'analysis'),
       ]);
-      setErrorsTxt(e.trim());
-      setTermsTxt(t.trim());
-      setRecsTxt(r.trim());
-    } catch (e: any) {
-      dispatch({ type: 'change', field: 'modelError', value: { message: e.message } });
+
+      setErrorsTxt(e === 'ERROR' ? '' : e);
+      setTermsTxt( t === 'ERROR' ? '' : t);
+      setRecsTxt(  r === 'ERROR' ? '' : r);
+    } catch (err: any) {
+      dispatch({ type: 'change', field: 'modelError', value: { message: err.message } });
     } finally {
       dispatch({ type: 'change', field: 'loading', value: false });
     }
   };
 
+  /* ── create doc ────────────────────────────────── */
   const createDoc = async (raw: string) => {
     dispatch({ type: 'change', field: 'loading', value: true });
     try {
@@ -209,52 +216,60 @@ ${doc}`.trim();
       setErrorsTxt('');
       setTermsTxt('');
       setRecsTxt('');
-      const base = await ask(docPrompt(raw), 'scribe');
-      const doc  = userSignOff ? `${base}\n\n---\n${userSignOff}` : base;
+      const tpl = prompts.find(p => p.name === activeTemplate)?.content ?? '';
+      const base = await ask(docPrompt(raw, tpl), 'scribe');
+
+      /* re‑read sign‑off each time in case user just saved profile */
+      const signOff = (userSignOff || '').trim();
+      const doc = signOff ? `${base}\n\n---\n${signOff}` : base;
       setClinicalDoc(doc);
+
       await analyseAll(doc, raw);
-    } catch (e:any) {
-      dispatch({ type: 'change', field: 'modelError', value: { message: e.message } });
+    } catch (err: any) {
+      dispatch({ type: 'change', field: 'modelError', value: { message: err.message } });
     }
   };
 
-  /* card component */
+  /* ── card ───────────────────────────────────────── */
   const Card = ({
     title, open, setOpen, content,
   }: {
     title: string; open: boolean; setOpen: (b: boolean)=>void; content: string;
-  }) => (
-    <div className="flex flex-col bg-white border rounded shadow">
-      <div className="flex justify-between items-center bg-gray-50 border-b px-3 py-1.5">
-        <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-1">
-          <Info size={14} /> {title}
-        </h3>
-        <button onClick={() => setOpen(!open)} className="text-gray-500 p-1">
-          {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </button>
-      </div>
-      {open && (
-        <div className="p-3 text-sm overflow-auto max-h-60">
-          {loading && !content ? <Loading text="Analyzing…" /> : null}
-          {!loading && content && (
-            <ReactMarkdown className="prose prose-sm" remarkPlugins={[remarkGfm]}>
-              {content}
-            </ReactMarkdown>
-          )}
-          {!loading && !content && <div className="text-gray-400 italic">No data.</div>}
+  }) =>
+    content === 'ERROR' || content === '' ? null : (
+      <div className="flex flex-col bg-white border rounded shadow">
+        <div className="flex justify-between items-center bg-gray-50 border-b px-3 py-1.5">
+          <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-1">
+            <Info size={14} /> {title}
+          </h3>
+          <button onClick={() => setOpen(!open)} className="text-gray-500 p-1">
+            {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
         </div>
-      )}
-    </div>
-  );
+        {open && (
+          <div className="p-3 text-sm overflow-auto max-h-60">
+            {loading && !content ? <Loading text="Analyzing…" /> : null}
+            {!loading && (
+              <ReactMarkdown
+                className="prose prose-sm"
+                remarkPlugins={[remarkGfm]}
+                /* strip any rogue headings */
+                children={content.replace(/^#+.*/gm, '').trim()}
+              />
+            )}
+          </div>
+        )}
+      </div>
+    );
 
-  /* mainContent */
+  /* ── main content ───────────────────────────────── */
   const Main = !transcript ? (
     <div className="text-center py-10 text-gray-500">
       Paste or dictate a transcript to begin.
     </div>
   ) : (
     <div className="flex flex-col md:flex-row gap-6 p-4">
-      {/* document */}
+      {/* Document */}
       <div className="flex-1 bg-white border rounded shadow p-4 overflow-auto">
         {loading && !clinicalDoc ? (
           <Loading text="Generating…" />
@@ -264,7 +279,7 @@ ${doc}`.trim();
           </ReactMarkdown>
         )}
       </div>
-      {/* analysis */}
+      {/* Analysis */}
       <div className="w-full md:w-1/3 flex flex-col gap-4">
         <Card title="Potential Transcription Errors" open={errOpen}   setOpen={setErrOpen}   content={errorsTxt} />
         <Card title="Inferred Clinical Terms"        open={termsOpen} setOpen={setTermsOpen} content={termsTxt} />
@@ -273,16 +288,16 @@ ${doc}`.trim();
     </div>
   );
 
-  /* render */
+  /* ── render ─────────────────────────────────────── */
   return (
     <div className="flex flex-col h-screen">
-      <div ref={containerRef} className="flex-1 overflow-y-auto">
+      <div ref={containerRef} className="flex-1 overflow-y-auto bg-gray-50">
         {Main}
         <div ref={endRef} />
       </div>
 
-      {/* input */}
-      <div className="border-t p-3">
+      {/* Input */}
+      <div className="border-t p-3 bg-white">
         <ChatInput
           stopConversationRef={stopConversationRef}
           textareaRef={null}
