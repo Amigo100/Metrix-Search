@@ -342,43 +342,17 @@ Return only the completed note.`.trim();
       const errorPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
 
-You are reviewing a **clinical speech transcript** (e.g. ED note, chest‑pain
+You are reviewing a clinical speech transcript (e.g. ED note, chest‑pain
 consult) that has been converted to text.
 
 TASK  
-Find words/phrases in the Transcript that are probably *mis‑heard* or
-*mis‑spelled*.  Good clues:  
-• Non‑medical gibberish (e.g. "troponone", "clab stat").  
-• Real words that make no sense in context (e.g. "zest pain" in a cardiac case).  
-• Wrong homophones (e.g. "allusive" vs "elusive").  
-Suggested correction can come from common medical vocabulary **or** matching
-content in the Clinical Document. Take care not to make-up transcription errors, ensuring accuracy. Do not simply expand abbreviations that otherwise appear correct. Simply note any terms that appear to have likely been incorrectly transcribed, including mis-spelt words or correctly spelt words that do not fit the context. Suggest likely corrections based on the context of the transcript
-
-STEPS  
-1. Scan Transcript; flag tokens that are not in standard English or medical
-   lexicons OR look contextually strange.  
-2. Propose the *most likely* correct medical term (sound‑alike or spelling).  
-3. If that term also appears in the Clinical Document, confidence ↑ but this is
-   not mandatory.  
-4. Output up to 8 of the clearest issues.
-
-OUTPUT  
-If ≥ 1 issue:
-
-## Potential Transcription Errors
-* wrongWord → likelyCorrectWord
-
-If **none**, output exactly:
-
-None.
+Review the transcript. Identify words/phrases in the Transcript that are probably mis‑heard or
+mis‑spelled, such as Non‑medical gibberish (e.g. "troponone", "clab stat"), Real words that make no sense in context (e.g. "zest pain" in a cardiac case), Wrong homophones (e.g. "allusive" vs "elusive").  
+Once possible errors are identified, review the context in which these errors appear and suggest possible corrections. Take care not to make-up transcription errors, ensuring accuracy and do not simply expand abbreviations that otherwise appear correct. Simply note any terms that appear to have likely been incorrectly transcribed, including mis-spelt words or correctly spelt words that do not fit the context. Suggest likely corrections based on the context of the transcript. Return these line-by-line i.e. error >>> likely correction
 
 Transcript:
 -----------
 ${rawTranscript}
-
-Clinical Document:
-------------------
-${doc}`.trim();
 
       const errorRes = await axios.post(ASK_RAG_URL, {
         message: errorPrompt,
