@@ -332,7 +332,7 @@ Return only the completed note.`.trim();
     }
   };
 
-  /* -------- STEP 2: transcription errors (unchanged) -------- */
+  /* -------- STEP 2: transcription errors – NEW PROMPT --- */
   const handleTranscriptionErrors = async (
     doc: string,
     rawTranscript: string,
@@ -341,28 +341,42 @@ Return only the completed note.`.trim();
       setLastOutputType('errors');
       const errorPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-You are verifying **speech‑to‑text accuracy**.
 
-RULES
-1. wrongWord  = appears in Transcript (whole‑word).  
-2. correctWord = appears in Clinical Document.  
-3. They differ by ≥2 letters OR are homophones.  
-4. Fabricated pairs are disallowed.  
-5. Max 8 lines.
+You are reviewing a **clinical speech transcript** (e.g. ED note, chest‑pain
+consult) that has been converted to text.
 
-OUTPUT
-If ≥1 pair:
+TASK  
+Find words/phrases in the Transcript that are probably *mis‑heard* or
+*mis‑spelled*.  Good clues:  
+• Non‑medical gibberish (e.g. "troponone", "clab stat").  
+• Real words that make no sense in context (e.g. "zest pain" in a cardiac case).  
+• Wrong homophones (e.g. "allusive" vs "elusive").  
+Suggested correction can come from common medical vocabulary **or** matching
+content in the Clinical Document.
+
+STEPS  
+1. Scan Transcript; flag tokens that are not in standard English or medical
+   lexicons OR look contextually strange.  
+2. Propose the *most likely* correct medical term (sound‑alike or spelling).  
+3. If that term also appears in the Clinical Document, confidence ↑ but this is
+   not mandatory.  
+4. Output up to 8 of the clearest issues.
+
+OUTPUT  
+If ≥ 1 issue:
+
 ## Potential Transcription Errors
-* wrongWord → correctWord (short reason)
+* wrongWord → likelyCorrectWord
 
-If none, output exactly:
+If **none**, output exactly:
+
 None.
 
 Transcript:
 -----------
 ${rawTranscript}
 
-Clinical Document:
+Clinical Document:
 ------------------
 ${doc}`.trim();
 
@@ -384,7 +398,7 @@ ${doc}`.trim();
     }
   };
 
-  /* -------- STEP 3: inferred terms (NEW detailed prompt) -------- */
+  /* -------- STEP 3: inferred terms – NEW STRICTER PROMPT --------------- */
   const handleInferTerms = async (doc: string, rawTranscript: string) => {
     try {
       setLastOutputType('terms');
@@ -394,29 +408,39 @@ ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
 You will compare a **Transcript** and its resulting **Clinical Document**.
 
 GOAL  
-List information that the document *re‑expresses* (paraphrases, summarises,
-re‑orders, or infers) rather than copying verbatim.
+Surface meaning that the document **adds or re‑expresses** – i.e. ideas that are
+*not* copied word‑for‑word from the transcript.
 
-STEP‑BY‑STEP  
-1. Make a bullet list of factual statements in the Clinical Document (skip
-   headings & pleasantries).  
-2. For each statement, search the Transcript:  
-   • If ≥ 5 consecutive words match verbatim → skip.  
-   • Else, if meaning is supported by different wording/context → keep.  
-3. Ignore lines that are *only* abbreviation expansions (e.g. NKDA ↔︎ No Known
-   Drug Allergies) unless the document adds NEW nuance.  
-4. Keep 3‑10 of the clearest examples.
+BAD EXAMPLES (must be excluded)  
+✗ “NKDA” → “NKDA” (identical text)  
+✗ “T 38.1°C” → “T: 38.1°C” (punctuation change only)  
+✗ Pure abbreviation expansions (STI → Sexually Transmitted Infection)  
+✗ Direct copy of vitals, drug names, lab values, or physical‑exam signs with
+  the same wording.
+
+GOOD EXAMPLES  
+✓ “two episodes of non‑bilious vomiting” → “associated nausea and vomiting”  
+✓ “appears uncomfortable, knees drawn up” → “patient positioned with knees drawn up”  
+✓ “negative pregnancy test” → “no vaginal bleeding or discharge” (inference)
+
+RULES  
+1. Build a list of factual statements in the Clinical Document.  
+2. For each statement find the closest matching sentence/phrase in the
+   Transcript.  
+3. Compute similarity = (# shared content words)/(# unique content words).  
+   • If similarity ≥ 0.6 → skip (too similar).  
+4. Skip items that are only numeric/vitals, drug names, or abbreviations.  
+5. Keep 3–10 of the best paraphrases / inferences.
 
 OUTPUT  
-If ≥ 1 line matches criteria, return EXACTLY:
+If ≥ 1 valid item:
 
 ## Inferred Clinical Terms
 * "snippet from transcript" → "phrase in document"
 
-  • Each snippet ≤ 10 words copied from the transcript.  
-  • Each phrase  ≤ 10 words copied from the document.
+  • Each side ≤ 10 words. Use ellipses (…) if needed.  
 
-If NONE meet criteria, return exactly:
+If **none** meet criteria, output **exactly**:
 
 None.
 
