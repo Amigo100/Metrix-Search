@@ -606,11 +606,18 @@ ${headings}`.trim();
   let mainContent: ReactNode;
   if (!hasTranscript && !loading && !modelError) {
     /* -------- landing screen -------- */
-    mainContent = (
+   mainContent = (
       <>
-        <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
-          Select a template and model, then start by recording audio, initiating
-          a consultation, or typing your summary below.
+        <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto leading-relaxed">
+          1&nbsp;·&nbsp;Choose a <strong>note template</strong> (edit or add your own in
+          the&nbsp;<em>Templates</em> menu).<br />
+          2&nbsp;·&nbsp;Capture the encounter:<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;<strong>Dictation</strong>&nbsp;for single‑speaker narration<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;<strong>Consultation</strong>&nbsp;for a two‑way patient conversation<br />
+          &nbsp;&nbsp;&nbsp;&nbsp;(press again to stop) — or simply paste a transcript into the bar below.<br />
+          3&nbsp;·&nbsp;Metrix AI will draft the document, recommendations &amp; QA panels, which you
+          can <em>copy, download, or edit</em>.<br />
+          4&nbsp;·&nbsp;Ask follow‑up questions in the bottom bar any time to refine the output.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 w-full max-w-3xl mx-auto">
