@@ -159,7 +159,7 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
            {/* Using DialogClose for the X button */}
            <DialogClose asChild>
                <Button
-                 variant="ghost" size="sm" // Use allowed size
+                 variant="default" size="sm" // Use allowed size
                  className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 h-6 w-6 p-0" // Adjusted style
                  onClick={onClose} aria-label="Close" // Added aria-label
                >
