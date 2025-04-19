@@ -231,7 +231,7 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
           <DialogFooter className="border-t border-gray-200 pt-4"> {/* Adjusted border color */}
             {/* Using DialogClose to wrap the Cancel button */}
             <DialogClose asChild>
-                <Button type="button" variant="secondary" className="text-black bg-gray-100 hover:bg-gray-200"> Cancel </Button>
+                <Button type="button" variant="outline" className="text-black bg-gray-100 hover:bg-gray-200 border-gray-300"> Cancel </Button> {/* Changed variant to "outline", added border color for visibility */}
             </DialogClose>
             <Button type="submit" className="bg-[#008080] hover:bg-[#006666] text-white"> Add Patient </Button> {/* Adjusted hover color */}
           </DialogFooter>
