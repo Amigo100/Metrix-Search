@@ -386,49 +386,47 @@ ${rawTranscript}`.trim();
       });
     }
   };
-  /* -------- STEP 3: inferred terms – NEW STRICTER PROMPT --------------- */
+  /* -------- STEP 3: inferred terms – IMPROVED “Heidi‑style” prompt ----- */
   const handleInferTerms = async (doc: string, rawTranscript: string) => {
     try {
       setLastOutputType('terms');
       const termPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
 
-You will compare a **Transcript** and its resulting **Clinical Document**.
+You are analysing how a clinical note was authored from the visit transcript.
 
-GOAL  
-Surface meaning that the document **adds or re‑expresses** – i.e. ideas that are
-*not* copied word‑for‑word from the transcript.
+**Definition – Inferred Term**  
+Information that appears in the Clinical Document even though it is NOT stated
+verbatim in the Transcript, but can reasonably be *deduced* from it (via
+paraphrase, re‑ordering, synthesis, or clinical reasoning).
 
-BAD EXAMPLES (must be excluded)  
-✗ “NKDA” → “NKDA” (identical text)  
-✗ “T 38.1°C” → “T: 38.1°C” (punctuation change only)  
-✗ Pure abbreviation expansions (STI → Sexually Transmitted Infection)  
-✗ Direct copy of vitals, drug names, lab values, or physical‑exam signs with
-  the same wording.
+Examples of valid inferences  
+• Transcript: “he threw up twice” → Document: “episodes of vomiting”.  
+• Transcript: “pain started around her belly button, moved right” → Document:
+  “migratory pain to right lower quadrant”.  
+• Transcript: lab values mentioned separately → Document: “sepsis suspected”.
 
-GOOD EXAMPLES  
-✓ “two episodes of non‑bilious vomiting” → “associated nausea and vomiting”  
-✓ “appears uncomfortable, knees drawn up” → “patient positioned with knees drawn up”  
-✓ “negative pregnancy test” → “no vaginal bleeding or discharge” (inference)
+What is **NOT** an inferred term  
+× Exact text copy or cosmetic punctuation changes.  
+× Simple abbreviation expansions (STI → Sexually Transmitted Infection).  
+× Vitals/labs/drug names copied without new meaning.
 
-RULES  
-1. Build a list of factual statements in the Clinical Document.  
-2. For each statement find the closest matching sentence/phrase in the
-   Transcript.  
-3. Compute similarity = (# shared content words)/(# unique content words).  
-   • If similarity ≥ 0.6 → skip (too similar).  
-4. Skip items that are only numeric/vitals, drug names, or abbreviations.  
-5. Keep 3–10 of the best paraphrases / inferences.
+Procedure (internal):  
+1. Break the Clinical Document into key factual statements.  
+2. For each, search the Transcript.  
+   ▸ If ≥ 5 consecutive words match → discard (not inferred).  
+3. Discard statements that are only numeric/lab/vital or trivial abbreviations.  
+4. Keep the 3‑10 strongest inferred statements.
 
-OUTPUT  
-If ≥ 1 valid item:
+Return *only*:
 
 ## Inferred Clinical Terms
-* "snippet from transcript" → "phrase in document"
+"snippet from transcript" → "phrase in document"
 
-  • Each side ≤ 10 words. Use ellipses (…) if needed.  
+– Use ≤ 10 words each side, add ellipses (…) if needed.  
+– One line per inference.
 
-If **none** meet criteria, output **exactly**:
+If you find **none**, return:
 
 None.
 
@@ -457,7 +455,6 @@ ${doc}`.trim();
       });
     }
   };
-
   /* -------- STEP 4: recommendations (unchanged) -------- */
   const handleRecommendations = async (doc: string) => {
     try {
