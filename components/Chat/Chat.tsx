@@ -280,7 +280,7 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
 
       const docPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-You are a helpful clinical scribe. Return **Markdown**.
+You are a helpful clinical scribe for doctors and nurses. You are to take a speech transcript, apply this to a selected clinical note template with pre-filled headers. Ensure this is professional and formatted appropriately. Take care to retain accuracy, use as much information from the transcript as possible, and reword or structure this as expected in a professional clinical document of the selected type. Return **Markdown**.
 
 Template:
 ---------
@@ -352,7 +352,7 @@ Find words/phrases in the Transcript that are probably *mis‑heard* or
 • Real words that make no sense in context (e.g. "zest pain" in a cardiac case).  
 • Wrong homophones (e.g. "allusive" vs "elusive").  
 Suggested correction can come from common medical vocabulary **or** matching
-content in the Clinical Document.
+content in the Clinical Document. Take care not to make-up transcription errors, ensuring accuracy. Do not simply expand abbreviations that otherwise appear correct. Simply note any terms that appear to have likely been incorrectly transcribed, including mis-spelt words or correctly spelt words that do not fit the context. Suggest likely corrections based on the context of the transcript
 
 STEPS  
 1. Scan Transcript; flag tokens that are not in standard English or medical
