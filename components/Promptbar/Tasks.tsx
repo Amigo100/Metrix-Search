@@ -244,7 +244,18 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
 // --- PatientCard Component ---
 interface PatientCardProps { /* ... */ }
-const PatientCard: React.FC<PatientCardProps> = ({ /* ...props... */ }) => {
+const PatientCard: React.FC<PatientCardProps> = ({
+    patient, // Destructure patient
+    removePatient, // Destructure handlers...
+    updateTaskTimerState,
+    addTaskToPatient,
+    updateTaskTimer,
+    removeTaskFromPatient,
+    updateTaskCompletion,
+    acknowledgeTaskTimer,
+    updatePatientNotes,
+    updateTaskNotes,
+}) => {
   // ... PatientCard implementation using internal mock Card/Button/Input & internal TaskItem ...
     const [lengthOfStayMinutes, setLengthOfStayMinutes] = useState<number>(() => differenceInMinutes(new Date(), patient.arrivalTime));
     const [lengthOfStayFormatted, setLengthOfStayFormatted] = useState<string>('');
