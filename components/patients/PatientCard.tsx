@@ -70,8 +70,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ // Component definition remains the
   const handleNotesKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {/* ... */};
   const handleCompletionToggle = () => {/* ... */};
   const handleSnooze = () => {/* ... */};
-  const getCompletionIcon = () => {/* ... */};
-
+  const getCompletionIcon = (): JSX.Element => {/* ... */};
 
   // --- Styling Logic (Revert to original text colors for consistency) ---
   let taskItemClasses = 'flex flex-col py-1.5 group';
