@@ -1,8 +1,7 @@
 // file: /components/Chat/Chat.tsx
 // -----------------------------------------------------------------------------
-// ❶ Personalised context + sign‑off retained
-// ❷ Structured analysis split into 3 cards
-// ❸ NEW scrollable analysis column so the Recommendations card is always visible
+// ❶ Separate LLM calls for Doc → Errors → Inferred Terms → Recommendations
+// ❷ Right‑hand column stays split into 3 independent, live‑updating cards
 // -----------------------------------------------------------------------------
 
 import {
@@ -133,7 +132,7 @@ const ASK_RAG_URL = `${API_BASE_URL}/rag/ask_rag`;
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
-type OutputType = 'doc' | 'analysis' | null;
+type OutputType = 'doc' | 'errors' | 'terms' | 'recs' | null;
 
 export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   const { t } = useTranslation('chat');
@@ -155,13 +154,10 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   /* -------------------- local state --------------------- */
   const [transcript, setTranscript] = useState('');
   const [clinicalDoc, setClinicalDoc] = useState('');
-  const [analysis, setAnalysis] = useState('');
 
-  // ==== UPDATE 1: split analysis into three buckets ======================
   const [analysisErrors, setAnalysisErrors] = useState('');
   const [analysisTerms, setAnalysisTerms] = useState('');
   const [analysisRecs, setAnalysisRecs] = useState('');
-  // ======================================================================
 
   const [isTranscriptExpanded, setIsTranscriptExpanded] = useState(true);
   const [isEditingDoc, setIsEditingDoc] = useState(false);
@@ -186,8 +182,9 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   }, 250);
 
   useEffect(() => {
-    if (clinicalDoc || analysis || loading) throttledScrollDown();
-  }, [clinicalDoc, analysis, loading, throttledScrollDown]);
+    if (clinicalDoc || analysisErrors || analysisTerms || analysisRecs || loading)
+      throttledScrollDown();
+  }, [clinicalDoc, analysisErrors, analysisTerms, analysisRecs, loading, throttledScrollDown]);
 
   useEffect(() => {
     const area = chatContainerRef.current;
@@ -201,26 +198,6 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
     return () => area.removeEventListener('scroll', handler);
   }, []);
 
-  // ==== UPDATE 2: parse analysis into the 3 panels =======================
-  useEffect(() => {
-    if (!analysis) {
-      setAnalysisErrors('');
-      setAnalysisTerms('');
-      setAnalysisRecs('');
-      return;
-    }
-    const sections = { err: '', terms: '', recs: '' };
-    analysis.split(/\n(?=##\s)/).forEach((chunk) => {
-      if (/transcription error/i.test(chunk)) sections.err = chunk.trim();
-      else if (/inferred/i.test(chunk)) sections.terms = chunk.trim();
-      else if (/recommendation/i.test(chunk)) sections.recs = chunk.trim();
-    });
-    setAnalysisErrors(sections.err);
-    setAnalysisTerms(sections.terms);
-    setAnalysisRecs(sections.recs);
-  }, [analysis]);
-  // ======================================================================
-
   /* ========================================================================
      Helpers
   ======================================================================== */
@@ -231,13 +208,13 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
       dispatch({ type: 'change', field: 'loading', value: true });
       dispatch({ type: 'change', field: 'modelError', value: null });
 
+      // reset UI
       setClinicalDoc('');
-      setAnalysis('');
       setAnalysisErrors('');
       setAnalysisTerms('');
       setAnalysisRecs('');
       setIsTranscriptExpanded(true);
-      setLastOutputType(null);
+      setLastOutputType('doc');
 
       const template = prompts.find((p) => p.name === activeTemplateName);
       const templateContent =
@@ -259,7 +236,7 @@ ${text}
 Instructions: Fill the template. Ensure the final answer is Markdown.
       `.trim();
 
-      const res = await axios.post(ASK_RAG_URL, {
+      const docRes = await axios.post(ASK_RAG_URL, {
         message: docPrompt,
         history: [],
         mode: 'scribe',
@@ -267,14 +244,14 @@ Instructions: Fill the template. Ensure the final answer is Markdown.
         model_name: activeModelName,
       });
 
-      const rawDoc = (res.data.response as string) || '';
+      const rawDoc = (docRes.data.response as string) || '';
       const finalDoc = userSignOff ? `${rawDoc}\n\n---\n${userSignOff}` : rawDoc;
 
       setClinicalDoc(finalDoc);
       setIsEditingDoc(false);
-      setLastOutputType('doc');
 
-      await handleAnalyzeDoc(finalDoc, text);
+      // Next: check transcription errors
+      await handleTranscriptionErrors(finalDoc, text);
     } catch (err: any) {
       console.error('[handleCreateDocFromTranscript]', err);
       dispatch({
@@ -282,29 +259,64 @@ Instructions: Fill the template. Ensure the final answer is Markdown.
         field: 'modelError',
         value: { message: err.message || 'Failed to create document.' },
       });
-    } finally {
       dispatch({ type: 'change', field: 'loading', value: false });
     }
   };
 
-  /* -------- analyse document -------- */
-  const handleAnalyzeDoc = async (doc: string, rawTranscript: string) => {
+  /* -------- 2️⃣  potential transcription errors -------- */
+  const handleTranscriptionErrors = async (doc: string, rawTranscript: string) => {
     try {
-      if (!loading) dispatch({ type: 'change', field: 'loading', value: true });
-      dispatch({ type: 'change', field: 'modelError', value: null });
-
-      // ==== UPDATE 3: enforced headings for reliable split =========
-      const analysisPrompt = `
-You are a clinical summariser focusing on:
-1) **Potential Transcription Errors** (list)
-2) **Inferred Clinical Terms** (list)
-3) **Recommendations** (headings / lists)
-
-Return the result in **Markdown** with these exact section titles:
+      setLastOutputType('errors');
+      const errorPrompt = `
+You are a clinical QA assistant. Compare the **Transcript** and the **Clinical Document**.  
+Return a short Markdown list under the heading:
 
 ## Potential Transcription Errors
+
+Include only items likely to be misheard, omitted or incorrect (max 10).  
+If none, write “No obvious discrepancies.”.
+      
+Transcript:
+-----------
+${rawTranscript}
+
+Clinical Document:
+------------------
+${doc}`.trim();
+
+      const errorRes = await axios.post(ASK_RAG_URL, {
+        message: errorPrompt,
+        history: [],
+        mode: 'analysis',
+        model_name: activeModelName,
+      });
+
+      setAnalysisErrors(errorRes.data.response || 'No response.');
+      // Next: inferred terms
+      await handleInferTerms(doc, rawTranscript);
+    } catch (err: any) {
+      console.error('[handleTranscriptionErrors]', err);
+      dispatch({
+        type: 'change',
+        field: 'modelError',
+        value: { message: err.message || 'Failed to detect errors.' },
+      });
+    }
+  };
+
+  /* -------- 3️⃣  inferred clinical terms -------- */
+  const handleInferTerms = async (doc: string, rawTranscript: string) => {
+    try {
+      setLastOutputType('terms');
+      const termPrompt = `
+You are analysing how a free‑text transcript was summarised.  
+Provide a Markdown list under the heading:
+
 ## Inferred Clinical Terms
-## Recommendations
+
+List clinical concepts or details PRESENT in the **Clinical Document** that are  
+*not stated verbatim* in the **Transcript** (i.e. inferred / rephrased).  
+Bullet list only; max 10 items.
 
 Transcript:
 -----------
@@ -312,25 +324,63 @@ ${rawTranscript}
 
 Clinical Document:
 ------------------
-${doc}
-      `.trim();
-      // ============================================================
+${doc}`.trim();
 
-      const res = await axios.post(ASK_RAG_URL, {
-        message: analysisPrompt,
+      const termRes = await axios.post(ASK_RAG_URL, {
+        message: termPrompt,
         history: [],
         mode: 'analysis',
         model_name: activeModelName,
       });
 
-      setAnalysis(res.data.response || '');
-      setLastOutputType('analysis');
+      setAnalysisTerms(termRes.data.response || 'No response.');
+      // Next: recommendations
+      await handleRecommendations(doc);
     } catch (err: any) {
-      console.error('[handleAnalyzeDoc]', err);
+      console.error('[handleInferTerms]', err);
       dispatch({
         type: 'change',
         field: 'modelError',
-        value: { message: err.message || 'Failed to analyse.' },
+        value: { message: err.message || 'Failed to infer terms.' },
+      });
+    }
+  };
+
+  /* -------- 4️⃣  tailored clinical recommendations -------- */
+  const handleRecommendations = async (doc: string) => {
+    try {
+      setLastOutputType('recs');
+      const recPrompt = `
+You are an experienced clinician. The following is a **${activeTemplateName}**.
+
+Provide actionable suggestions under the heading:
+
+## Recommendations
+
+Focus ONLY on items appropriate for this context:  
+- *ED Triage Note*: what the triaging doctor should consider next.  
+- *Discharge Summary*: key follow‑up, safety‑netting, and GP communication.  
+Keep it concise (≤ 8 bullets).  
+Return Markdown only.
+
+Clinical Document:
+------------------
+${doc}`.trim();
+
+      const recRes = await axios.post(ASK_RAG_URL, {
+        message: recPrompt,
+        history: [],
+        mode: 'analysis',
+        model_name: activeModelName,
+      });
+
+      setAnalysisRecs(recRes.data.response || 'No response.');
+    } catch (err: any) {
+      console.error('[handleRecommendations]', err);
+      dispatch({
+        type: 'change',
+        field: 'modelError',
+        value: { message: err.message || 'Failed to generate recommendations.' },
       });
     } finally {
       dispatch({ type: 'change', field: 'loading', value: false });
@@ -346,11 +396,8 @@ ${doc}
   };
 
   const handleRegenerate = async () => {
-    if (lastOutputType === 'doc') {
-      await handleCreateDocFromTranscript(transcript);
-    } else if (lastOutputType === 'analysis') {
-      await handleAnalyzeDoc(clinicalDoc, transcript);
-    }
+    if (!transcript) return;
+    await handleCreateDocFromTranscript(transcript);
   };
 
   const docWordCount = clinicalDoc
@@ -360,7 +407,6 @@ ${doc}
   const handleClearScribe = () => {
     setTranscript('');
     setClinicalDoc('');
-    setAnalysis('');
     setAnalysisErrors('');
     setAnalysisTerms('');
     setAnalysisRecs('');
@@ -560,7 +606,7 @@ ${doc}
           </div>
 
           {/* ----------------------------------------------------------------
-             ==== UPDATE 4: scrollable right‑hand column + 3 cards ====
+             Right‑hand column : 3 cards (Errors | Inferred | Recs)
              --------------------------------------------------------------- */}
           <div
             className="w-full md:w-2/5 lg:w-1/3 flex flex-col gap-4 overflow-y-auto"
@@ -574,7 +620,7 @@ ${doc}
                 </h3>
               </div>
               <div className="flex-1 overflow-auto p-4 text-sm">
-                {loading && lastOutputType === 'analysis' && (
+                {loading && lastOutputType === 'errors' && (
                   <LoadingIndicator text="Analyzing…" />
                 )}
                 {!loading && analysisErrors && (
@@ -600,7 +646,7 @@ ${doc}
                 </h3>
               </div>
               <div className="flex-1 overflow-auto p-4 text-sm">
-                {loading && lastOutputType === 'analysis' && (
+                {loading && lastOutputType === 'terms' && (
                   <LoadingIndicator text="Analyzing…" />
                 )}
                 {!loading && analysisTerms && (
@@ -626,7 +672,7 @@ ${doc}
                 </h3>
               </div>
               <div className="flex-1 overflow-auto p-4 text-sm">
-                {loading && lastOutputType === 'analysis' && (
+                {loading && lastOutputType === 'recs' && (
                   <LoadingIndicator text="Analyzing…" />
                 )}
                 {!loading && analysisRecs && (
@@ -643,9 +689,7 @@ ${doc}
               </div>
             </div>
           </div>
-          {/* ----------------------------------------------------------------
-             ==== END UPDATE 4 ====
-             --------------------------------------------------------------- */}
+          {/* ---------------------------------------------------------------- */}
         </div>
 
         <ScribeDisclaimer />
@@ -771,7 +815,14 @@ ${doc}
                   : 'Type summary, notes, or command…'
               }
               showRegenerateButton={
-                hasTranscript && !loading && Boolean(clinicalDoc || analysis)
+                hasTranscript &&
+                !loading &&
+                Boolean(
+                  clinicalDoc ||
+                    analysisErrors ||
+                    analysisTerms ||
+                    analysisRecs,
+                )
               }
             />
           </div>
