@@ -1,8 +1,8 @@
 // file: /components/Chat/Chat.tsx
 // -----------------------------------------------------------------------------
-// ❶ Retains personalised context + sign‑off logic
-// ❷ Adds structured analysis layout  (errors | inferred terms | recommendations)
-// ❸ Keeps original colour palette  (teal gradient / slate‑grey text)
+// ❶ Personalised context + sign‑off retained
+// ❷ Structured analysis split into 3 cards
+// ❸ NEW scrollable analysis column so the Recommendations card is always visible
 // -----------------------------------------------------------------------------
 
 import {
@@ -17,8 +17,6 @@ import {
   Loader2,
   X,
   FileText,
-  Send,
-  RotateCcw,
   Trash2,
 } from 'lucide-react';
 import React, {
@@ -37,22 +35,16 @@ import remarkGfm from 'remark-gfm';
 
 import HomeContext from '@/pages/api/home/home.context';
 import { throttle } from '@/utils/data/throttle';
+import { Message } from '@/types/chat';
 
-// Child components
 import { ChatInput } from './ChatInput';
 import { ChatTextToSpeech } from './ChatTextToSpeech';
 import { ChatStartOfficeVisit } from './ChatStartOfficeVisit';
 
-// Modal components
 import { ProfileModal } from '@/components/Modals/ProfileModal';
 import { TemplatesModal } from '@/components/Modals/TemplatesModal';
 import { HelpModal } from '@/components/Modals/HelpModal';
 import { SettingsModal } from '@/components/Modals/SettingsModal';
-
-// Types
-import { Message } from '@/types/chat';
-import { Prompt } from '@/types/prompt';
-import { Plugin } from '@/types/plugin';
 
 // PDF generation
 import pdfMake from 'pdfmake/build/pdfmake';
@@ -66,8 +58,6 @@ const secondaryButtonStyles =
   'inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 disabled:opacity-70 disabled:cursor-not-allowed';
 const ghostButtonStyles =
   'inline-flex items-center justify-center p-2 text-sm font-medium rounded-md text-gray-500 hover:text-teal-600 hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed';
-const formInputStyles =
-  'block w-full rounded-full border border-gray-300 py-2 px-4 shadow-sm transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 focus:border-teal-500 placeholder-gray-400 text-base';
 
 const SCRIBE_DISCLAIMER_TEXT =
   'Metrix AI Clinical Scribe generates documentation based on input. Always review and verify documentation for accuracy and completeness before finalising in patient records. This tool does not replace clinical judgment.';
@@ -134,7 +124,7 @@ const ScribeDisclaimer = ({ centered = false }: { centered?: boolean }) => (
   </div>
 );
 
-/* ----------------------- API URL helper ---------------------- */
+/* --------------------------- API helper ------------------------- */
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 const ASK_RAG_URL = `${API_BASE_URL}/rag/ask_rag`;
@@ -155,7 +145,6 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
       loading,
       models,
       prompts,
-      textInputContent,
       openModal,
       userContext,
       userSignOff,
@@ -168,11 +157,11 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   const [clinicalDoc, setClinicalDoc] = useState('');
   const [analysis, setAnalysis] = useState('');
 
-  // ====  UPDATE 1: split analysis into three dedicated strings ==========
-  const [analysisErrors, setAnalysisErrors] = useState('');       // NEW
-  const [analysisTerms, setAnalysisTerms] = useState('');         // NEW
-  const [analysisRecs, setAnalysisRecs] = useState('');           // NEW
-  // =====================================================================
+  // ==== UPDATE 1: split analysis into three buckets ======================
+  const [analysisErrors, setAnalysisErrors] = useState('');
+  const [analysisTerms, setAnalysisTerms] = useState('');
+  const [analysisRecs, setAnalysisRecs] = useState('');
+  // ======================================================================
 
   const [isTranscriptExpanded, setIsTranscriptExpanded] = useState(true);
   const [isEditingDoc, setIsEditingDoc] = useState(false);
@@ -204,15 +193,15 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
     const area = chatContainerRef.current;
     if (!area) return;
     const handler = () => {
-      const atBottom =
-        area.scrollTop + area.clientHeight >= area.scrollHeight - 50;
-      setAutoScrollEnabled(atBottom);
+      setAutoScrollEnabled(
+        area.scrollTop + area.clientHeight >= area.scrollHeight - 50,
+      );
     };
     area.addEventListener('scroll', handler);
     return () => area.removeEventListener('scroll', handler);
   }, []);
 
-  // ====  UPDATE 2: whenever raw analysis changes, extract the sections ===
+  // ==== UPDATE 2: parse analysis into the 3 panels =======================
   useEffect(() => {
     if (!analysis) {
       setAnalysisErrors('');
@@ -220,18 +209,12 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
       setAnalysisRecs('');
       return;
     }
-
     const sections = { err: '', terms: '', recs: '' };
-    // Very simple split by Markdown headings – will work as long as
-    // the LLM uses the mandated headings.
-    analysis
-      .split(/\n(?=##\s)/) // split at every `## Heading`
-      .forEach((chunk) => {
-        if (/transcription error/i.test(chunk)) sections.err = chunk.trim();
-        else if (/inferred/i.test(chunk)) sections.terms = chunk.trim();
-        else if (/recommendation/i.test(chunk)) sections.recs = chunk.trim();
-      });
-
+    analysis.split(/\n(?=##\s)/).forEach((chunk) => {
+      if (/transcription error/i.test(chunk)) sections.err = chunk.trim();
+      else if (/inferred/i.test(chunk)) sections.terms = chunk.trim();
+      else if (/recommendation/i.test(chunk)) sections.recs = chunk.trim();
+    });
     setAnalysisErrors(sections.err);
     setAnalysisTerms(sections.terms);
     setAnalysisRecs(sections.recs);
@@ -250,9 +233,9 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
 
       setClinicalDoc('');
       setAnalysis('');
-      setAnalysisErrors('');          // NEW
-      setAnalysisTerms('');           // NEW
-      setAnalysisRecs('');            // NEW
+      setAnalysisErrors('');
+      setAnalysisTerms('');
+      setAnalysisRecs('');
       setIsTranscriptExpanded(true);
       setLastOutputType(null);
 
@@ -261,7 +244,6 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
         template?.content ||
         'Default template: structure the note into clear headings.';
 
-      /* ---- build prompt with userContext ---- */
       const docPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
 You are a helpful clinical scribe AI. Return output in **Markdown** (headings bold/** or #, bullet lists *, -).
@@ -277,18 +259,15 @@ ${text}
 Instructions: Fill the template. Ensure the final answer is Markdown.
       `.trim();
 
-      const payload = {
+      const res = await axios.post(ASK_RAG_URL, {
         message: docPrompt,
         history: [],
         mode: 'scribe',
         template_name: activeTemplateName,
         model_name: activeModelName,
-      };
+      });
 
-      const res = await axios.post(ASK_RAG_URL, payload);
       const rawDoc = (res.data.response as string) || '';
-
-      /* append sign‑off if available */
       const finalDoc = userSignOff ? `${rawDoc}\n\n---\n${userSignOff}` : rawDoc;
 
       setClinicalDoc(finalDoc);
@@ -298,14 +277,10 @@ Instructions: Fill the template. Ensure the final answer is Markdown.
       await handleAnalyzeDoc(finalDoc, text);
     } catch (err: any) {
       console.error('[handleCreateDocFromTranscript]', err);
-      const msg =
-        err.response?.data?.detail ||
-        err.message ||
-        'Failed to create document.';
       dispatch({
         type: 'change',
         field: 'modelError',
-        value: { message: msg },
+        value: { message: err.message || 'Failed to create document.' },
       });
     } finally {
       dispatch({ type: 'change', field: 'loading', value: false });
@@ -318,15 +293,14 @@ Instructions: Fill the template. Ensure the final answer is Markdown.
       if (!loading) dispatch({ type: 'change', field: 'loading', value: true });
       dispatch({ type: 'change', field: 'modelError', value: null });
 
-      // ====  UPDATE 3: enforce deterministic headings for easier parsing ===
+      // ==== UPDATE 3: enforced headings for reliable split =========
       const analysisPrompt = `
 You are a clinical summariser focusing on:
 1) **Potential Transcription Errors** (list)
 2) **Inferred Clinical Terms** (list)
 3) **Recommendations** (headings / lists)
 
-Return the result in **Markdown** with the EXACT headings below
-so the UI can split your answer:
+Return the result in **Markdown** with these exact section titles:
 
 ## Potential Transcription Errors
 ## Inferred Clinical Terms
@@ -340,7 +314,7 @@ Clinical Document:
 ------------------
 ${doc}
       `.trim();
-      // ===================================================================
+      // ============================================================
 
       const res = await axios.post(ASK_RAG_URL, {
         message: analysisPrompt,
@@ -353,34 +327,24 @@ ${doc}
       setLastOutputType('analysis');
     } catch (err: any) {
       console.error('[handleAnalyzeDoc]', err);
-      const msg =
-        err.response?.data?.detail || err.message || 'Failed to analyse.';
       dispatch({
         type: 'change',
         field: 'modelError',
-        value: { message: msg },
+        value: { message: err.message || 'Failed to analyse.' },
       });
     } finally {
       dispatch({ type: 'change', field: 'loading', value: false });
     }
   };
 
-  /* -------- initial or follow‑up input -------- */
+  /* -------- input handlers -------- */
   const handleInitialInput = async (msg: Message) => {
     const text = msg.content.trim();
     if (!text) return;
     setTranscript(text);
-    dispatch({ type: 'change', field: 'textInputContent', value: '' });
     await handleCreateDocFromTranscript(text);
   };
 
-  const handleSendFollowUp = async (msg: Message) => {
-    console.log('Follow‑up:', msg.content);
-    alert('Follow‑up flow not implemented.');
-    dispatch({ type: 'change', field: 'textInputContent', value: '' });
-  };
-
-  /* -------- regenerate -------- */
   const handleRegenerate = async () => {
     if (lastOutputType === 'doc') {
       await handleCreateDocFromTranscript(transcript);
@@ -389,7 +353,6 @@ ${doc}
     }
   };
 
-  /* -------- misc helpers -------- */
   const docWordCount = clinicalDoc
     ? clinicalDoc.replace(/---\n[\s\S]*$/, '').trim().split(/\s+/).length
     : 0;
@@ -398,18 +361,17 @@ ${doc}
     setTranscript('');
     setClinicalDoc('');
     setAnalysis('');
-    setAnalysisErrors('');          // NEW
-    setAnalysisTerms('');           // NEW
-    setAnalysisRecs('');            // NEW
+    setAnalysisErrors('');
+    setAnalysisTerms('');
+    setAnalysisRecs('');
     setIsEditingDoc(false);
     setEditDocText('');
     setLastOutputType(null);
-    dispatch({ type: 'change', field: 'textInputContent', value: '' });
     dispatch({ type: 'change', field: 'modelError', value: null });
   };
 
   /* ========================================================================
-     JSX sections
+     JSX
   ======================================================================== */
 
   const hasTranscript = Boolean(transcript);
@@ -417,10 +379,9 @@ ${doc}
     ? { message: (modelError as any)?.message || 'An unexpected error occurred.' }
     : null;
 
-  /* ----------------------- mainContent decision ------------------------ */
   let mainContent: ReactNode;
   if (!hasTranscript && !loading && !modelError) {
-    /* -------- initial screen (unchanged) -------- */
+    /* -------- landing screen -------- */
     mainContent = (
       <>
         <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
@@ -441,7 +402,7 @@ ${doc}
       </>
     );
   } else {
-    /* -------- transcript + results -------- */
+    /* -------- transcript + outputs -------- */
     mainContent = (
       <>
         <ErrorMessageDivComponent error={errorForDiv} />
@@ -578,11 +539,7 @@ ${doc}
                 <button
                   className={secondaryButtonStyles}
                   onClick={() => {
-                    /* ensure sign‑off remains (or gets added if missing) */
-                    const cleaned = editDocText.replace(
-                      /\n?---\n[\s\S]*$/,
-                      '',
-                    );
+                    const cleaned = editDocText.replace(/\n?---\n[\s\S]*$/, '');
                     const savedDoc = userSignOff
                       ? `${cleaned}\n\n---\n${userSignOff}`
                       : cleaned;
@@ -603,11 +560,13 @@ ${doc}
           </div>
 
           {/* ----------------------------------------------------------------
-             ====  UPDATE 4: NEW three‑column analysis layout  ====
+             ==== UPDATE 4: scrollable right‑hand column + 3 cards ====
              --------------------------------------------------------------- */}
-          <div className="w-full md:w-2/5 lg:w-1/3 flex flex-col gap-4">
-            {/* Section a) Potential transcription errors */}
-            <div className="flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden min-h-[140px]">
+          <div
+            className="w-full md:w-2/5 lg:w-1/3 flex flex-col gap-4 overflow-y-auto"
+          >
+            {/* a) Errors */}
+            <div className="flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden min-h-[140px] flex-shrink-0">
               <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-2">
                 <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                   <Info size={16} />
@@ -618,7 +577,6 @@ ${doc}
                 {loading && lastOutputType === 'analysis' && (
                   <LoadingIndicator text="Analyzing…" />
                 )}
-
                 {!loading && analysisErrors && (
                   <ReactMarkdown
                     className="prose prose-sm max-w-none"
@@ -627,15 +585,14 @@ ${doc}
                     {analysisErrors}
                   </ReactMarkdown>
                 )}
-
                 {!loading && !analysisErrors && (
                   <InfoPlaceholder text="No errors detected." />
                 )}
               </div>
             </div>
 
-            {/* Section b) Inferred clinical terms */}
-            <div className="flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden min-h-[140px]">
+            {/* b) Inferred terms */}
+            <div className="flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden min-h-[140px] flex-shrink-0">
               <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-2">
                 <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                   <Info size={16} />
@@ -646,7 +603,6 @@ ${doc}
                 {loading && lastOutputType === 'analysis' && (
                   <LoadingIndicator text="Analyzing…" />
                 )}
-
                 {!loading && analysisTerms && (
                   <ReactMarkdown
                     className="prose prose-sm max-w-none"
@@ -655,15 +611,14 @@ ${doc}
                     {analysisTerms}
                   </ReactMarkdown>
                 )}
-
                 {!loading && !analysisTerms && (
                   <InfoPlaceholder text="No inferred terms." />
                 )}
               </div>
             </div>
 
-            {/* Section c) Recommendations */}
-            <div className="flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden min-h-[140px]">
+            {/* c) Recommendations */}
+            <div className="flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden min-h-[140px] flex-shrink-0">
               <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-2">
                 <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                   <Info size={16} />
@@ -674,7 +629,6 @@ ${doc}
                 {loading && lastOutputType === 'analysis' && (
                   <LoadingIndicator text="Analyzing…" />
                 )}
-
                 {!loading && analysisRecs && (
                   <ReactMarkdown
                     className="prose prose-sm max-w-none"
@@ -683,7 +637,6 @@ ${doc}
                     {analysisRecs}
                   </ReactMarkdown>
                 )}
-
                 {!loading && !analysisRecs && (
                   <InfoPlaceholder text="No recommendations." />
                 )}
@@ -691,7 +644,7 @@ ${doc}
             </div>
           </div>
           {/* ----------------------------------------------------------------
-             ====  END UPDATE 4  ====
+             ==== END UPDATE 4 ====
              --------------------------------------------------------------- */}
         </div>
 
@@ -705,7 +658,7 @@ ${doc}
     <div className="flex flex-col w-full h-screen text-gray-900 bg-gradient-to-b from-white via-teal-50 to-white">
       {/* Top bar */}
       <div className="border-b border-gray-200 px-4 py-2 flex items-center gap-3 bg-white shadow-sm">
-        {/* template dropdown */}
+        {/* Template dropdown */}
         <div className="relative">
           <button
             className={`${secondaryButtonStyles} !py-1.5 !px-3 gap-1.5`}
@@ -740,7 +693,7 @@ ${doc}
           )}
         </div>
 
-        {/* model dropdown */}
+        {/* Model dropdown */}
         <div className="relative">
           <button
             className={`${secondaryButtonStyles} !py-1.5 !px-3 gap-1.5`}
@@ -776,17 +729,14 @@ ${doc}
         </div>
       </div>
 
-      {/* scrollable content */}
-      <div
-        ref={chatContainerRef}
-        className="flex-1 overflow-y-auto flex flex-col"
-      >
+      {/* Scrollable content */}
+      <div ref={chatContainerRef} className="flex-1 overflow-y-auto flex flex-col">
         <ScribeHeader />
         {mainContent}
         <div ref={messagesEndRef} className="h-1 flex-shrink-0" />
       </div>
 
-      {/* bottom input */}
+      {/* Bottom input */}
       <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 shadow-sm z-20">
         <div className="w-full max-w-4xl mx-auto flex items-center gap-3">
           {hasTranscript && (
@@ -798,12 +748,11 @@ ${doc}
               <Trash2 size={18} />
             </button>
           )}
-
           <div className="flex-1">
             <ChatInput
               stopConversationRef={stopConversationRef}
               textareaRef={inputRef}
-              onSend={hasTranscript ? handleSendFollowUp : handleInitialInput}
+              onSend={hasTranscript ? () => {} : handleInitialInput}
               onRegenerate={handleRegenerate}
               onScrollDownClick={() =>
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
