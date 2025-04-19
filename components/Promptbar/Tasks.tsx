@@ -215,7 +215,7 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
                      className="w-24 bg-white border-gray-300 text-black placeholder-gray-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" // Adjusted style
                   />
                   <Button
-                     type="button" variant="ghost" size="sm" // Use allowed size
+                     type="button" variant="default" size="sm" // Use allowed size
                      className="text-red-500 hover:bg-red-100 h-8 w-8 p-0 disabled:opacity-50 disabled:cursor-not-allowed" // Adjusted style
                      onClick={() => handleRemoveTask(task.id)} disabled={tasks.length <= 1 && task.text === '' && task.timerMinutes === ''} // Allow removing last line if empty
                      aria-label="Remove task"
@@ -223,7 +223,7 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
                 </div>
               ))}
               <Button
-                 type="button" variant="outline" size="sm" onClick={handleAddTask}
+                 type="button" variant="default" size="sm" onClick={handleAddTask}
                  className="mt-2 border-gray-300 text-black hover:bg-gray-100" // Adjusted style
               > <Plus className="h-4 w-4 mr-2" /> Add Task Line </Button>
             </div>
