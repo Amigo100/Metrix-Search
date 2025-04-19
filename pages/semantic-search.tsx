@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Send, Loader2, AlertTriangle, Search as SearchIcon } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 
-/* ──────────────── Types ───────────────── */ 
+/* ──────────────── Types ───────────────── */  
 interface Citation {
   source_id: number;
   document_title: string;
