@@ -1,4 +1,4 @@
-# project/semantic_search/search_logic.py
+# ───────── project/semantic_search/search_logic.py ─────────
 """
 High‑level RAG helper – **pure Python, no FastAPI imports here**.
 
@@ -100,7 +100,8 @@ def perform_rag_search(query: str) -> Dict[str, Any]:
             "After the answer list exactly the citation numbers you used, "
             "then suggest 1‑3 follow‑up questions."
         )
-        user_msg = f"CONTEXT:\n{'\n\n'.join(ctx)}\n\nQUESTION: {query}"
+        join_ctx = "\n\n".join(ctx)                       # 🟢 NEW
+        user_msg = f"CONTEXT:\n{join_ctx}\n\nQUESTION: {query}"  # 🟢 NEW
 
         try:
             chat = openai.chat.completions.create(
@@ -121,3 +122,4 @@ def perform_rag_search(query: str) -> Dict[str, Any]:
     except Exception as ex:
         log.error("perform_rag_search failed: %s", ex, exc_info=True)
         return {"answer": "", "citations": [], "error": str(ex)}
+# ───────────────────────────────────────────────────────────────
