@@ -1,9 +1,6 @@
 // file: /components/Chat/Chat.tsx
 // -----------------------------------------------------------------------------
-// ❶ 4‑step prompt chain (Doc → Errors → Terms → Recs) with USER CONTEXT
-// ❷ Collapsible right‑hand cards
-// ❸ Sign‑off auto‑appended on every save / regen
-// ❹ Bottom bar = follow‑up chat with history
+// Fixed compile errors + retains new features (collapsible cards, chat, etc.)
 // -----------------------------------------------------------------------------
 
 import {
@@ -67,16 +64,90 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 const ASK_RAG_URL = `${API_BASE_URL}/rag/ask_rag`;
 
+/* --------------------- helper components ----------------------- */
+const ErrorBanner = ({ err }: { err: string | null }) =>
+  err ? (
+    <div className="px-4 pt-4 md:px-6">
+      <div className="flex items-center space-x-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm max-w-3xl mx-auto">
+        <AlertTriangle size={18} className="flex-shrink-0 text-red-500" />
+        <span className="text-sm">{err}</span>
+      </div>
+    </div>
+  ) : null;
+
+const LoadingIndicator = ({ text }: { text: string }) => (
+  <div className="flex items-center justify-center space-x-2 text-gray-500 py-4 text-sm">
+    <Loader2 size={16} className="animate-spin" />
+    <span className="italic">{text}</span>
+  </div>
+);
+
+const InfoPlaceholder = ({ text }: { text: string }) => (
+  <div className="flex flex-col items-center justify-center h-full text-gray-400 italic p-4 text-center">
+    <Info size={24} className="mb-2 opacity-80" />
+    <span className="text-sm">{text}</span>
+  </div>
+);
+
+/* ---------- Collapsible Card ---------- */
+interface CardProps {
+  title: string;
+  collapsed: boolean;
+  toggle: () => void;
+  loadingShown: boolean;
+  content: string;
+  emptyText: string;
+}
+const Card: React.FC<CardProps> = ({
+  title,
+  collapsed,
+  toggle,
+  loadingShown,
+  content,
+  emptyText,
+}) => (
+  <div className="flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex-shrink-0">
+    <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-2">
+      <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <Info size={16} /> {title}
+      </h3>
+      <button onClick={toggle} className={ghostButtonStyles}>
+        {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+      </button>
+    </div>
+    {!collapsed && (
+      <div className="flex-1 overflow-auto p-4 text-sm">
+        {loadingShown && <LoadingIndicator text="Processing…" />}
+        {!loadingShown && content && (
+          <ReactMarkdown
+            className="prose prose-sm max-w-none"
+            remarkPlugins={[remarkGfm]}
+          >
+            {content}
+          </ReactMarkdown>
+        )}
+        {!loadingShown && !content && <InfoPlaceholder text={emptyText} />}
+      </div>
+    )}
+  </div>
+);
+
 /* ----------------------------- component ---------------------- */
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
 type OutputType = 'doc' | 'errors' | 'terms' | 'recs' | 'chat' | null;
 
+/* chat history type that includes 'system' */
+interface ChatMsg {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
 export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   const { t } = useTranslation('chat');
 
-  /* ------------------- global context (incl. profile) ------------------- */
+  /* ------------------- global context ------------------- */
   const {
     state: {
       modelError,
@@ -91,46 +162,53 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   } = useContext(HomeContext);
 
   /* -------------------- local state --------------------- */
-  const [transcript, setTranscript]          = useState('');
-  const [clinicalDoc, setClinicalDoc]        = useState('');
+  const [transcript, setTranscript] = useState('');
+  const [clinicalDoc, setClinicalDoc] = useState('');
 
-  const [analysisErrors, setAnalysisErrors]  = useState('');
-  const [analysisTerms, setAnalysisTerms]    = useState('');
-  const [analysisRecs, setAnalysisRecs]      = useState('');
+  const [analysisErrors, setAnalysisErrors] = useState('');
+  const [analysisTerms, setAnalysisTerms] = useState('');
+  const [analysisRecs, setAnalysisRecs] = useState('');
 
-  /* collapsible cards */
-  const [collapsedErr,   setCollapsedErr]   = useState(false);
+  const [collapsedErr, setCollapsedErr] = useState(false);
   const [collapsedTerms, setCollapsedTerms] = useState(false);
-  const [collapsedRecs,  setCollapsedRecs]  = useState(false);
+  const [collapsedRecs, setCollapsedRecs] = useState(false);
 
-  /* follow‑up chat */
-  const [chatHistory, setChatHistory]        = useState<Message[]>([]);
-  const [followUpLoading, setFollowUpLoading]= useState(false);
+  const [chatHistory, setChatHistory] = useState<ChatMsg[]>([]);
+  const [followUpLoading, setFollowUpLoading] = useState(false);
 
-  /* misc UI */
   const [isTranscriptExpanded, setIsTranscriptExpanded] = useState(true);
   const [isEditingDoc, setIsEditingDoc] = useState(false);
   const [editDocText, setEditDocText] = useState('');
-  const [activeTemplateName, setActiveTemplateName] = useState('ED Triage Note');
-  const [activeModelName, setActiveModelName]       = useState('GPT-4');
+  const [activeTemplateName, setActiveTemplateName] =
+    useState('ED Triage Note');
+  const [activeModelName, setActiveModelName] = useState('GPT-4');
   const [showTemplatesDropdown, setShowTemplatesDropdown] = useState(false);
-  const [showModelsDropdown, setShowModelsDropdown]       = useState(false);
-  const [lastOutputType, setLastOutputType]           = useState<OutputType>(null);
+  const [showModelsDropdown, setShowModelsDropdown] = useState(false);
+  const [lastOutputType, setLastOutputType] = useState<OutputType>(null);
 
   /* -------------------- refs & scrolling ---------------- */
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef   = useRef<HTMLDivElement>(null);
-  const inputRef         = useRef<HTMLTextAreaElement | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+
   const throttledScrollDown = throttle(() => {
     if (!autoScrollEnabled) return;
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, 250);
 
   useEffect(() => {
-    if (loading || followUpLoading) return;
+    if (
+      loading ||
+      followUpLoading ||
+      lastOutputType === 'doc' ||
+      lastOutputType === 'errors' ||
+      lastOutputType === 'terms' ||
+      lastOutputType === 'recs'
+    )
+      return;
     throttledScrollDown();
-  }, [clinicalDoc, analysisErrors, analysisTerms, analysisRecs, followUpLoading, loading, throttledScrollDown]);
+  }, [analysisRecs, followUpLoading, throttledScrollDown]);
 
   useEffect(() => {
     const area = chatContainerRef.current;
@@ -159,7 +237,9 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
       setAnalysisTerms('');
       setAnalysisRecs('');
       setChatHistory([]);
-      setCollapsedErr(false); setCollapsedTerms(false); setCollapsedRecs(false);
+      setCollapsedErr(false);
+      setCollapsedTerms(false);
+      setCollapsedRecs(false);
       setIsTranscriptExpanded(true);
       setLastOutputType('doc');
 
@@ -184,7 +264,7 @@ Instructions:
 • Headings: use **bold** or Markdown #.
 • Bullet lists with * or -.
 
-Return only the completed note. `.trim();
+Return only the completed note.`.trim();
 
       const docRes = await axios.post(ASK_RAG_URL, {
         message: docPrompt,
@@ -194,7 +274,7 @@ Return only the completed note. `.trim();
         model_name: activeModelName,
       });
 
-      const rawDoc   = (docRes.data.response as string) || '';
+      const rawDoc = (docRes.data.response as string) || '';
       const finalDoc = `${rawDoc}\n\n---\n${userSignOff || ''}`.trim();
 
       setClinicalDoc(finalDoc);
@@ -202,7 +282,11 @@ Return only the completed note. `.trim();
 
       /* prime chat history for follow‑ups */
       setChatHistory([
-        { role: 'system', content: 'You are Metrix AI. Follow‑up questions should refine or expand the previously generated document.' },
+        {
+          role: 'system',
+          content:
+            'You are Metrix AI. Follow‑up questions should refine or expand the previously generated document.',
+        },
         { role: 'assistant', content: `Clinical Document:\n${finalDoc}` },
       ]);
 
@@ -218,7 +302,10 @@ Return only the completed note. `.trim();
   };
 
   /* -------- STEP 2: transcription errors -------- */
-  const handleTranscriptionErrors = async (doc: string, rawTranscript: string) => {
+  const handleTranscriptionErrors = async (
+    doc: string,
+    rawTranscript: string,
+  ) => {
     try {
       setLastOutputType('errors');
       const errorPrompt = `
@@ -228,7 +315,7 @@ Compare **Transcript** vs **Clinical Document** and list any likely discrepancie
 Return:
 ## Potential Transcription Errors
 * bullet list of items (max 10).
-* DO NOT give generic advice, instructions or disclaimers. `.trim();
+* DO NOT give generic advice, instructions or disclaimers.`.trim();
 
       const errorRes = await axios.post(ASK_RAG_URL, {
         message: errorPrompt,
@@ -259,7 +346,7 @@ Identify content present in the **Clinical Document** that is not stated verbati
 
 Return:
 ## Inferred Clinical Terms
-* bullet list (≤10). `.trim();
+* bullet list (≤10).`.trim();
 
       const termRes = await axios.post(ASK_RAG_URL, {
         message: termPrompt,
@@ -291,7 +378,7 @@ Based on this **${activeTemplateName}**, suggest next steps.
 Return:
 ## Recommendations
 * 5‑8 concise bullets relevant to the context.
-* Clinical guidance only – no transcript QA tips or disclaimers. `.trim();
+* Clinical guidance only – no transcript QA tips or disclaimers.`.trim();
 
       const recRes = await axios.post(ASK_RAG_URL, {
         message: recPrompt,
@@ -324,7 +411,7 @@ Return:
   const handleFollowUp = async (msg: Message) => {
     const question = msg.content.trim();
     if (!question) return;
-    const newHistory = [...chatHistory, { role: 'user', content: question }];
+    const newHistory: ChatMsg[] = [...chatHistory, { role: 'user', content: question }];
     setChatHistory(newHistory);
     setFollowUpLoading(true);
     setLastOutputType('chat');
@@ -339,7 +426,7 @@ Return:
 
       const answer = resp.data.response || 'Sorry, no answer.';
       setChatHistory(prev => [...prev, { role: 'assistant', content: answer }]);
-      setAnalysisRecs(answer);      // show latest answer in recs panel
+      setAnalysisRecs(answer); // show latest answer in recs panel
     } catch (err: any) {
       dispatch({
         type: 'change',
@@ -369,38 +456,18 @@ Return:
     : 0;
 
   const handleClearScribe = () => {
-    setTranscript(''); setClinicalDoc('');
-    setAnalysisErrors(''); setAnalysisTerms(''); setAnalysisRecs('');
-    setChatHistory([]); setFollowUpLoading(false);
-    setIsEditingDoc(false); setEditDocText('');
+    setTranscript('');
+    setClinicalDoc('');
+    setAnalysisErrors('');
+    setAnalysisTerms('');
+    setAnalysisRecs('');
+    setChatHistory([]);
+    setFollowUpLoading(false);
+    setIsEditingDoc(false);
+    setEditDocText('');
     setLastOutputType(null);
     dispatch({ type: 'change', field: 'modelError', value: null });
   };
-
-  /* ---------------- visual helpers ---------------- */
-  const ErrorBanner = ({ err }: { err: string | null }) =>
-    err ? (
-      <div className="px-4 pt-4 md:px-6">
-        <div className="flex items-center space-x-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm max-w-3xl mx-auto">
-          <AlertTriangle size={18} className="flex-shrink-0 text-red-500" />
-          <span className="text-sm">{err}</span>
-        </div>
-      </div>
-    ) : null;
-
-  const LoadingIndicator = ({ text }: { text: string }) => (
-    <div className="flex items-center justify-center space-x-2 text-gray-500 py-4 text-sm">
-      <Loader2 size={16} className="animate-spin" />
-      <span className="italic">{text}</span>
-    </div>
-  );
-
-  const InfoPlaceholder = ({ text }: { text: string }) => (
-    <div className="flex flex-col items-center justify-center h-full text-gray-400 italic p-4 text-center">
-      <Info size={24} className="mb-2 opacity-80" />
-      <span className="text-sm">{text}</span>
-    </div>
-  );
 
   /* ========================================================================
      JSX
@@ -451,7 +518,11 @@ Return:
                 onClick={() => setIsTranscriptExpanded(p => !p)}
                 className={ghostButtonStyles}
               >
-                {isTranscriptExpanded ? <ChevronUp size={16}/> : <ChevronDown size={16}/>}
+                {isTranscriptExpanded ? (
+                  <ChevronUp size={16} />
+                ) : (
+                  <ChevronDown size={16} />
+                )}
               </button>
             </div>
 
@@ -468,9 +539,11 @@ Return:
           <div className="flex-1 md:w-3/5 lg:w-2/3 flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
             <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-2">
               <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <FileText size={16}/> Clinical Document
+                <FileText size={16} /> Clinical Document
                 {docWordCount > 0 && (
-                  <span className="ml-2 text-xs text-gray-500">{docWordCount} words</span>
+                  <span className="ml-2 text-xs text-gray-500">
+                    {docWordCount} words
+                  </span>
                 )}
               </h3>
               {!loading && clinicalDoc && (
@@ -480,15 +553,26 @@ Return:
                     title="Copy"
                     onClick={() => navigator.clipboard.writeText(clinicalDoc)}
                   >
-                    <Copy size={16}/>
+                    <Copy size={16} />
                   </button>
                   <button
                     className={ghostButtonStyles}
                     title="Download PDF"
-                    onClick={() => pdfMake.createPdf({ content: clinicalDoc, defaultStyle:{fontSize:11} })
-                                .download(`Metrix_${activeTemplateName.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`)}
+                    onClick={() =>
+                      pdfMake
+                        .createPdf({
+                          content: clinicalDoc,
+                          defaultStyle: { fontSize: 11 },
+                        })
+                        .download(
+                          `Metrix_${activeTemplateName.replace(
+                            /\s+/g,
+                            '_',
+                          )}_${new Date().toISOString().slice(0, 10)}.pdf`,
+                        )
+                    }
                   >
-                    <Download size={16}/>
+                    <Download size={16} />
                   </button>
                   <button
                     className={ghostButtonStyles}
@@ -498,17 +582,22 @@ Return:
                       setEditDocText(clinicalDoc);
                     }}
                   >
-                    {isEditingDoc ? <X size={16}/> : <Edit size={16}/>}
+                    {isEditingDoc ? <X size={16} /> : <Edit size={16} />}
                   </button>
                 </div>
               )}
             </div>
 
             <div className="flex-1 overflow-auto p-4 text-sm">
-              {loading && lastOutputType==='doc' && <LoadingIndicator text="Generating document…"/>}
+              {loading && lastOutputType === 'doc' && (
+                <LoadingIndicator text="Generating document…" />
+              )}
 
               {!loading && clinicalDoc && !isEditingDoc && (
-                <ReactMarkdown className="prose prose-sm max-w-none" remarkPlugins={[remarkGfm]}>
+                <ReactMarkdown
+                  className="prose prose-sm max-w-none"
+                  remarkPlugins={[remarkGfm]}
+                >
                   {clinicalDoc}
                 </ReactMarkdown>
               )}
@@ -517,63 +606,48 @@ Return:
                 <textarea
                   className="w-full h-full border border-gray-300 rounded p-2 text-sm font-mono"
                   value={editDocText}
-                  onChange={e=>setEditDocText(e.target.value)}
+                  onChange={e => setEditDocText(e.target.value)}
                 />
               )}
 
-              {!loading && !clinicalDoc && <InfoPlaceholder text="No document yet."/>}
+              {!loading && !clinicalDoc && (
+                <InfoPlaceholder text="No document yet." />
+              )}
             </div>
 
             {isEditingDoc && (
               <div className="bg-gray-50 border-t border-gray-200 flex gap-2 p-2">
                 <button
                   className={secondaryButtonStyles}
-                  onClick={()=>{
+                  onClick={() => {
                     const cleaned = editDocText.replace(/\n?---\n[\s\S]*$/, '');
-                    const savedDoc = `${cleaned}\n\n---\n${userSignOff || ''}`.trim();
+                    const savedDoc = `${cleaned}\n\n---\n${
+                      userSignOff || ''
+                    }`.trim();
                     setClinicalDoc(savedDoc);
                     setIsEditingDoc(false);
                   }}
-                >Save</button>
-                <button className={ghostButtonStyles} onClick={()=>setIsEditingDoc(false)}>Cancel</button>
+                >
+                  Save
+                </button>
+                <button
+                  className={ghostButtonStyles}
+                  onClick={() => setIsEditingDoc(false)}
+                >
+                  Cancel
+                </button>
               </div>
             )}
           </div>
 
           {/* ---------------- right column ----------------- */}
           <div className="w-full md:w-2/5 lg:w-1/3 flex flex-col gap-4 overflow-y-auto">
-
-            {/* card helper */}
-            const Card = ({title, collapsed, toggle, loadingShown, content, emptyText}:{title:string,collapsed:boolean,toggle:()=>void,loadingShown:boolean,content:string,emptyText:string})=>(
-              <div className="flex flex-col bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex-shrink-0">
-                <div className="flex items-center justify-between bg-gray-50 border-b border-gray-200 px-4 py-2">
-                  <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                    <Info size={16}/> {title}
-                  </h3>
-                  <button onClick={toggle} className={ghostButtonStyles}>
-                    {collapsed ? <ChevronDown size={14}/> : <ChevronUp size={14}/>}
-                  </button>
-                </div>
-                {!collapsed && (
-                  <div className="flex-1 overflow-auto p-4 text-sm">
-                    {loadingShown && <LoadingIndicator text="Processing…"/>}
-                    {!loadingShown && content && (
-                      <ReactMarkdown className="prose prose-sm max-w-none" remarkPlugins={[remarkGfm]}>
-                        {content}
-                      </ReactMarkdown>
-                    )}
-                    {!loadingShown && !content && <InfoPlaceholder text={emptyText}/>}
-                  </div>
-                )}
-              </div>
-            );
-
             {/* a) Errors */}
             <Card
               title="Potential Transcription Errors"
               collapsed={collapsedErr}
-              toggle={()=>setCollapsedErr(p=>!p)}
-              loadingShown={loading && lastOutputType==='errors'}
+              toggle={() => setCollapsedErr(p => !p)}
+              loadingShown={loading && lastOutputType === 'errors'}
               content={analysisErrors}
               emptyText="No errors detected."
             />
@@ -582,18 +656,20 @@ Return:
             <Card
               title="Inferred Clinical Terms"
               collapsed={collapsedTerms}
-              toggle={()=>setCollapsedTerms(p=>!p)}
-              loadingShown={loading && lastOutputType==='terms'}
+              toggle={() => setCollapsedTerms(p => !p)}
+              loadingShown={loading && lastOutputType === 'terms'}
               content={analysisTerms}
               emptyText="No inferred terms."
             />
 
-            {/* c) Recommendations (and follow‑ups) */}
+            {/* c) Recommendations */}
             <Card
               title="Recommendations"
               collapsed={collapsedRecs}
-              toggle={()=>setCollapsedRecs(p=>!p)}
-              loadingShown={(loading && lastOutputType==='recs') || followUpLoading}
+              toggle={() => setCollapsedRecs(p => !p)}
+              loadingShown={
+                (loading && lastOutputType === 'recs') || followUpLoading
+              }
               content={analysisRecs}
               emptyText="No recommendations."
             />
@@ -615,15 +691,32 @@ Return:
       <div className="border-b border-gray-200 px-4 py-2 flex items-center gap-3 bg-white shadow-sm">
         {/* Template dropdown */}
         <div className="relative">
-          <button className={`${secondaryButtonStyles} !py-1.5 !px-3 gap-1.5`} onClick={()=>setShowTemplatesDropdown(p=>!p)}>
-            <span className="font-medium text-xs uppercase tracking-wide">Template:</span>{' '}
+          <button
+            className={`${secondaryButtonStyles} !py-1.5 !px-3 gap-1.5`}
+            onClick={() => setShowTemplatesDropdown(p => !p)}
+          >
+            <span className="font-medium text-xs uppercase tracking-wide">
+              Template:
+            </span>{' '}
             {activeTemplateName}
-            <ChevronDown size={16} className={`transition-transform ${showTemplatesDropdown?'rotate-180':''}`}/>
+            <ChevronDown
+              size={16}
+              className={`transition-transform ${
+                showTemplatesDropdown ? 'rotate-180' : ''
+              }`}
+            />
           </button>
           {showTemplatesDropdown && (
             <div className="absolute left-0 mt-1.5 w-60 rounded-lg border border-gray-300 bg-white p-1 shadow-lg z-50 max-h-60 overflow-y-auto">
-              {prompts.map(p=>(
-                <button key={p.id} className="block w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-teal-50 rounded" onClick={()=>{setActiveTemplateName(p.name);setShowTemplatesDropdown(false);}}>
+              {prompts.map(p => (
+                <button
+                  key={p.id}
+                  className="block w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-teal-50 rounded"
+                  onClick={() => {
+                    setActiveTemplateName(p.name);
+                    setShowTemplatesDropdown(false);
+                  }}
+                >
                   {p.name}
                 </button>
               ))}
@@ -633,15 +726,32 @@ Return:
 
         {/* Model dropdown */}
         <div className="relative">
-          <button className={`${secondaryButtonStyles} !py-1.5 !px-3 gap-1.5`} onClick={()=>setShowModelsDropdown(p=>!p)}>
-            <span className="font-medium text-xs uppercase tracking-wide">Model:</span>{' '}
+          <button
+            className={`${secondaryButtonStyles} !py-1.5 !px-3 gap-1.5`}
+            onClick={() => setShowModelsDropdown(p => !p)}
+          >
+            <span className="font-medium text-xs uppercase tracking-wide">
+              Model:
+            </span>{' '}
             {activeModelName}
-            <ChevronDown size={16} className={`transition-transform ${showModelsDropdown?'rotate-180':''}`}/>
+            <ChevronDown
+              size={16}
+              className={`transition-transform ${
+                showModelsDropdown ? 'rotate-180' : ''
+              }`}
+            />
           </button>
           {showModelsDropdown && (
             <div className="absolute left-0 mt-1.5 w-60 rounded-lg border border-gray-300 bg-white p-1 shadow-lg z-50 max-h-60 overflow-y-auto">
-              {models.map((m:any)=>(
-                <button key={m.id} className="block w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-teal-50 rounded" onClick={()=>{setActiveModelName(m.name);setShowModelsDropdown(false);}}>
+              {models.map((m: any) => (
+                <button
+                  key={m.id}
+                  className="block w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-teal-50 rounded"
+                  onClick={() => {
+                    setActiveModelName(m.name);
+                    setShowModelsDropdown(false);
+                  }}
+                >
                   {m.name}
                 </button>
               ))}
@@ -651,17 +761,24 @@ Return:
       </div>
 
       {/* Scrollable content */}
-      <div ref={chatContainerRef} className="flex-1 overflow-y-auto flex flex-col">
+      <div
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto flex flex-col"
+      >
         {mainContent}
-        <div ref={messagesEndRef} className="h-1 flex-shrink-0"/>
+        <div ref={messagesEndRef} className="h-1 flex-shrink-0" />
       </div>
 
       {/* Bottom input */}
       <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 shadow-sm z-20">
         <div className="w-full max-w-4xl mx-auto flex items-center gap-3">
           {hasTranscript && (
-            <button onClick={handleClearScribe} className={ghostButtonStyles} title="Clear Session">
-              <Trash2 size={18}/>
+            <button
+              onClick={handleClearScribe}
+              className={ghostButtonStyles}
+              title="Clear Session"
+            >
+              <Trash2 size={18} />
             </button>
           )}
           <div className="flex-1">
@@ -670,21 +787,35 @@ Return:
               textareaRef={inputRef}
               onSend={hasTranscript ? handleFollowUp : handleInitialInput}
               onRegenerate={handleRegenerate}
-              onScrollDownClick={()=>messagesEndRef.current?.scrollIntoView({behavior:'smooth'})}
-              showScrollDownButton={!autoScrollEnabled && Boolean(chatContainerRef.current && chatContainerRef.current.scrollHeight>chatContainerRef.current.clientHeight+50)}
-              placeholder={hasTranscript?'Ask follow‑up questions…':'Type summary, notes, or command…'}
-              showRegenerateButton={hasTranscript && !loading && !followUpLoading}
-              primaryIcon={hasTranscript ? <Send size={18}/> : undefined}
+              onScrollDownClick={() =>
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+              }
+              showScrollDownButton={
+                !autoScrollEnabled &&
+                Boolean(
+                  chatContainerRef.current &&
+                    chatContainerRef.current.scrollHeight >
+                      chatContainerRef.current.clientHeight + 50,
+                )
+              }
+              placeholder={
+                hasTranscript
+                  ? 'Ask follow‑up questions…'
+                  : 'Type summary, notes, or command…'
+              }
+              showRegenerateButton={
+                hasTranscript && !loading && !followUpLoading
+              }
             />
           </div>
         </div>
       </div>
 
       {/* Modals */}
-      {openModal==='profile'   && <ProfileModal/>}
-      {openModal==='templates' && <TemplatesModal/>}
-      {openModal==='help'      && <HelpModal/>}
-      {openModal==='settings'  && <SettingsModal/>}
+      {openModal === 'profile' && <ProfileModal />}
+      {openModal === 'templates' && <TemplatesModal />}
+      {openModal === 'help' && <HelpModal />}
+      {openModal === 'settings' && <SettingsModal />}
     </div>
   );
 });
