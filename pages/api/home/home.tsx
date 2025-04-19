@@ -1,7 +1,7 @@
-
 // file: /pages/api/home/home.tsx
 
-import { useEffect, useRef, useState } from 'react';
+// Added useContext
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import { useQuery } from 'react-query';
 
 import { GetServerSideProps } from 'next';
@@ -10,7 +10,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
 
-import { useCreateReducer } from '@/hooks/useCreateReducer';
+// Removed: import { useCreateReducer } from '@/hooks/useCreateReducer';
 
 import useErrorService from '@/services/errorService';
 import useApiService from '@/services/useApiService';
@@ -43,8 +43,9 @@ import { Chatbar } from '@/components/Chatbar/Chatbar';
 import { Navbar } from '@/components/Mobile/Navbar';
 import Promptbar from '@/components/Promptbar';
 
+// Import context definition (not provider)
 import HomeContext from './home.context';
-import { HomeInitialState, initialState } from './home.state';
+// Removed: import { HomeInitialState, initialState } from './home.state';
 import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
@@ -65,202 +66,112 @@ const Home = ({
   const { getModelsError } = useErrorService();
   const [initialRender, setInitialRender] = useState<boolean>(true);
 
-  const contextValue = useCreateReducer<HomeInitialState>({
-    initialState,
-  });
+  // --- REMOVED Redundant State Creation ---
+  // const contextValue = useCreateReducer<HomeInitialState>({
+  //   initialState,
+  // });
 
+  // --- ADDED: Consume context from the REAL provider in _app.tsx ---
   const {
-    state: {
+    state, // Get the shared state
+    dispatch, // Get the shared dispatch
+    handleNewConversation, // Get the shared handler
+    // Note: other handlers (handleCreateFolder etc.) are likely called by
+    // Chatbar/Promptbar which consume context directly. If Home needs them
+    // directly for props, destructure them here too.
+    // handleCreateFolder,
+    // handleDeleteFolder,
+    // handleUpdateFolder,
+    // handleSelectConversation,
+    // handleUpdateConversation,
+    // Patient handlers are available but likely not needed directly here
+  } = useContext(HomeContext);
+
+  // Destructure needed state variables from the *shared* state
+  const {
       apiKey,
       lightMode,
-      folders,
-      conversations,
+      // folders, // Likely used by Chatbar/Promptbar directly
+      // conversations, // Likely used by Chatbar/Promptbar directly
       selectedConversation,
-      prompts,
-      temperature,
-    },
-    dispatch,
-  } = contextValue;
+      // prompts, // Likely used by Promptbar directly
+      // temperature, // Likely used by Chat directly
+  } = state;
+
 
   const stopConversationRef = useRef<boolean>(false);
 
-  // Use react-query to fetch models
+  // Use react-query to fetch models (remains the same)
   const { data, error, refetch } = useQuery(
-    ['GetModels', apiKey, serverSideApiKeyIsSet],
+    ['GetModels', apiKey, serverSideApiKeyIsSet], // Depends on apiKey from shared state
     ({ signal }) => {
       if (!apiKey && !serverSideApiKeyIsSet) return null;
-      return getModels(
-        {
-          key: apiKey,
-        },
-        signal
-      );
+      return getModels({ key: apiKey }, signal);
     },
     { enabled: true, refetchOnMount: false }
   );
 
-  // --- FIX 1: Add `type: 'change'` here
+  // --- Effects now use the SHARED dispatch ---
   useEffect(() => {
     if (data) {
-      dispatch({ type: 'change', field: 'models', value: data });
+      dispatch({ type: 'change', field: 'models', value: data }); // Uses shared dispatch
     }
-  }, [data, dispatch]);
+  }, [data, dispatch]); // dispatch dependency is stable
 
-  // --- FIX 2: Add `type: 'change'` here
   useEffect(() => {
     dispatch({
       type: 'change',
       field: 'modelError',
       value: getModelsError(error),
-    });
-  }, [dispatch, error, getModelsError]);
+    }); // Uses shared dispatch
+  }, [dispatch, error, getModelsError]); // dispatch dependency is stable
 
-  // SELECT A CONVERSATION
-  const handleSelectConversation = (conversation: Conversation) => {
-    dispatch({
-      type: 'change',
-      field: 'selectedConversation',
-      value: conversation,
-    });
-    saveConversation(conversation);
-  };
+  // --- REMOVED Redundant Handler Definitions ---
+  // const handleSelectConversation = ...
+  // const handleCreateFolder = ...
+  // const handleDeleteFolder = ...
+  // const handleUpdateFolder = ...
+  // const handleNewConversation = ... (now obtained from context)
+  // const handleUpdateConversation = ...
 
-  // FOLDER OPERATIONS
-  const handleCreateFolder = (name: string, type: FolderType) => {
-    const newFolder: FolderInterface = {
-      id: uuidv4(),
-      name,
-      type,
-    };
-
-    const updatedFolders = [...folders, newFolder];
-    dispatch({ type: 'change', field: 'folders', value: updatedFolders });
-    saveFolders(updatedFolders);
-  };
-
-  const handleDeleteFolder = (folderId: string) => {
-    const updatedFolders = folders.filter((f) => f.id !== folderId);
-    dispatch({ type: 'change', field: 'folders', value: updatedFolders });
-    saveFolders(updatedFolders);
-
-    const updatedConversations: Conversation[] = conversations.map((c) => {
-      if (c.folderId === folderId) {
-        return { ...c, folderId: null };
-      }
-      return c;
-    });
-    dispatch({
-      type: 'change',
-      field: 'conversations',
-      value: updatedConversations,
-    });
-    saveConversations(updatedConversations);
-
-    const updatedPrompts: Prompt[] = prompts.map((p) => {
-      if (p.folderId === folderId) {
-        return { ...p, folderId: null };
-      }
-      return p;
-    });
-    dispatch({ type: 'change', field: 'prompts', value: updatedPrompts });
-    savePrompts(updatedPrompts);
-  };
-
-  const handleUpdateFolder = (folderId: string, name: string) => {
-    const updatedFolders = folders.map((f) => {
-      if (f.id === folderId) {
-        return { ...f, name };
-      }
-      return f;
-    });
-    dispatch({ type: 'change', field: 'folders', value: updatedFolders });
-    saveFolders(updatedFolders);
-  };
-
-  // CONVERSATION OPERATIONS
-  const handleNewConversation = () => {
-    const lastConversation = conversations[conversations.length - 1];
-    const newConversation: Conversation = {
-      id: uuidv4(),
-      name: t('New Conversation'),
-      messages: [],
-      model: lastConversation?.model || {
-        id: OpenAIModels[defaultModelId].id,
-        name: OpenAIModels[defaultModelId].name,
-        maxLength: OpenAIModels[defaultModelId].maxLength,
-        tokenLimit: OpenAIModels[defaultModelId].tokenLimit,
-      },
-      prompt: DEFAULT_SYSTEM_PROMPT,
-      temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
-      folderId: null,
-    };
-
-    const updatedConversations = [...conversations, newConversation];
-    dispatch({
-      type: 'change',
-      field: 'selectedConversation',
-      value: newConversation,
-    });
-    dispatch({
-      type: 'change',
-      field: 'conversations',
-      value: updatedConversations,
-    });
-    saveConversation(newConversation);
-    saveConversations(updatedConversations);
-    dispatch({ type: 'change', field: 'loading', value: false });
-  };
-
-  const handleUpdateConversation = (
-    conversation: Conversation,
-    data: KeyValuePair
-  ) => {
-    const updatedConversation = { ...conversation, [data.key]: data.value };
-    const { single, all } = updateConversation(
-      updatedConversation,
-      conversations
-    );
-    dispatch({ type: 'change', field: 'selectedConversation', value: single });
-    dispatch({ type: 'change', field: 'conversations', value: all });
-  };
-
-  // OTHER EFFECTS
+  // --- OTHER EFFECTS (now use shared dispatch) ---
 
   useEffect(() => {
+    // This effect seems specific to initial mobile layout, keep it but use shared dispatch
     if (window.innerWidth < 640) {
       dispatch({ type: 'change', field: 'showChatbar', value: false });
     }
-  }, [selectedConversation]);
+    // This dependency might cause re-runs if selectedConversation changes often.
+    // Consider if this logic should only run once on mount or be elsewhere.
+  }, [selectedConversation, dispatch]); // Added dispatch dependency
 
   useEffect(() => {
+    // This effect sets initial state based on props, keep it but use shared dispatch
     if (defaultModelId) {
       dispatch({ type: 'change', field: 'defaultModelId', value: defaultModelId });
     }
     if (serverSideApiKeyIsSet) {
       dispatch({
-        type: 'change',
-        field: 'serverSideApiKeyIsSet',
-        value: serverSideApiKeyIsSet,
+        type: 'change', field: 'serverSideApiKeyIsSet', value: serverSideApiKeyIsSet,
       });
     }
     if (serverSidePluginKeysSet) {
       dispatch({
-        type: 'change',
-        field: 'serverSidePluginKeysSet',
-        value: serverSidePluginKeysSet,
+        type: 'change', field: 'serverSidePluginKeysSet', value: serverSidePluginKeysSet,
       });
     }
+    // Removed dispatch from dependencies as it's stable; props dependency is correct
   }, [defaultModelId, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
 
-  // ON LOAD
+  // ON LOAD Effect - simplified as much logic should be in Provider now
   useEffect(() => {
+    // Keep settings load, API key logic (as it uses props), maybe plugin keys
     const settings = getSettings();
     if (settings.theme) {
       dispatch({ type: 'change', field: 'lightMode', value: settings.theme });
     }
 
-    // Automatically store the API key from the server into localStorage
-    if (openaiApiKey) {
+    if (openaiApiKey) { // Prioritize prop from server
       dispatch({ type: 'change', field: 'apiKey', value: openaiApiKey });
       localStorage.setItem('apiKey', openaiApiKey);
     } else {
@@ -270,184 +181,71 @@ const Home = ({
       }
     }
 
+    // Plugin keys logic might still be relevant here if server-side props control it
     const pluginKeys = localStorage.getItem('pluginKeys');
     if (serverSidePluginKeysSet) {
       dispatch({ type: 'change', field: 'pluginKeys', value: [] });
       localStorage.removeItem('pluginKeys');
     } else if (pluginKeys) {
-      dispatch({ type: 'change', field: 'pluginKeys', value: pluginKeys });
+      // Make sure pluginKeys are parsed correctly if they are stored as JSON
+      try {
+        dispatch({ type: 'change', field: 'pluginKeys', value: JSON.parse(pluginKeys) });
+      } catch {
+         dispatch({ type: 'change', field: 'pluginKeys', value: [] }); // fallback
+      }
     }
 
+    // UI flags based on localStorage can remain here if desired
     if (window.innerWidth < 640) {
       dispatch({ type: 'change', field: 'showChatbar', value: false });
       dispatch({ type: 'change', field: 'showSidePromptbar', value: false });
     }
-
     const showChatbar = localStorage.getItem('showChatbar');
     if (showChatbar) {
-      dispatch({
-        type: 'change',
-        field: 'showChatbar',
-        value: showChatbar === 'true',
-      });
+      dispatch({ type: 'change', field: 'showChatbar', value: showChatbar === 'true'});
     }
-
     const showSidePromptbar = localStorage.getItem('showSidePromptbar');
     if (showSidePromptbar) {
-      // note: if "false", the bar is closed
-      dispatch({
-        type: 'change',
-        field: 'showSidePromptbar',
-        value: showSidePromptbar === 'false'
-      });
+      dispatch({ type: 'change', field: 'showSidePromptbar', value: showSidePromptbar === 'false'}); // Assuming 'false' means closed
     }
 
-    const folders = localStorage.getItem('folders');
-    if (folders) {
-      dispatch({ type: 'change', field: 'folders', value: JSON.parse(folders) });
-    }
+    // *** Ideally, loading folders, prompts, conversations, selectedConversation
+    // *** from localStorage should happen ONCE in the HomeContextProvider.
+    // *** Keeping them here duplicates that logic and might cause conflicts/race conditions.
+    // *** Recommended: Remove the sections below loading these from localStorage here.
 
-    const prompts = localStorage.getItem('prompts');
-    if (prompts) {
-      dispatch({ type: 'change', field: 'prompts', value: JSON.parse(prompts) });
-    }
+    // --- Start Optional Removal ---
+    // const folders = localStorage.getItem('folders');
+    // if (folders) {
+    //   dispatch({ type: 'change', field: 'folders', value: JSON.parse(folders) });
+    // }
+    // const prompts = localStorage.getItem('prompts');
+    // if (prompts) {
+    //   dispatch({ type: 'change', field: 'prompts', value: JSON.parse(prompts) });
+    // }
+    // const conversationHistory = localStorage.getItem('conversationHistory');
+    // if (conversationHistory) {
+    //   // ... parsing/cleaning ...
+    //   dispatch({ type: 'change', field: 'conversations', value: cleanedConversationHistory });
+    // }
+    // const selectedConversationLS = localStorage.getParameter('selectedConversation');
+    // if (selectedConversationLS) {
+    //    // ... parsing/cleaning ...
+    //   dispatch({ type: 'change', field: 'selectedConversation', value: cleanedSelectedConversation });
+    // } else if (!state.selectedConversation) { // Check if selectedConversation is already set by provider
+    //    // Logic to set a default new conversation might be needed if nothing loaded
+    //    // This part highly depends on how the provider handles initial state
+    // }
+    // --- End Optional Removal ---
 
-    const conversationHistory = localStorage.getItem('conversationHistory');
-    if (conversationHistory) {
-      const parsedConversationHistory: Conversation[] = JSON.parse(conversationHistory);
-      const cleanedConversationHistory = cleanConversationHistory(parsedConversationHistory);
-      dispatch({
-        type: 'change',
-        field: 'conversations',
-        value: cleanedConversationHistory,
-      });
-    }
 
-    const selectedConversation = localStorage.getItem('selectedConversation');
-    if (selectedConversation) {
-      const parsedSelectedConversation: Conversation = JSON.parse(selectedConversation);
-      const cleanedSelectedConversation = cleanSelectedConversation(parsedSelectedConversation);
-      dispatch({
-        type: 'change',
-        field: 'selectedConversation',
-        value: cleanedSelectedConversation,
-      });
-    } else {
-      const lastConversation = conversations[conversations.length - 1];
-      dispatch({
-        type: 'change',
-        field: 'selectedConversation',
-        value: {
-          id: uuidv4(),
-          name: t('New Conversation'),
-          messages: [],
-          model: OpenAIModels[defaultModelId],
-          prompt: DEFAULT_SYSTEM_PROMPT,
-          temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
-          folderId: null,
-        },
-      });
-    }
-  }, [
-    defaultModelId,
-    dispatch,
-    serverSideApiKeyIsSet,
-    serverSidePluginKeysSet,
-    openaiApiKey,
-  ]);
+  // Only run ONCE on mount - dependencies should reflect values needed *only* for initialization
+  // Dispatch is stable and doesn't need to be listed.
+  }, [openaiApiKey, serverSideApiKeyIsSet, serverSidePluginKeysSet, defaultModelId]);
 
+
+  // --- REMOVED Provider Wrapper ---
   return (
-    <HomeContext.Provider
-      value={{
-        ...contextValue,
-        handleNewConversation,
-        handleCreateFolder,
-        handleDeleteFolder,
-        handleUpdateFolder,
-        handleSelectConversation,
-        handleUpdateConversation,
-      }}
-    >
+    <> {/* Use Fragment or other container if needed */}
       <Head>
-        <title>Metrix AI - The Intelligent Clinical Scribe Platform</title>
-        <meta name="description" content="Smarter algorithms for smarter working" />
-        <meta
-          name="viewport"
-          content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <Script src="https://www.googletagmanager.com/gtag/js?id=G-S2RT6C3E5G" strategy="afterInteractive" />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-S2RT6C3E5G');
-        `}
-      </Script>
-
-      {selectedConversation && (
-        <main
-          className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
-        >
-          <div className="fixed top-0 w-full sm:hidden">
-            <Navbar
-              selectedConversation={selectedConversation}
-              onNewConversation={handleNewConversation}
-            />
-          </div>
-
-          <div className="flex h-full w-full pt-[48px] sm:pt-0">
-            <Chatbar />
-
-            <div className="flex flex-1">
-              <Chat stopConversationRef={stopConversationRef} />
-            </div>
-
-            <Promptbar />
-          </div>
-        </main>
-      )}
-    </HomeContext.Provider>
-  );
-};
-
-export default Home;
-
-export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
-  const defaultModelId =
-    (process.env.DEFAULT_MODEL &&
-      Object.values(OpenAIModelID).includes(
-        process.env.DEFAULT_MODEL as OpenAIModelID
-      ) &&
-      process.env.DEFAULT_MODEL) ||
-    fallbackModelID;
-
-  let serverSidePluginKeysSet = false;
-
-  const googleApiKey = process.env.GOOGLE_API_KEY;
-  const googleCSEId = process.env.GOOGLE_CSE_ID;
-
-  if (googleApiKey && googleCSEId) {
-    serverSidePluginKeysSet = true;
-  }
-
-  return {
-    props: {
-      serverSideApiKeyIsSet: !!process.env.OPENAI_API_KEY,
-      openaiApiKey: process.env.OPENAI_API_KEY || '',
-      defaultModelId,
-      serverSidePluginKeysSet,
-      ...(await serverSideTranslations(locale ?? 'en', [
-        'common',
-        'chat',
-        'sidebar',
-        'markdown',
-        'promptbar',
-        'settings',
-      ])),
-    },
-  };
-};
+        <title>Metrix AI - The
