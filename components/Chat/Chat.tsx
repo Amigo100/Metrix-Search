@@ -1,8 +1,8 @@
 // file: /components/Chat/Chat.tsx
 // -----------------------------------------------------------------------------
-// v2.5 – refined prompts (real errors & inferences), native copy alert,
-//         “regenerate” button in document toolbar, follow‑up paging fixed,
-//         sign‑off always appended
+// v2.5.1 – tighter prompts for real transcription errors & true inferences,
+//           forbid note‑echo in Recommendations, native copy alert preserved,
+//           regenerate button, follow‑up paging, sign‑off, logo – all intact
 // -----------------------------------------------------------------------------
 
 import {
@@ -341,19 +341,21 @@ Return only the completed note.`.trim();
       setLastOutputType('errors');
       const errorPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-TASK: List **actual** word-level mismatches likely due to speech‑to‑text errors.
+You are verifying **speech‑to‑text accuracy**.
 
-CONDITIONS for each pair:
-• 'wrongWord' appears in the Transcript (case-insensitive).  
-• 'likelyCorrectWord' appears in the Clinical Document.  
-• Omit generic advice.
+RULES
+1. wrongWord  = appears in Transcript (whole‑word).  
+2. correctWord = appears in Clinical Document.  
+3. They differ by ≥2 letters OR are homophones.  
+4. Fabricated pairs are disallowed.  
+5. Max 8 lines.
 
-FORMAT:
+OUTPUT
+If ≥1 pair:
 ## Potential Transcription Errors
-* wrongWord → likelyCorrectWord (short reason)
+* wrongWord → correctWord (short reason)
 
 If none, output exactly:
-
 None.
 
 Transcript:
@@ -388,14 +390,19 @@ ${doc}`.trim();
       setLastOutputType('terms');
       const termPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-Highlight information **derived or paraphrased** (not verbatim) from the
-transcript. Ignore simple abbreviation expansions unless forming new content.
+Find content in the *Clinical Document* that is **inferred, summarised, or
+paraphrased**—NOT quoted verbatim from the Transcript.
 
-FORMAT:
+EXCLUDE simple abbreviation expansions (NKDA → No Known Drug Allergies, etc.).
+
+FORMAT
+If ≥1 item:
 ## Inferred Clinical Terms
 * "snippet from transcript" → "phrase in document"
+(max 8 lines, each side ≤10 words)
 
-Max 10 lines or 'None.'
+If none, output exactly:
+None.
 
 Transcript:
 -----------
@@ -440,16 +447,18 @@ ${doc}`.trim();
 
       const recPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-Draft specific next‑steps relevant for **${activeTemplateName}**. No QA tips.
+Draft concise, specific next‑steps relevant for **${activeTemplateName}**.
 
-Return Markdown:
+RULES
+• Use the headings supplied below.  
+• Bullets ≤1 sentence each.  
+• Do **NOT** re‑quote or duplicate the clinical document.  
+• No transcription/QA advice.
+
+RETURN:
 
 ## Recommendations
-${headings}
-
-Clinical Document:
-------------------
-${doc}`.trim();
+${headings}`.trim();
 
       const recRes = await axios.post(ASK_RAG_URL, {
         message: recPrompt,
