@@ -70,7 +70,7 @@ const PatientFullScreenView: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <h1 className="text-xl font-semibold text-teal-800 dark:text-teal-300 flex items-center">
             <UsersIcon className="h-6 w-6 mr-2"/> {/* Added Icon */}
-            Patient Task Board
+            Patient Task Board - Track patient wait times, pending jobs to better manage your caseload
           </h1>
           {/* Potential location for Add Patient, Filter, Sort controls */}
         </div>
