@@ -1,12 +1,20 @@
-# ───────────────────── project/combined_main.py ─────────────────────
+# ───────────────── project/combined_main.py ─────────────────
 import logging
+import sys
+from pathlib import Path
+
+# ── Make sub‑packages importable at top‑level ───────────────
+PROJECT_ROOT = Path(__file__).resolve().parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))   # now "import my_rag_app" works
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# NOTE: all imports are now *package‑relative* so Python can find them
-from .my_rag_app.main import app as rag_app
-from .predictive_backend.app.main import app as predictive_app
-from .semantic_search.router import semantic_router
+# original sub‑apps (keep absolute imports inside them happy)
+from my_rag_app.main import app as rag_app
+from predictive_backend.app.main import app as predictive_app
+from semantic_search.router import semantic_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,7 +28,6 @@ combined_app = FastAPI(
     version="1.1.0",
 )
 
-# explicit origins + any *.vercel.app preview URL
 allowed_origins = [
     "http://localhost:3000",
     "https://fast-api-platform-clean-ozlq.vercel.app",
@@ -35,7 +42,6 @@ combined_app.add_middleware(
     allow_headers=["*"],
 )
 
-# mount / include sub‑apps
 combined_app.mount("/rag", rag_app)
 combined_app.mount("/predictive", predictive_app)
 combined_app.include_router(semantic_router, prefix="/semantic")
@@ -47,4 +53,4 @@ def root_check():
         "message": "Unified service for RAG + Predictive + Semantic Search",
         "allowed_origins": allowed_origins,
     }
-# ────────────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────
