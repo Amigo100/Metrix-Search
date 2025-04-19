@@ -2,14 +2,14 @@
 'use client';
 
 import React, {
-  useState, useEffect, useCallback, ChangeEvent, FormEvent, useContext, useRef, KeyboardEvent, ForwardedRef
+  useState, useEffect, useCallback, ChangeEvent, FormEvent, useContext, useRef, KeyboardEvent, ForwardedRef // Added ForwardedRef back for mock components
 } from 'react';
 import {
   Plus, Clock, AlertTriangle, X, Edit3, Save, Trash2, CheckSquare, Square, MinusSquare, MessageSquare, BellOff, AlarmClockOff,
-} from 'lucide-react';
+} from 'lucide-react'; // Keep all icons needed by internal components
 import {
   format, differenceInMinutes, addMinutes, formatDistanceToNowStrict, parse, formatRelative, isValid,
-} from 'date-fns';
+} from 'date-fns'; // Keep all date-fns needed
 
 // --- Import Context ---
 import HomeContext from '@/pages/api/home/home.context';
@@ -17,14 +17,24 @@ import HomeContext from '@/pages/api/home/home.context';
 // --- Import Centralized Types ---
 import { Patient, Task, TaskCompletionStatus } from '@/types/patient';
 
+// --- REMOVED Imports for external UI components and PatientCard ---
+// import { Button } from '@/components/ui/button';
+// import { Input } from '@/components/ui/input';
+// import { Label } from '@/components/ui/label';
+// import { Dialog, ... } from '@/components/ui/dialog';
+// import { Card, ... } from '@/components/ui/Card';
+// import { PatientCard } from '@/components/patients/PatientCard';
+
+
 // ===-----------------------------------------===
 // === Start: Restored Mock Component Definitions ===
+// === (Copied from original Tasks.tsx)         ===
 // ===-----------------------------------------===
 
 // --- Mock shadcn/ui Components ---
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+  size?: 'default' | 'sm' | 'lg' | 'icon'; // Keep original mock sizes
   asChild?: boolean;
   className?: string;
 }
@@ -32,7 +42,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'default', size = 'default', asChild = false, ...props }, ref) => {
     const baseStyle = 'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
     const variants = { default: 'bg-primary text-primary-foreground hover:bg-primary/90', destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90', outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground', secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80', ghost: 'hover:bg-accent hover:text-accent-foreground', link: 'text-primary underline-offset-4 hover:underline' };
-    const sizes = { default: 'h-10 px-4 py-2', sm: 'h-9 rounded-md px-3', lg: 'h-11 rounded-md px-8', icon: 'h-10 w-10' };
+    const sizes = { default: 'h-10 px-4 py-2', sm: 'h-9 rounded-md px-3', lg: 'h-11 rounded-md px-8', icon: 'h-10 w-10' }; // Keep original mock sizes
+    // Ensure `variants[variant]` and `sizes[size]` handle potential undefined safely if needed, though defaults are set.
     const variantClass = variants[variant || 'default'];
     const sizeClass = sizes[size || 'default'];
     return (<button className={`${baseStyle} ${variantClass} ${sizeClass} ${className ?? ''}`} ref={ref} {...props} />);
@@ -55,7 +66,7 @@ Label.displayName = 'Label';
 
 // --- Dialog Components ---
 interface DialogProps { open: boolean; onOpenChange: (open: boolean) => void; children: React.ReactNode; }
-// === FIX #2 APPLIED HERE ===
+// === FIX #1 APPLIED HERE (Dialog width) ===
 const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) =>
  open ? (
    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
@@ -65,7 +76,7 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) =>
      </div>
    </div>
  ) : null;
-// === END OF FIX #2 ===
+// === END OF FIX #1 ===
 
 interface DialogContentProps { children: React.ReactNode; className?: string; }
 const DialogContent: React.FC<DialogContentProps> = ({ children, className }) => (<div className={`p-6 ${className ?? ''}`}>{children}</div>);
@@ -106,7 +117,6 @@ const getBorderColor = (minutes: number): string => {
     return 'border-green-500';
 };
 const getBackgroundColor = (minutes: number): string => {
-    // Original logic from old Tasks.tsx / PatientCard.tsx
     if (minutes >= 300) return 'bg-neutral-50';
     if (minutes >= 240) return 'bg-neutral-50';
     if (minutes >= 120) return 'bg-neutral-50';
@@ -114,9 +124,21 @@ const getBackgroundColor = (minutes: number): string => {
 };
 
 // --- TaskItem Component ---
-interface TaskItemProps { /* ... */ }
-const TaskItem: React.FC<TaskItemProps> = ({ /* ...props... */ }) => {
-  // ... TaskItem implementation using internal mock Buttons/Inputs ...
+interface TaskItemProps {
+  task: Task;
+  patientId: string;
+  patientName: string;
+  updateTaskTimerState: (patientId: string, taskId: string | number, isExpired: boolean) => void;
+  updateTaskTimer: (patientId: string, taskId: string | number, newTimerMinutes: string | null) => void;
+  removeTask: (patientId: string, taskId: string | number) => void;
+  updateTaskCompletion: (patientId: string, taskId: string | number, status: TaskCompletionStatus) => void;
+  acknowledgeTimer: (patientId: string, taskId: string | number) => void;
+  updateTaskNotes: (patientId: string, taskId: string | number, notes: string) => void;
+}
+
+const TaskItem: React.FC<TaskItemProps> = ({
+  task, patientId, patientName, updateTaskTimerState, updateTaskTimer, removeTask, updateTaskCompletion, acknowledgeTimer, updateTaskNotes,
+}) => {
   const [isTimerExpired, setIsTimerExpired] = useState<boolean>(task.isTimerExpired);
   const [timeRemaining, setTimeRemaining] = useState<string>('');
   const [isEditingTimer, setIsEditingTimer] = useState<boolean>(false);
@@ -125,18 +147,75 @@ const TaskItem: React.FC<TaskItemProps> = ({ /* ...props... */ }) => {
   const [editNotes, setEditNotes] = useState<string>(task.notes || '');
   const timerInputRef = useRef<HTMLInputElement>(null);
   const notesTextareaRef = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => { /* ... timer check effect ... */ }, [ /* ... dependencies ... */ ]);
-  useEffect(() => { /* ... focus timer effect ... */ }, [isEditingTimer, task.timerEnd]);
-  useEffect(() => { /* ... focus notes effect ... */ }, [isEditingNotes, task.notes]);
-  const handleTimerEditSubmit = () => {/* ... */};
-  const handleTimerInputChange = (e: ChangeEvent<HTMLInputElement>) => {/* ... */};
-  const handleTimerInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {/* ... */};
-  const handleNotesEditSubmit = () => {/* ... */};
-  const handleNotesInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {/* ... */};
-  const handleNotesKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {/* ... */};
-  const handleCompletionToggle = () => {/* ... */};
-  const handleSnooze = () => {/* ... */};
-  const getCompletionIcon = (): JSX.Element => { /* ... same logic */ switch (task.completionStatus) { case 'in-progress': return <MinusSquare className="h-4 w-4 text-yellow-400" />; case 'complete': return <CheckSquare className="h-4 w-4 text-green-400" />; case 'incomplete': default: return <Square className="h-4 w-4 text-gray-500" />; } };
+
+  useEffect(() => {
+     if (!task.timerEnd || task.completionStatus === 'complete') {
+       if (isTimerExpired) setIsTimerExpired(false);
+       setTimeRemaining('');
+       return;
+     }
+     let intervalId: NodeJS.Timeout | null = null;
+     const checkTimer = () => {
+       const now = new Date();
+       if (task.timerEnd && now >= task.timerEnd) {
+         if (!isTimerExpired) {
+           setIsTimerExpired(true);
+           setTimeRemaining('Expired');
+           updateTaskTimerState(patientId, task.id, true);
+           if (!task.isAcknowledged && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+             new Notification(`Task Timer Expired: ${patientName}`, { body: task.text, tag: `task-${task.id}` });
+           }
+         }
+         if (intervalId) clearInterval(intervalId);
+       } else if (task.timerEnd) {
+         if (isTimerExpired) {
+           setIsTimerExpired(false);
+           updateTaskTimerState(patientId, task.id, false);
+         }
+         setTimeRemaining(`in ${formatDistanceToNowStrict(task.timerEnd)}`);
+       }
+     };
+     checkTimer();
+     if (task.timerEnd && new Date() < task.timerEnd) {
+        intervalId = setInterval(checkTimer, 1000 * 30);
+     }
+     return () => { if (intervalId) clearInterval(intervalId); };
+  }, [ task.timerEnd, task.id, patientId, updateTaskTimerState, isTimerExpired, task.isTimerExpired, task.completionStatus, task.isAcknowledged, patientName, task.text ]);
+
+  useEffect(() => {
+     if (isEditingTimer) {
+       const initialMinutes = task.timerEnd && task.timerEnd > new Date() ? Math.max(0, differenceInMinutes(task.timerEnd, new Date())).toString() : '';
+       setEditTimerMinutes(initialMinutes);
+       setTimeout(() => timerInputRef.current?.focus(), 0);
+     }
+  }, [isEditingTimer, task.timerEnd]);
+
+  useEffect(() => {
+     if (isEditingNotes) {
+       setEditNotes(task.notes || '');
+       setTimeout(() => notesTextareaRef.current?.focus(), 0);
+     }
+  }, [isEditingNotes, task.notes]);
+
+  const handleTimerEditSubmit = () => {
+     if (!isEditingTimer) return;
+     const minutesToSet = editTimerMinutes.trim() === '' || editTimerMinutes === '0' ? null : editTimerMinutes;
+     updateTaskTimer(patientId, task.id, minutesToSet);
+     setIsEditingTimer(false);
+  };
+  const handleTimerInputChange = (e: ChangeEvent<HTMLInputElement>) => { setEditTimerMinutes(e.target.value); };
+  const handleTimerInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') { handleTimerEditSubmit(); } else if (e.key === 'Escape') { setIsEditingTimer(false); } };
+  const handleNotesEditSubmit = () => { if (!isEditingNotes) return; updateTaskNotes(patientId, task.id, editNotes); setIsEditingNotes(false); };
+  const handleNotesInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => { setEditNotes(e.target.value); };
+  const handleNotesKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleNotesEditSubmit(); } else if (e.key === 'Escape') { setIsEditingNotes(false); setEditNotes(task.notes || ''); } };
+  const handleCompletionToggle = () => {
+     let nextStatus: TaskCompletionStatus;
+     switch (task.completionStatus) { case 'incomplete': nextStatus = 'in-progress'; break; case 'in-progress': nextStatus = 'complete'; break; case 'complete': nextStatus = 'incomplete'; break; default: nextStatus = 'incomplete'; break; }
+     updateTaskCompletion(patientId, task.id, nextStatus);
+  };
+  const handleSnooze = () => { updateTaskTimer(patientId, task.id, '15'); };
+  const getCompletionIcon = (): JSX.Element => { switch (task.completionStatus) { case 'in-progress': return <MinusSquare className="h-4 w-4 text-yellow-400" />; case 'complete': return <CheckSquare className="h-4 w-4 text-green-400" />; case 'incomplete': default: return <Square className="h-4 w-4 text-gray-500" />; } };
+
   let taskItemClasses = 'flex flex-col py-1.5 group'; let taskTextStyle = 'text-sm'; let timerTextStyle = 'text-xs font-mono';
   if (task.completionStatus === 'complete') { taskTextStyle += ' line-through text-gray-300'; timerTextStyle += ' text-gray-300'; }
   else if (isTimerExpired && !task.isAcknowledged) { taskItemClasses += ' animate-flash'; taskTextStyle += ' text-red-400 font-medium'; timerTextStyle += ' text-red-400 font-semibold'; }
@@ -174,8 +253,8 @@ const PatientCard: React.FC<PatientCardProps> = ({ /* ...props... */ }) => {
     const [isEditingPatientNotes, setIsEditingPatientNotes] = useState<boolean>(false);
     const [editPatientNotes, setEditPatientNotes] = useState<string>(patient.notes || '');
     const patientNotesTextareaRef = useRef<HTMLTextAreaElement>(null);
-    useEffect(() => { /* ... LOS effect ... */ }, [patient.arrivalTime]);
-    useEffect(() => { /* ... focus notes effect ... */ }, [isEditingPatientNotes, patient.notes]);
+    useEffect(() => { const calculateLOS = () => { const now = new Date(); const minutes = differenceInMinutes(now, patient.arrivalTime); const hours = Math.floor(minutes / 60); const remainingMinutes = minutes % 60; setLengthOfStayMinutes(minutes); setLengthOfStayFormatted(`${hours}h ${remainingMinutes}m`); }; calculateLOS(); const intervalId = setInterval(calculateLOS, 60_000); return () => clearInterval(intervalId); }, [patient.arrivalTime]);
+    useEffect(() => { if (isEditingPatientNotes) { setEditPatientNotes(patient.notes || ''); setTimeout(() => patientNotesTextareaRef.current?.focus(), 0); } }, [isEditingPatientNotes, patient.notes]);
     const handleAddTaskSubmit = (e?: FormEvent<HTMLFormElement>) => { e?.preventDefault(); if (newTaskText.trim() === '') return; addTaskToPatient(patient.id, newTaskText, newTaskTimerMinutes); setNewTaskText(''); setNewTaskTimerMinutes(''); };
     const handleNewTaskKeyDown = (e: KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddTaskSubmit(); } };
     const handlePatientNotesSubmit = () => { if (!isEditingPatientNotes) return; updatePatientNotes(patient.id, editPatientNotes); setIsEditingPatientNotes(false); };
@@ -195,6 +274,7 @@ const PatientCard: React.FC<PatientCardProps> = ({ /* ...props... */ }) => {
        </Card>
     );
 };
+
 
 // --- AddPatientModal Component ---
 interface ModalTaskState { /* ... */ }
@@ -216,11 +296,11 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
     };
 
   return (
-    // AddPatientModal JSX using internal mock Dialog, Button, Input etc.
+    // AddPatientModal JSX using *internal* mock Dialog, Button, Input etc.
     <Dialog open={isOpen} onOpenChange={onClose}>
-       {/* === FIX #1 APPLIED HERE === */}
-      <DialogContent className="bg-neutral-50 text-black sm:max-w-3xl"> {/* Changed to sm:max-w-3xl */}
-       {/* === END OF FIX #1 === */}
+       {/* === FIX #2 APPLIED HERE (DialogContent width) === */}
+      <DialogContent className="bg-neutral-50 text-black sm:max-w-3xl"> {/* Changed sm:max-w-[550px] to sm:max-w-3xl */}
+       {/* === END OF FIX #2 === */}
         <DialogHeader>
            <DialogTitle>Add New Patient</DialogTitle>
            <DialogDescription className="text-black"> Enter patient details... </DialogDescription>
@@ -248,11 +328,11 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
 
 // --- MAIN SIDEBAR COMPONENT (Consumes Context, Renders Internal Components) ---
 const Tasks: React.FC = () => {
-  // --- Context Consumption (Remains the same) ---
+  // --- Context Consumption ---
   const { state, addPatient, removePatient, updateTaskTimerState, addTaskToPatient, updateTaskTimer, removeTaskFromPatient, updateTaskCompletion, acknowledgeTaskTimer, updatePatientNotes, updateTaskNotes } = useContext(HomeContext);
   const { showSidePromptbar, patients } = state;
 
-  // --- Local State (Remains the same) ---
+  // --- Local State ---
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>( typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default' );
   useEffect(() => { if (typeof window !== 'undefined' && 'Notification' in window && notificationPermission === 'default') { Notification.requestPermission().then(setNotificationPermission); } }, [notificationPermission]);
@@ -263,13 +343,13 @@ const Tasks: React.FC = () => {
     <div className={`flex flex-col h-full overflow-y-auto transition-all duration-300 bg-neutral-50 shadow-md border-l border-gray-200 ${sidebarWidth} ${showSidePromptbar ? 'visible' : 'invisible'}`}>
       {showSidePromptbar && (
         <>
-          {/* Header - Uses *internal* mock Button */}
+          {/* Header */}
           <div className="flex justify-between items-center p-4 shadow-md border-b border-gray-200 flex-shrink-0">
             <h2 className="text-lg font-semibold text-black">Patient Tracker</h2>
             <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)} className="bg-[#008080] hover:bg-[#008080] border-[#008080] text-black"> <Plus className="h-4 w-4 mr-2" /> Add Patient </Button>
           </div>
 
-          {/* Patient List - Renders *internal* PatientCard */}
+          {/* Patient List */}
           <div className="flex-1 overflow-y-auto p-4">
             {patients.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-500 text-center"> <AlertTriangle className="w-10 h-10 mb-4 text-gray-600" /> <p className="font-medium">No patients being tracked.</p> <p className="text-sm mt-1">Click &quot;Add Patient&quot; to start.</p> </div>
@@ -293,7 +373,7 @@ const Tasks: React.FC = () => {
             )}
           </div>
 
-          {/* Renders *internal* AddPatientModal */}
+          {/* Modal */}
           <AddPatientModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} addPatientHandler={addPatient} />
         </>
       )}
