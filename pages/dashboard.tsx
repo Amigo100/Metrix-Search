@@ -53,7 +53,7 @@ const coreTools = [
   { title: 'Risk & Scoring Tools', description: 'Calculate clinical scores.', href: '/clinical-scoring-tools', icon: Calculator, color: 'text-green-600', bgColor: 'bg-green-50' },
   { title: 'Guideline Search', description: 'Find local protocols.', href: '/semantic-search', icon: Search, color: 'text-orange-600', bgColor: 'bg-orange-50' }, // Add this page if it exists
   { title: 'Predictive Insights', description: 'View ED forecasts.', href: '/predictive-analytics', icon: TrendingUp, color: 'text-red-600', bgColor: 'bg-red-50' },
-  { title: 'Patient Tracker', description: 'Manage tasks & timers.', href: '/tasks-fullscreen', // Link to open task sidebar? Or a dedicated page?
+  { title: 'Patient Tracker', description: 'Manage tasks & timers.', href: '/patients-fullscreen', // Link to open task sidebar? Or a dedicated page?
     icon: ClipboardCheck, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
 ];
 
