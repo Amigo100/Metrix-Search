@@ -99,8 +99,19 @@ CardContent.displayName = 'CardContent';
 // ===-----------------------------------------===
 
 // --- Helper Functions ---
-const getBorderColor = (minutes: number): string => { /* ... */ };
-const getBackgroundColor = (minutes: number): string => { /* ... */ };
+const getBorderColor = (minutes: number): string => {
+    if (minutes >= 300) return 'border-red-500 animate-pulse-border';
+    if (minutes >= 240) return 'border-red-500';
+    if (minutes >= 120) return 'border-amber-500';
+    return 'border-green-500';
+};
+const getBackgroundColor = (minutes: number): string => {
+    // Original logic from old Tasks.tsx / PatientCard.tsx
+    if (minutes >= 300) return 'bg-neutral-50';
+    if (minutes >= 240) return 'bg-neutral-50';
+    if (minutes >= 120) return 'bg-neutral-50';
+    return 'bg-neutral-50';
+};
 
 // --- TaskItem Component ---
 interface TaskItemProps { /* ... */ }
