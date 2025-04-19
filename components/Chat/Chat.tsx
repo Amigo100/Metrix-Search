@@ -405,6 +405,9 @@ ${doc}`.trim();
           onSend={(m: Message) => createDoc(m.content)}
           showRegenerateButton={!!transcript && !!clinicalDoc && !loading}
           showScrollDownButton={false}
+          onScrollDownClick={() =>
+            endRef.current?.scrollIntoView({ behavior: 'smooth' })
+          }
           placeholder="Paste or dictate transcript…"
           onRegenerate={() => runAllAnalysis(clinicalDoc, transcript)}
         />
