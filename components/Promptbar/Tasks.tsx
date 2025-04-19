@@ -124,39 +124,193 @@ interface TaskItemProps {
   updateTaskTimerState: (patientId: string, taskId: string | number, isExpired: boolean) => void;
   updateTaskTimer: (patientId: string, taskId: string | number, newTimerMinutes: string | null) => void;
   removeTask: (patientId: string, taskId: string | number) => void;
-  updateTaskCompletion: (patientId: string, taskId: string | number, status: TaskCompletionStatus) => void;
+  updateTaskCompletion: (
+    patientId: string,
+    taskId: string | number,
+    status: TaskCompletionStatus
+  ) => void;
   acknowledgeTimer: (patientId: string, taskId: string | number) => void;
   updateTaskNotes: (patientId: string, taskId: string | number, notes: string) => void;
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({
-  task, patientId, patientName, updateTaskTimerState, updateTaskTimer, removeTask, updateTaskCompletion, acknowledgeTimer, updateTaskNotes,
+  task,
+  patientId,
+  patientName,
+  updateTaskTimerState,
+  updateTaskTimer,
+  removeTask,
+  updateTaskCompletion,
+  acknowledgeTimer,
+  updateTaskNotes,
 }) => {
-  // State, Effects, Handlers are identical to the version previously in PatientCard.tsx
   const [isTimerExpired, setIsTimerExpired] = useState<boolean>(task.isTimerExpired);
   const [timeRemaining, setTimeRemaining] = useState<string>('');
   const [isEditingTimer, setIsEditingTimer] = useState<boolean>(false);
   const [editTimerMinutes, setEditTimerMinutes] = useState<string>('');
   const [isEditingNotes, setIsEditingNotes] = useState<boolean>(false);
   const [editNotes, setEditNotes] = useState<string>(task.notes || '');
+
   const timerInputRef = useRef<HTMLInputElement>(null);
   const notesTextareaRef = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => { /* ... timer check effect ... */ }, [ /* ... dependencies ... */ ]);
-  useEffect(() => { /* ... focus timer effect ... */ }, [isEditingTimer, task.timerEnd]);
-  useEffect(() => { /* ... focus notes effect ... */ }, [isEditingNotes, task.notes]);
-  const handleTimerEditSubmit = () => {/* ... */};
-  const handleTimerInputChange = (e: ChangeEvent<HTMLInputElement>) => {/* ... */};
-  const handleTimerInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {/* ... */};
-  const handleNotesEditSubmit = () => {/* ... */};
-  const handleNotesInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {/* ... */};
-  const handleNotesKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {/* ... */};
-  const handleCompletionToggle = () => {/* ... */};
-  const handleSnooze = () => {/* ... */};
-  const getCompletionIcon = (): JSX.Element => { /* ... same logic, return <Square../> as fallback */
-     switch (task.completionStatus) { case 'in-progress': return <MinusSquare className="h-4 w-4 text-yellow-400" />; case 'complete': return <CheckSquare className="h-4 w-4 text-green-400" />; case 'incomplete': default: return <Square className="h-4 w-4 text-gray-500" />; }
-    // return <Square className="h-4 w-4 text-gray-500" />; // Fallback removed as default case handles it
-   };
 
+  // Timer check effect
+  useEffect(() => {
+    if (!task.timerEnd || task.completionStatus === 'complete') {
+      if (isTimerExpired) setIsTimerExpired(false);
+      setTimeRemaining('');
+      return;
+    }
+    let intervalId: NodeJS.Timeout | null = null;
+
+    const checkTimer = () => {
+      const now = new Date();
+      if (task.timerEnd && now >= task.timerEnd) {
+        if (!isTimerExpired) {
+          setIsTimerExpired(true);
+          setTimeRemaining('Expired');
+          updateTaskTimerState(patientId, task.id, true);
+
+          // Fire a desktop notification if not acknowledged
+          if (
+            !task.isAcknowledged &&
+            typeof window !== 'undefined' &&
+            'Notification' in window
+          ) {
+            if (Notification.permission === 'granted') {
+              new Notification(`Task Timer Expired: ${patientName}`, {
+                body: task.text,
+                tag: `task-${task.id}`,
+              });
+            }
+          }
+        }
+        if (intervalId) clearInterval(intervalId);
+      } else if (task.timerEnd) {
+        if (isTimerExpired) {
+          setIsTimerExpired(false);
+          updateTaskTimerState(patientId, task.id, false);
+        }
+        setTimeRemaining(`in ${formatDistanceToNowStrict(task.timerEnd)}`);
+      }
+    };
+
+    checkTimer();
+    if (task.timerEnd && new Date() < task.timerEnd) {
+      intervalId = setInterval(checkTimer, 1000 * 30);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [
+    task.timerEnd,
+    task.id,
+    patientId,
+    updateTaskTimerState,
+    isTimerExpired,
+    task.isTimerExpired,
+    task.completionStatus,
+    task.isAcknowledged,
+    patientName,
+    task.text,
+  ]);
+
+  // When editing the timer
+  useEffect(() => {
+    if (isEditingTimer) {
+      const initialMinutes =
+        task.timerEnd && task.timerEnd > new Date()
+          ? Math.max(0, differenceInMinutes(task.timerEnd, new Date())).toString()
+          : '';
+      setEditTimerMinutes(initialMinutes);
+      setTimeout(() => timerInputRef.current?.focus(), 0);
+    }
+  }, [isEditingTimer, task.timerEnd]);
+
+  // When editing notes
+  useEffect(() => {
+    if (isEditingNotes) {
+      setEditNotes(task.notes || '');
+      setTimeout(() => notesTextareaRef.current?.focus(), 0);
+    }
+  }, [isEditingNotes, task.notes]);
+
+  const handleTimerEditSubmit = () => {
+    if (!isEditingTimer) return;
+    const minutesToSet =
+      editTimerMinutes.trim() === '' || editTimerMinutes === '0' ? null : editTimerMinutes;
+    updateTaskTimer(patientId, task.id, minutesToSet);
+    setIsEditingTimer(false);
+  };
+
+  const handleTimerInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setEditTimerMinutes(e.target.value);
+  };
+
+  const handleTimerInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleTimerEditSubmit();
+    } else if (e.key === 'Escape') {
+      setIsEditingTimer(false);
+    }
+  };
+
+  const handleNotesEditSubmit = () => {
+    if (!isEditingNotes) return;
+    updateTaskNotes(patientId, task.id, editNotes);
+    setIsEditingNotes(false);
+  };
+
+  const handleNotesInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setEditNotes(e.target.value);
+  };
+
+  const handleNotesKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleNotesEditSubmit();
+    } else if (e.key === 'Escape') {
+      setIsEditingNotes(false);
+      setEditNotes(task.notes || '');
+    }
+  };
+
+  const handleCompletionToggle = () => {
+    // Cycle through incomplete -> in-progress -> complete
+    let nextStatus: TaskCompletionStatus;
+    switch (task.completionStatus) {
+      case 'incomplete':
+        nextStatus = 'in-progress';
+        break;
+      case 'in-progress':
+        nextStatus = 'complete';
+        break;
+      case 'complete':
+        nextStatus = 'incomplete';
+        break;
+      default:
+        nextStatus = 'incomplete';
+        break;
+    }
+    updateTaskCompletion(patientId, task.id, nextStatus);
+  };
+
+  const handleSnooze = () => {
+    // Quick 15-min extension
+    updateTaskTimer(patientId, task.id, '15');
+  };
+
+  const getCompletionIcon = () => {
+    switch (task.completionStatus) {
+      case 'in-progress':
+        return <MinusSquare className="h-4 w-4 text-yellow-400" />;
+      case 'complete':
+        return <CheckSquare className="h-4 w-4 text-green-400" />;
+      case 'incomplete':
+      default:
+        return <Square className="h-4 w-4 text-gray-500" />;
+    }
+  };
 
   // --- Styling Logic (Using original from old Tasks.tsx) ---
   let taskItemClasses = 'flex flex-col py-1.5 group';
