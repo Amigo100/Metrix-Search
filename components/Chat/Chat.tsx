@@ -1,8 +1,8 @@
 // file: /components/Chat/Chat.tsx
 // -----------------------------------------------------------------------------
-// v2.5.1 – tighter prompts for real transcription errors & true inferences,
-//           forbid note‑echo in Recommendations, native copy alert preserved,
-//           regenerate button, follow‑up paging, sign‑off, logo – all intact
+// v2.5.2 – identical to v2.5.1 *except* the prompt in handleInferTerms
+//           has been expanded so the model reliably returns paraphrases /
+//           inferred items instead of “None.”  All other logic/UI untouched.
 // -----------------------------------------------------------------------------
 
 import {
@@ -332,7 +332,7 @@ Return only the completed note.`.trim();
     }
   };
 
-  /* -------- STEP 2: transcription errors -------- */
+  /* -------- STEP 2: transcription errors (unchanged) -------- */
   const handleTranscriptionErrors = async (
     doc: string,
     rawTranscript: string,
@@ -384,31 +384,47 @@ ${doc}`.trim();
     }
   };
 
-  /* -------- STEP 3: inferred terms -------- */
+  /* -------- STEP 3: inferred terms (NEW detailed prompt) -------- */
   const handleInferTerms = async (doc: string, rawTranscript: string) => {
     try {
       setLastOutputType('terms');
       const termPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-Find content in the *Clinical Document* that is **inferred, summarised, or
-paraphrased**—NOT quoted verbatim from the Transcript.
 
-EXCLUDE simple abbreviation expansions (NKDA → No Known Drug Allergies, etc.).
+You will compare a **Transcript** and its resulting **Clinical Document**.
 
-FORMAT
-If ≥1 item:
+GOAL  
+List information that the document *re‑expresses* (paraphrases, summarises,
+re‑orders, or infers) rather than copying verbatim.
+
+STEP‑BY‑STEP  
+1. Make a bullet list of factual statements in the Clinical Document (skip
+   headings & pleasantries).  
+2. For each statement, search the Transcript:  
+   • If ≥ 5 consecutive words match verbatim → skip.  
+   • Else, if meaning is supported by different wording/context → keep.  
+3. Ignore lines that are *only* abbreviation expansions (e.g. NKDA ↔︎ No Known
+   Drug Allergies) unless the document adds NEW nuance.  
+4. Keep 3‑10 of the clearest examples.
+
+OUTPUT  
+If ≥ 1 line matches criteria, return EXACTLY:
+
 ## Inferred Clinical Terms
 * "snippet from transcript" → "phrase in document"
-(max 8 lines, each side ≤10 words)
 
-If none, output exactly:
+  • Each snippet ≤ 10 words copied from the transcript.  
+  • Each phrase  ≤ 10 words copied from the document.
+
+If NONE meet criteria, return exactly:
+
 None.
 
 Transcript:
 -----------
 ${rawTranscript}
 
-Clinical Document:
+Clinical Document:
 ------------------
 ${doc}`.trim();
 
@@ -430,7 +446,7 @@ ${doc}`.trim();
     }
   };
 
-  /* -------- STEP 4: clinical recommendations -------- */
+  /* -------- STEP 4: recommendations (unchanged) -------- */
   const handleRecommendations = async (doc: string) => {
     try {
       setLastOutputType('recs');
@@ -479,7 +495,7 @@ ${headings}`.trim();
     }
   };
 
-  /* -------- follow‑up questions / refinement -------- */
+  /* -------- follow‑up questions / refinement (unchanged) -------- */
   const handleFollowUp = async (msg: Message) => {
     const question = msg.content.trim();
     if (!question) return;
@@ -514,7 +530,7 @@ ${headings}`.trim();
     }
   };
 
-  /* -------- initial input (transcript) -------- */
+  /* -------- initial input, regenerate, clear helpers (unchanged) -------- */
   const handleInitialInput = async (msg: Message) => {
     const text = msg.content.trim();
     if (!text) return;
