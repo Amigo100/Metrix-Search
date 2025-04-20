@@ -88,51 +88,56 @@ export const initialState: HomeInitialState = {
       id: 'temp-1-discharge-summary',
       name: 'Discharge Summary',
       description: 'A structured template for detailed discharge summary documentation.',
-      content: `Chief Complaint:
+      content: `History:
+- [Patient's age (only if mentioned in transcript or patient details, otherwise omit completely)]
+- [Current issues, reasons for visit, history of presenting complaints etc] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Mention duration, timing, location, quality, severity and/or context of complaint, if relevant and mentioned] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [List anything that worsens or alleviates the symptoms, including self-treatment attempts and their effectiveness] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Progression: describe how the symptoms have changed or evolved over time] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Previous episodes: detail any past occurrences of similar symptoms, including when they occurred, how they were managed, and the outcomes] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Impact on daily activities: explain how the symptoms affect the patient's daily life, work, and activities] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Associated symptoms: any other symptoms (focal and systemic) that accompany the reasons for visit &amp; chief complaints] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
 
-Duration (If Applicable):
+Past Medical History:
+- [Medical history: including past medical and surgical history relevant to the current complaints] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Family history that may be relevant to the reasons for visit and chief complaints] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Social history: any relevant social factors, including smoking, alcohol, drug use, or occupational exposures] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Allergies, including details on reactions] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Medications, including current prescribed medications, over-the-counter drugs, and supplements] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Immunization history &amp; status] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Other relevant history or contributing factors] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
 
-History of Presenting Complaint:
-
-Past Medical History: (Generate as a list)
-
-Drug History: (Generate as a list)
-
-Assessment
-Vitals:
-General:
-Examination Findings:
-
-Review of Systems
-Airway:
-Breathing:
-Cardiovascular:
-Abdomen:
-Neurological:
-Head and Neck:
-Dental:
-Musculoskeletal:
-Pelvis:
-Skin:
-Other:
+Physical Examination:
+- [Vital signs] (e.g. pulse, blood pressure, temperature etc, but only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Physical or mental state examination findings, including system specific examination(s)] (make sure each systems examination findings are separated line by line, and only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
 
 Investigations:
-Imaging:
-Bloods:
-Urinalysis:
-Wound Swab:
-Primary Diagnosis:
-Management in Department:
+- [Completed investigations with results] (you must only include completed investigations with results if they have been explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely. Planned or ordered investigations should be documented under the Management Plan section.)
 
-Clinical Status at Discharge:
+Impression &amp; Plan:
+[1. Issue, problem, or request 1 (issue, request or condition name only)]
+- [Impression, likely diagnosis for Issue 1 (condition name only)] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Differential diagnosis for Issue 1] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Investigations planned for Issue 1] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Treatment planned for Issue 1] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Relevant referrals for Issue 1] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
 
-Discharge Plan
-Medications:
-Advice:
-Wound Care (If Applicable):
-Referrals:
-Follow-Up:
-Advised to return to the Emergency Department if:`,
+[2. Issue, problem, or request 2 (issue, request or condition name only)]
+- [Impression, likely diagnosis for Issue 2 (condition name only)] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Differential diagnosis for Issue 2] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Investigations planned for Issue 2] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Treatment planned for Issue 2] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Relevant referrals for Issue 2] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+
+[3. Issue, problem, or request 3, 4, 5 etc. (issue, request or condition name only)]
+- [Impression, likely diagnosis for Issue 3, 4, 5 etc. (condition name only)] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Differential diagnosis for Issue 3, 4, 5 etc.] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Investigations planned for Issue 3, 4, 5 etc.] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Treatment planned for Issue 3, 4, 5 etc.] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Relevant referrals for Issue 3, 4, 5 etc.] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+
+(Never come up with your own patient details, assessment, plan, interventions, evaluation, and plan for continuing care - use only the transcript, contextual notes or clinical note as a reference for the information included in your note.
+If any information related to a placeholder has not been explicitly mentioned in the transcript, contextual notes or clinical note, you must not state the information has not been explicitly mentioned in your output, just leave the relevant placeholder or section blank.)`,
       model: {
         id: 'gpt-4',
         name: 'GPT-4',
