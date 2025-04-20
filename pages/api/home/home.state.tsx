@@ -112,7 +112,7 @@ Physical Examination:
 - [Physical or mental state examination findings, including system specific examination(s)] (make sure each systems examination findings are separated line by line, and only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
 
 Investigations:
-- [Completed investigations with results, including diagnostic imaging results] (you must only include completed investigations with results if they have been explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely. Planned or ordered investigations should be documented under the Management Plan section.)
+- [Completed investigations with results, including diagnostic imaging results, blood test results, microbiology/serology results, urinalysis, diagnostic procedure results, and other formal investigation findings.] (you must only include completed investigations with results if they have been explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely. Planned or ordered investigations should be documented under the Management Plan section.)
 
 Impression and Plan:
 [1. Issue, problem, or request 1 (issue, request or condition name only)]
