@@ -74,11 +74,11 @@ const ScribeHeader = () => (
     <img
       src="/MetrixAI.png"
       alt="Metrix Logo"
-      width={56}
-      height={56}
+      width={64}
+      height={64}
       className="mb-3"
     />
-    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+    <h1 className="mt-3 text-2xl font-bold text-center"> 
       Clinical Scribe Assistant
     </h1>
   </header>
