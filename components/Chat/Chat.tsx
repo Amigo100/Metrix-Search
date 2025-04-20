@@ -291,7 +291,7 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
       // Construct the prompt for document generation
       const docPrompt = `
 ${userContext ? `USER CONTEXT:\n${userContext}\n\n` : ''}
-You are a helpful clinical scribe for doctors and nurses. You are to take a speech transcript, apply this to a selected clinical note template with pre-filled headers. Ensure this is professional and formatted appropriately. Take care to retain accuracy, use as much information from the transcript as possible, and reword or structure this as expected in a professional clinical document of the selected type. Return **Markdown**.
+You are a helpful clinical scribe for doctors and nurses. You are to take a speech transcript, and apply this to a selected clinical note template with pre-filled headers. Ensure this is formatted appropriately, and take great care to retain accuracy, using as much information from the transcript as possible. Reword or structure this as expected in a professional clinical document of the selected type. Include plentiful detail regarding the patient's presenting complaint. Return **Markdown**.
 
 Template:
 ---------
