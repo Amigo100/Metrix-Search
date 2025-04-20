@@ -20,7 +20,7 @@ export const CloseSidebarButton: React.FC<Props> = ({ side, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="z-40 h-8 w-8 fixed flex items-center justify-center rounded-md bg-gray-100 text-black hover:bg-teal-700 shadow"
+      className="z-40 h-8 w-8 fixed flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-teal-600 shadow"
       style={{ top: HEADER_HEIGHT, ...offset }}
       aria-label="Close sidebar"
     >
@@ -38,7 +38,7 @@ export const OpenSidebarButton: React.FC<Props> = ({ side, onClick }) => {
       onClick={onClick}
       className={`z-40 h-8 w-8 fixed flex items-center justify-center
                   ${side === 'left' ? 'rounded-r-md' : 'rounded-l-md'}
-                  bg-gray-100 text-black hover:bg-teal-700 shadow`}
+                  bg-gray-100 text-gray-600 hover:bg-teal-600 shadow`}
       style={{ top: HEADER_HEIGHT, ...offset }}
       aria-label="Open sidebar"
     >
