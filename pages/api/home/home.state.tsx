@@ -104,7 +104,7 @@ Past Medical History:
 - [Social history: any relevant social factors, including smoking, alcohol, drug use, or occupational exposures] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
 - [Allergies, including details on reactions] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
 - [Medications, including current prescribed medications, over-the-counter drugs, and supplements] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
-- [Immunization history &amp; status] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
+- [Immunization history and status] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
 - [Other relevant history or contributing factors] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
 
 Physical Examination:
@@ -112,9 +112,9 @@ Physical Examination:
 - [Physical or mental state examination findings, including system specific examination(s)] (make sure each systems examination findings are separated line by line, and only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
 
 Investigations:
-- [Completed investigations with results] (you must only include completed investigations with results if they have been explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely. Planned or ordered investigations should be documented under the Management Plan section.)
+- [Completed investigations with results, including diagnostic imaging results] (you must only include completed investigations with results if they have been explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely. Planned or ordered investigations should be documented under the Management Plan section.)
 
-Impression &amp; Plan:
+Impression and Plan:
 [1. Issue, problem, or request 1 (issue, request or condition name only)]
 - [Impression, likely diagnosis for Issue 1 (condition name only)] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
 - [Differential diagnosis for Issue 1] (only include if explicitly mentioned in the transcript, contextual notes or clinical note, otherwise omit completely)
