@@ -1,43 +1,48 @@
-import { IconArrowBarLeft, IconArrowBarRight } from '@tabler/icons-react';
+// file: /components/Sidebar/components/OpenCloseButton.tsx
+import React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Props {
-  onClick: any;
   side: 'left' | 'right';
+  onClick: () => void;
 }
 
-export const CloseSidebarButton = ({ onClick, side }: Props) => {
+/* Keep in sync with AppLayout */
+const HEADER_HEIGHT = 80;   // px
+const CHATBAR_WIDTH   = 210; // px → left sidebar inner edge
+const PROMPTBAR_WIDTH = 250; // px → right sidebar inner edge
+
+/* ── CLOSE (sidebar is open) ────────────────────────────────────────────── */
+export const CloseSidebarButton: React.FC<Props> = ({ side, onClick }) => {
+  const offset =
+    side === 'left' ? { left: CHATBAR_WIDTH } : { right: PROMPTBAR_WIDTH };
+
   return (
-    <>
-      {/* Aligned flush with the new 320px sidebar width */}
-      <button
-        className={`fixed top-2.5 ${
-          side === 'right' ? 'right-[320px]' : 'left-[320px]'
-        } z-50 h-7 w-7 hover:text-teal-700 dark:text-white dark:hover:text-teal-700 sm:top-0.5 sm:${
-          side === 'right' ? 'right-[320px]' : 'left-[320px]'
-        } sm:h-8 sm:w-8 sm:text-neutral-700`}
-        onClick={onClick}
-      >
-        {side === 'right' ? <IconArrowBarRight /> : <IconArrowBarLeft />}
-      </button>
-      <div
-        onClick={onClick}
-        className="absolute top-0 left-0 z-10 h-full w-full bg-black opacity-70 sm:hidden"
-      ></div>
-    </>
+    <button
+      onClick={onClick}
+      className="z-40 h-8 w-8 fixed flex items-center justify-center rounded-md bg-teal-600 text-white hover:bg-teal-700 shadow"
+      style={{ top: HEADER_HEIGHT, ...offset }}
+      aria-label="Close sidebar"
+    >
+      {side === 'left' ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+    </button>
   );
 };
 
-export const OpenSidebarButton = ({ onClick, side }: Props) => {
+/* ── OPEN (sidebar is closed) ───────────────────────────────────────────── */
+export const OpenSidebarButton: React.FC<Props> = ({ side, onClick }) => {
+  const offset = side === 'left' ? { left: 0 } : { right: 0 };
+
   return (
     <button
-      className={`fixed top-2.5 ${
-        side === 'right' ? 'right-2' : 'left-2'
-      } z-50 h-7 w-7 text-black hover:text-teal-700 dark:text-white dark:hover:text-gray-300 sm:top-0.5 sm:${
-        side === 'right' ? 'right-2' : 'left-2'
-      } sm:h-8 sm:w-8 sm:text-black`}
       onClick={onClick}
+      className={`z-40 h-8 w-8 fixed flex items-center justify-center
+                  ${side === 'left' ? 'rounded-r-md' : 'rounded-l-md'}
+                  bg-teal-600 text-white hover:bg-teal-700 shadow`}
+      style={{ top: HEADER_HEIGHT, ...offset }}
+      aria-label="Open sidebar"
     >
-      {side === 'right' ? <IconArrowBarLeft /> : <IconArrowBarRight />}
+      {side === 'left' ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
     </button>
   );
 };
