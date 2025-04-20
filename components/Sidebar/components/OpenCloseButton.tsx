@@ -9,8 +9,8 @@ interface Props {
 
 /* Keep in sync with AppLayout */
 const HEADER_HEIGHT = 80;   // px
-const CHATBAR_WIDTH   = 230; // px → left sidebar inner edge
-const PROMPTBAR_WIDTH = 290; // px → right sidebar inner edge
+const CHATBAR_WIDTH   = 240; // px → left sidebar inner edge
+const PROMPTBAR_WIDTH = 300; // px → right sidebar inner edge
 
 /* ── CLOSE (sidebar is open) ────────────────────────────────────────────── */
 export const CloseSidebarButton: React.FC<Props> = ({ side, onClick }) => {
@@ -20,7 +20,7 @@ export const CloseSidebarButton: React.FC<Props> = ({ side, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="z-40 h-8 w-8 fixed flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:bg-teal-600 shadow"
+      className="z-40 h-8 w-8 fixed flex items-center justify-center rounded-md bg-gray-100 text-gray-600 hover:text-teal-600 shadow"
       style={{ top: HEADER_HEIGHT, ...offset }}
       aria-label="Close sidebar"
     >
@@ -38,7 +38,7 @@ export const OpenSidebarButton: React.FC<Props> = ({ side, onClick }) => {
       onClick={onClick}
       className={`z-40 h-8 w-8 fixed flex items-center justify-center
                   ${side === 'left' ? 'rounded-r-md' : 'rounded-l-md'}
-                  bg-gray-100 text-gray-600 hover:bg-teal-600 shadow`}
+                  bg-gray-100 text-gray-600 hover:text-teal-600 shadow`}
       style={{ top: HEADER_HEIGHT, ...offset }}
       aria-label="Open sidebar"
     >
