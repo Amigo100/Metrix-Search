@@ -1,44 +1,44 @@
-// file: /components/Sidebar/components/OpenCloseButton.tsx
-import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+// file: /components/Sidebar/SidebarButton.tsx
+// -----------------------------------------------------------------------------
+// Adds a default export so the component can be imported either as
+//   import SidebarButton from '...'
+// or
+//   import { SidebarButton } from '...'
+// -----------------------------------------------------------------------------
+
+import React, { FC } from 'react';
 
 interface Props {
-  side: 'left' | 'right';
+  text: string;
+  icon: JSX.Element;
   onClick: () => void;
+  disabled?: boolean;
 }
 
-/*  HEADER_HEIGHT MUST match AppLayout (80 px)  */
-const HEADER_HEIGHT = 80;
+export const SidebarButton: FC<Props> = ({
+  text,
+  icon,
+  onClick,
+  disabled,
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`
+        flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium
+        transition-colors duration-150 ease-in-out
+        ${disabled
+          ? 'text-gray-400 cursor-not-allowed'
+          : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 cursor-pointer focus:outline-none focus:ring-1 focus:ring-teal-500 focus:bg-teal-50'}
+      `}
+    >
+      {/* icon is pre‑rendered with desired size */}
+      {icon}
+      <span className="truncate">{text}</span>
+    </button>
+  );
+};
 
-/* width of the sidebar */
-const SIDEBAR_WIDTH = 260;
-
-export const CloseSidebarButton: React.FC<Props> = ({ side, onClick }) => (
-  <button
-    onClick={onClick}
-    className={`
-      fixed z-40
-      top-[${HEADER_HEIGHT}px]
-      ${side === 'left' ? `left-[${SIDEBAR_WIDTH}px]` : `right-[${SIDEBAR_WIDTH}px]`}
-      m-0 flex h-8 w-8 items-center justify-center
-      rounded-r-md bg-teal-600 text-white hover:bg-teal-700
-    `}
-  >
-    {side === 'left' ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
-  </button>
-);
-
-export const OpenSidebarButton: React.FC<Props> = ({ side, onClick }) => (
-  <button
-    onClick={onClick}
-    className={`
-      fixed z-40
-      top-[${HEADER_HEIGHT}px]
-      ${side === 'left' ? 'left-0 rounded-r-md' : 'right-0 rounded-l-md'}
-      m-0 flex h-8 w-8 items-center justify-center
-      bg-teal-600 text-white hover:bg-teal-700
-    `}
-  >
-    {side === 'left' ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-  </button>
-);
+/* Default export so both import styles work */
+export default SidebarButton;
