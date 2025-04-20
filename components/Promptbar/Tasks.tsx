@@ -507,7 +507,8 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
           {/* Footer using original styles */}
           <DialogFooter className="border-t border-gray-700 pt-4">
             <Button type="button" variant="secondary" onClick={onClose} className="text-black bg-neutral-50 hover:bg-gray-100"> Cancel </Button>
-            <Button type="submit" className="bg-[#008080] hover:bg-[#008080] text-white"> Add Patient </Button>
+            <Button type="submit" className="bg-[#008080] hover:bg-[#008080] text-white 
+              "> Add Patient </Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -540,7 +541,7 @@ const Tasks: React.FC = () => {
           {/* Header - Uses *internal* mock Button */}
           <div className="flex justify-between items-center p-4 shadow-md border-b border-gray-200 flex-shrink-0">
             <h2 className="text-lg font-semibold text-black">Patient Tracker</h2>
-            <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)} className="bg-[#008080] hover:bg-[#008080] border-[#008080] text-black"> <Plus className="h-4 w-4 mr-2" /> Add Patient </Button>
+            <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)} className="bg-[#008080] hover:bg-[#008080] border-gray-400 text-white"> <Plus className="h-4 w-4 mr-2" /> Add Patient </Button>
           </div>
 
           {/* Patient List - Renders *internal* PatientCard */}
