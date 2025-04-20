@@ -541,7 +541,7 @@ const Tasks: React.FC = () => {
           {/* Header - Uses *internal* mock Button */}
           <div className="flex justify-between items-center p-4 shadow-md border-b border-gray-200 flex-shrink-0">
             <h2 className="text-lg font-semibold text-black">Patient Tracker</h2>
-            <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)} className="bg-[#008080] hover:bg-[#008080] border-gray-400 text-white"> <Plus className="h-4 w-4 mr-2" /> Add Patient </Button>
+            <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)} className="bg-[#008080] hover:bg-[#009999] border-gray-400 text-white"> <Plus className="h-4 w-4 mr-2" /> Add Patient </Button>
           </div>
 
           {/* Patient List - Renders *internal* PatientCard */}
