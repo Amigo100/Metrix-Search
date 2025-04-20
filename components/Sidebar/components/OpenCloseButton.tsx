@@ -9,8 +9,8 @@ interface Props {
 
 /* Keep in sync with AppLayout */
 const HEADER_HEIGHT = 80;   // px
-const CHATBAR_WIDTH   = 210; // px → left sidebar inner edge
-const PROMPTBAR_WIDTH = 250; // px → right sidebar inner edge
+const CHATBAR_WIDTH   = 230; // px → left sidebar inner edge
+const PROMPTBAR_WIDTH = 270; // px → right sidebar inner edge
 
 /* ── CLOSE (sidebar is open) ────────────────────────────────────────────── */
 export const CloseSidebarButton: React.FC<Props> = ({ side, onClick }) => {
