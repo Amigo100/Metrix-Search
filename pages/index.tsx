@@ -164,12 +164,12 @@ const TrustedBy: React.FC = () => {
     const scrollerRef = useRef<HTMLDivElement>(null);
     // Placeholder logos referencing /public/images/logos/ - Names updated slightly
     const logos = [
-        { name: "NHS Trust A", alt: "NHS Trust A Logo", src: "/images/logos/logo-placeholder-1.png" },
-        { name: "Clinical Group B", alt: "Clinical Group B Logo", src: "/images/logos/logo-placeholder-2.png" },
-        { name: "Healthcare Partner C", alt: "Healthcare Partner C Logo", src: "/images/logos/logo-placeholder-3.png" },
-        { name: "NHS Foundation Trust D", alt: "NHS Foundation Trust D Logo", src: "/images/logos/logo-placeholder-4.png" },
-        { name: "Research Institute E", alt: "Research Institute E Logo", src: "/images/logos/logo-placeholder-5.png" },
-        { name: "Primary Care Network F", alt: "Primary Care Network F Logo", src: "/images/logos/logo-placeholder-6.png" },
+        { name: "NHS Trust A", alt: "NHS Trust A Logo", src: "/logo-placeholder-1.png" },
+        { name: "Clinical Group B", alt: "Clinical Group B Logo", src: "/logo-placeholder-2.png" },
+        { name: "Healthcare Partner C", alt: "Healthcare Partner C Logo", src: "/logo-placeholder-3.png" },
+        { name: "NHS Foundation Trust D", alt: "NHS Foundation Trust D Logo", src: "/logo-placeholder-4.png" },
+        { name: "Research Institute E", alt: "Research Institute E Logo", src: "/logo-placeholder-5.png" },
+        { name: "Primary Care Network F", alt: "Primary Care Network F Logo", src: "/logo-placeholder-6.png" },
     ];
 
     useEffect(() => { /* Logo cloning effect - remains the same */
