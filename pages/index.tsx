@@ -15,7 +15,7 @@ interface FeatureCardProps {
   delay: string; // e.g., 'delay-100'
 }
 
-// FeatureCard Component - Updated icon background color
+// FeatureCard Component remains the same structurally
 const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, delay }) => {
   const ref = useRef<HTMLDivElement>(null);
   return (
@@ -26,8 +26,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, del
         delay
       )}
     >
-      {/* --- COLOR CHANGE: Teal to Orange Gradient --- */}
-      <div className="flex items-center justify-center h-14 w-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 text-white mb-5 shadow-md flex-shrink-0">
+      <div className="flex items-center justify-center h-14 w-14 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 text-white mb-5 shadow-md flex-shrink-0">
         {icon}
       </div>
       <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
@@ -46,10 +45,10 @@ interface TestimonialCardProps {
     delay: string;
 }
 
-// TestimonialCard Component - Updated avatar src naming convention
+// TestimonialCard Component updated for local images
 const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, name, title, avatarSrc, rating, delay }) => {
     const ref = useRef<HTMLDivElement>(null);
-    const renderStars = () => { /* Star rendering logic - remains the same */
+    const renderStars = () => { /* Star rendering logic */
         const stars = [];
         for (let i = 1; i <= 5; i++) { stars.push( <svg key={i} className={classNames( 'w-5 h-5 fill-current', i <= rating ? 'text-yellow-400' : 'text-gray-300' )} viewBox="0 0 20 20" > <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/> </svg> ); }
         return stars;
@@ -61,7 +60,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, name, title, a
             <div className="flex items-center mt-auto">
                 <img
                     className="h-10 w-10 rounded-full mr-3 object-cover bg-gray-200" // Added object-cover and bg-gray-200 fallback
-                    src={avatarSrc} // Use local path (e.g., /ortus-avatar-1.jpg)
+                    src={avatarSrc} // Use local path
                     alt={`${name} avatar`}
                     width={40} // Add width
                     height={40} // Add height
@@ -74,7 +73,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ quote, name, title, a
 };
 
 // --- Header Component ---
-// Updated logo, text, colors, and section link
+// Updated to use next/link for Login and Features pages
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   return (
@@ -83,15 +82,14 @@ const Header: React.FC = () => {
         {/* Logo */}
         <Link href="/" legacyBehavior>
             <a className="flex items-center space-x-2 animate-fadeInLeft cursor-pointer">
-              {/* --- IMAGE & TEXT CHANGE: Metrix to Ortus-iHealth --- */}
               <img
-                src="/ortus-logo.png" // NEW IMAGE NAME
-                alt="Ortus-iHealth Logo" // UPDATED ALT TEXT
-                width={32}
-                height={32}
-                className="h-8 w-8"
+                src="/MetrixAI.png" // Or metrix-logo.svg
+                alt="Metrix Logo"
+                width={32} // Corresponds to h-8 w-8
+                height={32} // Corresponds to h-8 w-8
+                className="h-8 w-8" // Keep size consistent
               />
-              <span className="font-bold text-2xl text-gray-800">Ortus-iHealth</span> {/* UPDATED TEXT */}
+              <span className="font-bold text-2xl text-gray-800">Metrix</span>
             </a>
         </Link>
 
@@ -99,29 +97,25 @@ const Header: React.FC = () => {
         <div className="hidden md:flex items-center space-x-7 animate-fadeIn delay-100">
           {/* Use next/link for page navigation */}
           <Link href="/features" legacyBehavior>
-            {/* --- COLOR CHANGE: Teal to Orange Hover --- */}
-            <a className="text-gray-600 hover:text-orange-700 font-medium transition duration-200 ease-in-out">Features</a>
+            <a className="text-gray-600 hover:text-teal-700 font-medium transition duration-200 ease-in-out">Features</a>
           </Link>
-           {/* --- LINK & TEXT CHANGE: On-Site Advantage to Platform Benefits --- */}
-          <Link href="/#platform-benefits" legacyBehavior>
-             <a className="text-gray-600 hover:text-orange-700 font-medium transition duration-200 ease-in-out">Platform Benefits</a>
+          <Link href="/#on-site" legacyBehavior>
+             <a className="text-gray-600 hover:text-teal-700 font-medium transition duration-200 ease-in-out">On-Site Advantage</a>
           </Link>
           <Link href="/#contact" legacyBehavior>
-            <a className="text-gray-600 hover:text-orange-700 font-medium transition duration-200 ease-in-out">Contact</a>
+            <a className="text-gray-600 hover:text-teal-700 font-medium transition duration-200 ease-in-out">Contact</a>
           </Link>
           <Link href="/login" legacyBehavior>
-            <a className="text-gray-600 hover:text-orange-700 font-medium transition duration-200 ease-in-out mr-3">Log In</a>
+            <a className="text-gray-600 hover:text-teal-700 font-medium transition duration-200 ease-in-out mr-3">Log In</a>
           </Link>
           <Link href="/#contact" legacyBehavior>
-            {/* --- COLOR CHANGE: Teal to Orange Gradient --- */}
-            <a className="bg-gradient-to-r from-orange-600 to-orange-800 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover-lift-strong text-sm hover:from-orange-500 hover:to-orange-700"> Request Demo </a>
+            <a className="bg-gradient-to-r from-teal-600 to-teal-800 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover-lift-strong text-sm hover:from-teal-400 hover:to-teal-600"> Request Demo </a>
           </Link>
         </div>
 
         {/* Mobile Menu Button */}
         <div className="md:hidden animate-fadeIn delay-100">
-          {/* --- COLOR CHANGE: Teal to Orange Hover/Focus --- */}
-          <button type="button" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-gray-500 hover:text-orange-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500" aria-controls="mobile-menu" aria-expanded={isMobileMenuOpen} >
+          <button type="button" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-gray-500 hover:text-teal-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500" aria-controls="mobile-menu" aria-expanded={isMobileMenuOpen} >
             <span className="sr-only">Open main menu</span>
             <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true" strokeWidth="2"> {isMobileMenuOpen ? ( <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /> ) : ( <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16m-7 6h7" /> )} </svg>
           </button>
@@ -133,22 +127,19 @@ const Header: React.FC = () => {
         <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg border-t border-gray-100 z-40" id="mobile-menu">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             <Link href="/features" legacyBehavior>
-                {/* --- COLOR CHANGE: Teal to Orange Hover --- */}
-                <a onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-700 hover:bg-gray-50">Features</a>
+                <a onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-700 hover:bg-gray-50">Features</a>
             </Link>
-            {/* --- LINK & TEXT CHANGE: On-Site Advantage to Platform Benefits --- */}
-            <Link href="/#platform-benefits" legacyBehavior>
-                <a onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-700 hover:bg-gray-50">Platform Benefits</a>
+            <Link href="/#on-site" legacyBehavior>
+                <a onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-700 hover:bg-gray-50">On-Site Advantage</a>
             </Link>
             <Link href="/#contact" legacyBehavior>
-                <a onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-700 hover:bg-gray-50">Contact</a>
+                <a onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-700 hover:bg-gray-50">Contact</a>
             </Link>
             <Link href="/login" legacyBehavior>
-                <a onClick={() => setIsMobileMenuOpen(false)} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-700 hover:bg-gray-50">Log In</a>
+                <a onClick={() => setIsMobileMenuOpen(false)} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-700 hover:bg-gray-50">Log In</a>
             </Link>
             <Link href="/#contact" legacyBehavior>
-                {/* --- COLOR CHANGE: Teal to Orange Gradient --- */}
-                <a onClick={() => setIsMobileMenuOpen(false)} className="block w-full text-center mt-2 bg-gradient-to-r from-orange-600 to-orange-800 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:from-orange-500 hover:to-orange-700"> Request Demo </a>
+                <a onClick={() => setIsMobileMenuOpen(false)} className="block w-full text-center mt-2 bg-gradient-to-r from-teal-600 to-teal-800 text-white font-semibold py-2.5 px-5 rounded-lg transition duration-300 ease-in-out shadow-md hover:from-teal-400 hover:to-teal-600"> Request Demo </a>
             </Link>
           </div>
         </div>
@@ -159,20 +150,19 @@ const Header: React.FC = () => {
 
 
 // --- Trusted By Component (with Scroller Logic) ---
-// Updated heading text
 const TrustedBy: React.FC = () => {
     const scrollerRef = useRef<HTMLDivElement>(null);
-    // Placeholder logos referencing /public/images/logos/ - Names updated slightly
+    // Placeholder logos referencing /public/images/logos/
     const logos = [
-        { name: "NHS Trust A", alt: "NHS Trust A Logo", src: "/logo-placeholder-1.png" },
-        { name: "Clinical Group B", alt: "Clinical Group B Logo", src: "/logo-placeholder-2.png" },
-        { name: "Healthcare Partner C", alt: "Healthcare Partner C Logo", src: "/logo-placeholder-3.png" },
-        { name: "NHS Foundation Trust D", alt: "NHS Foundation Trust D Logo", src: "/logo-placeholder-4.png" },
-        { name: "Research Institute E", alt: "Research Institute E Logo", src: "/logo-placeholder-5.png" },
-        { name: "Primary Care Network F", alt: "Primary Care Network F Logo", src: "/logo-placeholder-6.png" },
+        { name: "NHS Trust A", alt: "NHS Trust A Logo", src: "/images/logos/logo-placeholder-1.png" },
+        { name: "Clinical Group B", alt: "Clinical Group B Logo", src: "/images/logos/logo-placeholder-2.png" },
+        { name: "UK University C", alt: "UK University C Logo", src: "/images/logos/logo-placeholder-3.png" },
+        { name: "NZ DHB D", alt: "NZ DHB D Logo", src: "/images/logos/logo-placeholder-4.png" },
+        { name: "Research Inst. E", alt: "Research Institute E Logo", src: "/images/logos/logo-placeholder-5.png" },
+        { name: "Primary Care F", alt: "Primary Care F Logo", src: "/images/logos/logo-placeholder-6.png" },
     ];
 
-    useEffect(() => { /* Logo cloning effect - remains the same */
+    useEffect(() => { /* Logo cloning effect */
         const scrollerInner = scrollerRef.current;
         if (scrollerInner && scrollerInner.children.length === logos.length) {
             logos.forEach((logo, index) => {
@@ -186,8 +176,7 @@ const TrustedBy: React.FC = () => {
         <section className="py-16 sm:py-20 lg:py-24 bg-white">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12 sm:mb-16 animate-fadeInUp">
-                    {/* --- TEXT CHANGE: Updated Heading --- */}
-                    <h2 className="text-2xl font-semibold tracking-tight text-gray-600 sm:text-3xl"> Trusted by leading healthcare organisations </h2>
+                    <h2 className="text-2xl font-semibold tracking-tight text-gray-600 sm:text-3xl"> Collaborating with innovators in healthcare </h2>
                 </div>
                 <div className="relative logo-scroller w-full overflow-hidden">
                     <div ref={scrollerRef} className="scroller-inner">
@@ -214,58 +203,46 @@ const TrustedBy: React.FC = () => {
 };
 
 // --- Footer Component ---
-// Updated logo, text, company name, and copyright year
 const Footer: React.FC = () => {
     return (
        <footer className="bg-gray-900 text-gray-400">
-         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 xl:grid-cols-5">
-             <div className="col-span-2 md:col-span-4 xl:col-span-1 mb-8 xl:mb-0">
-               <div className="flex items-center space-x-2 mb-3">
-                 {/* --- LOGO & TEXT CHANGE: Replaced SVG with IMG, updated text --- */}
-                 <img
-                     src="/ortus-logo-footer-white.png" // SUGGESTED: Use a white/monochrome version for dark background
-                     alt="Ortus-iHealth Logo"
-                     width={28} // Corresponds to h-7 w-7 approx
-                     height={28}
-                     className="h-7 w-7"
-                 />
-                 <span className="font-bold text-xl text-white">Ortus-iHealth</span> {/* UPDATED TEXT */}
-               </div>
-               {/* --- TEXT CHANGE: Updated tagline --- */}
-               <p className="text-sm pr-4">Remote Monitoring & Virtual Ward Platform. Built by clinicians, for clinicians.</p>
-             </div>
-             {/* Footer Links - Use next/link */}
-             <div> <h3 className="text-sm font-semibold text-gray-200 tracking-wider uppercase mb-4">Platform</h3> <ul className="space-y-3"> <li><Link href="/features" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Features</a></Link></li> {/* --- LINK & TEXT CHANGE: Renamed section link --- */} <li><Link href="/#platform-benefits" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Platform Benefits</a></Link></li> <li><Link href="/security" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Security & Compliance</a></Link></li> <li><Link href="/#contact" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Request Demo</a></Link></li> </ul> </div>
-             <div> <h3 className="text-sm font-semibold text-gray-200 tracking-wider uppercase mb-4">Company</h3> <ul className="space-y-3"> <li><Link href="/about" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">About Us</a></Link></li> <li><Link href="/blog" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Blog</a></Link></li> <li><Link href="/careers" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Careers</a></Link></li> <li><Link href="/#contact" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Contact</a></Link></li> </ul> </div>
-             <div> <h3 className="text-sm font-semibold text-gray-200 tracking-wider uppercase mb-4">Resources</h3> <ul className="space-y-3"> <li><Link href="/docs" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Documentation</a></Link></li> <li><Link href="/case-studies" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Case Studies</a></Link></li> <li><Link href="/privacy" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Privacy Policy</a></Link></li> <li><Link href="/terms" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Terms of Service</a></Link></li> </ul> </div>
-             <div> <h3 className="text-sm font-semibold text-gray-200 tracking-wider uppercase mb-4">Connect</h3> <ul className="space-y-3"> <li><a href="#" target="_blank" rel="noopener noreferrer" className="hover:text-white transition duration-150 ease-in-out text-sm">LinkedIn</a></li> <li><a href="#" target="_blank" rel="noopener noreferrer" className="hover:text-white transition duration-150 ease-in-out text-sm">Twitter</a></li> <li><Link href="/#contact" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Contact Sales</a></Link></li> </ul> </div>
-           </div>
-           <div className="mt-12 border-t border-gray-700 pt-8 text-center">
-             {/* --- TEXT CHANGE: Updated Company Name & Year --- */}
-             <p className="text-sm">&copy; {new Date().getFullYear()} Ortus-iHealth Ltd. All rights reserved.</p>
-           </div>
-         </div>
-       </footer>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 xl:grid-cols-5">
+            <div className="col-span-2 md:col-span-4 xl:col-span-1 mb-8 xl:mb-0">
+              <div className="flex items-center space-x-2 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" viewBox="0 0 60 60" fill="none"> {/* Footer Logo */} <defs> <linearGradient id="reactGrad1F" x1="0%" y1="0%" x2="100%" y2="100%"> <stop offset="0%" style={{ stopColor: '#5fc2b1', stopOpacity: 1 }} /> <stop offset="100%" style={{ stopColor: '#3b9a9c', stopOpacity: 1 }} /> </linearGradient> <linearGradient id="reactGrad2F" x1="100%" y1="0%" x2="0%" y2="100%"> <stop offset="0%" style={{ stopColor: '#3b9a9c', stopOpacity: 1 }} /> <stop offset="100%" style={{ stopColor: '#1e6b6b', stopOpacity: 1 }} /> </linearGradient> </defs> <path d="M20 5 H40 Q45 5 45 10 V50 Q45 55 40 55 H20 Q15 55 15 50 V10 Q15 5 20 5 Z" fill="url(#reactGrad1F)"/> <path d="M5 20 H25 Q30 20 30 25 V35 Q30 40 25 40 H5 Q0 40 0 35 V25 Q0 20 5 20 Z" fill="url(#reactGrad2F)"/> <path d="M35 20 H55 Q60 20 60 25 V35 Q60 40 55 40 H35 Q30 40 30 35 V25 Q30 20 35 20 Z" fill="url(#reactGrad1F)" transform="translate(-2, 0)" /> </svg>
+                <span className="font-bold text-xl text-white">Metrix</span>
+              </div>
+              <p className="text-sm pr-4">The On-Site Clinical Assistant Platform. Built by clinicians, for clinicians.</p>
+            </div>
+            {/* Footer Links - Use next/link */}
+            <div> <h3 className="text-sm font-semibold text-gray-200 tracking-wider uppercase mb-4">Platform</h3> <ul className="space-y-3"> <li><Link href="/features" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Features</a></Link></li> <li><Link href="/#on-site" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">On-Site Advantage</a></Link></li> <li><Link href="/security" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Security</a></Link></li> <li><Link href="/#contact" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Request Demo</a></Link></li> </ul> </div>
+            <div> <h3 className="text-sm font-semibold text-gray-200 tracking-wider uppercase mb-4">Company</h3> <ul className="space-y-3"> <li><Link href="/about" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">About Us</a></Link></li> <li><Link href="/blog" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Blog</a></Link></li> <li><Link href="/careers" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Careers</a></Link></li> <li><Link href="/#contact" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Contact</a></Link></li> </ul> </div>
+            <div> <h3 className="text-sm font-semibold text-gray-200 tracking-wider uppercase mb-4">Resources</h3> <ul className="space-y-3"> <li><Link href="/docs" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Documentation</a></Link></li> <li><Link href="/case-studies" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Case Studies</a></Link></li> <li><Link href="/privacy" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Privacy Policy</a></Link></li> <li><Link href="/terms" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Terms of Service</a></Link></li> </ul> </div>
+            <div> <h3 className="text-sm font-semibold text-gray-200 tracking-wider uppercase mb-4">Connect</h3> <ul className="space-y-3"> <li><a href="#" target="_blank" rel="noopener noreferrer" className="hover:text-white transition duration-150 ease-in-out text-sm">LinkedIn</a></li> <li><a href="#" target="_blank" rel="noopener noreferrer" className="hover:text-white transition duration-150 ease-in-out text-sm">Twitter</a></li> <li><Link href="/#contact" legacyBehavior><a className="hover:text-white transition duration-150 ease-in-out text-sm">Contact Sales</a></Link></li> </ul> </div>
+          </div>
+          <div className="mt-12 border-t border-gray-700 pt-8 text-center">
+            <p className="text-sm">&copy; {new Date().getFullYear()} Metrix Health Ltd. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     );
 };
 
 
 // --- Landing Page Component (Represents index.tsx) ---
-// Updated text, colors, image names, feature descriptions, section content
 const LandingPage: React.FC = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const observedElementsRef = useRef<Set<Element>>(new Set());
-  const intersectionCallback = useCallback((entries: IntersectionObserverEntry[]) => { /* Intersection logic - remains the same */ entries.forEach(entry => { if (entry.isIntersecting) { const target = entry.target as HTMLElement; if (target.style.animationPlayState !== 'running') { target.style.animationPlayState = 'running'; } } }); }, []);
-  useEffect(() => { /* Observer setup and cleanup - remains the same */ if (!('IntersectionObserver' in window)) { console.log("IntersectionObserver not supported..."); document.querySelectorAll('.animate-fadeInUp, .animate-fadeInLeft, .animate-fadeIn').forEach(el => { (el as HTMLElement).style.animationPlayState = 'running'; }); return; } observerRef.current = new IntersectionObserver(intersectionCallback, { threshold: 0.1 }); const observer = observerRef.current; const elements = document.querySelectorAll('.animate-fadeInUp, .animate-fadeInLeft, .animate-fadeIn'); elements.forEach(el => { if (!(el as HTMLElement).style.animationPlayState || (el as HTMLElement).style.animationPlayState === 'paused') { (el as HTMLElement).style.animationPlayState = 'paused'; } observer.observe(el); observedElementsRef.current.add(el); }); return () => { if (observer) { observedElementsRef.current.forEach(el => observer.unobserve(el)); observer.disconnect(); observedElementsRef.current.clear(); } }; }, [intersectionCallback]);
+  const intersectionCallback = useCallback((entries: IntersectionObserverEntry[]) => { /* Intersection logic */ entries.forEach(entry => { if (entry.isIntersecting) { const target = entry.target as HTMLElement; if (target.style.animationPlayState !== 'running') { target.style.animationPlayState = 'running'; } } }); }, []);
+  useEffect(() => { /* Observer setup and cleanup */ if (!('IntersectionObserver' in window)) { console.log("IntersectionObserver not supported..."); document.querySelectorAll('.animate-fadeInUp, .animate-fadeInLeft, .animate-fadeIn').forEach(el => { (el as HTMLElement).style.animationPlayState = 'running'; }); return; } observerRef.current = new IntersectionObserver(intersectionCallback, { threshold: 0.1 }); const observer = observerRef.current; const elements = document.querySelectorAll('.animate-fadeInUp, .animate-fadeInLeft, .animate-fadeIn'); elements.forEach(el => { if (!(el as HTMLElement).style.animationPlayState || (el as HTMLElement).style.animationPlayState === 'paused') { (el as HTMLElement).style.animationPlayState = 'paused'; } observer.observe(el); observedElementsRef.current.add(el); }); return () => { if (observer) { observedElementsRef.current.forEach(el => observer.unobserve(el)); observer.disconnect(); observedElementsRef.current.clear(); } }; }, [intersectionCallback]);
 
   return (
     <>
-        {/* Global Styles necessary for this page - Updated colors */}
+        {/* Global Styles necessary for this page */}
         <style jsx global>{`
-            body { font-family: 'Inter', sans-serif; background-color: #fffaf0; /* Light orange background hint */ overflow-x: hidden; }
-            /* --- COLOR CHANGE: Teal shadow to Orange shadow --- */
-            .hover-lift-strong:hover { transform: translateY(-6px); box-shadow: 0 15px 25px -5px rgba(249, 115, 22, 0.2), 0 8px 10px -6px rgba(249, 115, 22, 0.2); transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; }
+            body { font-family: 'Inter', sans-serif; background-color: #f7fdfd; overflow-x: hidden; }
+            .hover-lift-strong:hover { transform: translateY(-6px); box-shadow: 0 15px 25px -5px rgba(59, 154, 156, 0.2), 0 8px 10px -6px rgba(59, 154, 156, 0.2); transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; }
             .hover-lift-subtle:hover { transform: translateY(-3px); box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07); transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
             @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
             @keyframes fadeInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
@@ -281,48 +258,38 @@ const LandingPage: React.FC = () => {
             .logo-scroller img:hover { filter: grayscale(0%); opacity: 1; }
             .testimonial-card { background-color: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; }
             .form-input { width: 100%; border-radius: 0.5rem; border: 1px solid #d1d5db; padding: 0.75rem 1rem; transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
-            /* --- COLOR CHANGE: Teal focus ring to Orange focus ring --- */
-            .form-input:focus { outline: none; border-color: #f97316; box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.3); }
+            .form-input:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 2px rgba(59, 154, 156, 0.3); }
             html { scroll-behavior: smooth; }
         `}</style>
 
       <Header /> {/* Render Header */}
 
       {/* Hero Section */}
-      {/* --- COLOR CHANGE: Teal background gradient to Orange --- */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-white via-orange-50 to-white pt-24 pb-28 sm:pt-32 sm:pb-36 lg:pt-40 lg:pb-48">
-          {/* --- COLOR CHANGE: Teal background glow to Orange --- */}
-          <div className="absolute inset-0 opacity-10" aria-hidden="true"> {/* Background Glow */} <svg className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/4" width="1200" height="1200" fill="none" viewBox="0 0 1200 1200"> <circle cx="600" cy="600" r="600" fill="url(#ortusGlow1)" /> <defs><radialGradient id="ortusGlow1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(600 600) rotate(90) scale(600)"><stop stopColor="#fb923c"/><stop offset="1" stopColor="#f97316" stopOpacity="0"/></radialGradient></defs> </svg> </div>
+      <section className="relative overflow-hidden bg-gradient-to-b from-white via-teal-50 to-white pt-24 pb-28 sm:pt-32 sm:pb-36 lg:pt-40 lg:pb-48">
+          <div className="absolute inset-0 opacity-10" aria-hidden="true"> {/* Background Glow */} <svg className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/4" width="1200" height="1200" fill="none" viewBox="0 0 1200 1200"> <circle cx="600" cy="600" r="600" fill="url(#reactGlow1)" /> <defs><radialGradient id="reactGlow1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(600 600) rotate(90) scale(600)"><stop stopColor="#2dd4bf"/><stop offset="1" stopColor="#0d9488" stopOpacity="0"/></radialGradient></defs> </svg> </div>
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-              {/* --- TEXT & COLOR CHANGE: Updated Badge --- */}
-              <span className="inline-flex items-center px-4 py-1 rounded-full text-sm font-semibold bg-white text-orange-800 shadow-sm mb-5 animate-fadeInUp"> ⚕️ Remote Monitoring & Virtual Wards </span>
-              {/* --- TEXT & COLOR CHANGE: Updated Heading --- */}
-              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tighter text-gray-900 mb-6 !leading-tight animate-fadeInUp delay-100"> The Clinician-Built Platform for <br className="hidden sm:block"/> <span className="bg-gradient-to-r from-orange-600 to-orange-400 text-transparent bg-clip-text">Remote Care</span>. </h1>
-              {/* --- TEXT CHANGE: Updated Subheading --- */}
-              <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-10 animate-fadeInUp delay-200"> Ortus-iHealth enables seamless remote patient monitoring and virtual wards. Collect qualitative & quantitative data, manage patients via configurable dashboards, and improve outcomes. Built by a consultant cardiologist for clinical teams. </p>
+              <span className="inline-flex items-center px-4 py-1 rounded-full text-sm font-semibold bg-white text-teal-800 shadow-sm mb-5 animate-fadeInUp"> 🚀 Built by Clinicians, for Clinicians </span>
+              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tighter text-gray-900 mb-6 !leading-tight animate-fadeInUp delay-100"> The On-Site Clinical <br className="hidden sm:block"/> <span className="bg-gradient-to-r from-teal-600 to-teal-400 text-transparent bg-clip-text">Assistant Platform</span>. </h1>
+              <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto mb-10 animate-fadeInUp delay-200"> Metrix integrates AI Scribe, Clinical Chat, Calculators, Semantic Search & Predictive Insights into a secure, locally-run platform. Enhance efficiency and decision-making without compromising data security. Developed by UK/NZ doctors. </p>
               <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-5 animate-fadeInUp delay-300">
                 <Link href="/#contact" legacyBehavior>
-                    {/* --- COLOR CHANGE: Teal to Orange Gradient Button --- */}
-                    <a className="w-full sm:w-auto bg-gradient-to-r from-orange-600 to-orange-800 text-white font-semibold py-3.5 px-8 rounded-lg transition duration-300 ease-in-out shadow-lg text-lg hover-lift-strong hover:from-orange-500 hover:to-orange-700"> Request a Demo </a>
+                  <a className="w-full sm:w-auto bg-gradient-to-r from-teal-600 to-teal-800 text-white font-semibold py-3.5 px-8 rounded-lg transition duration-300 ease-in-out shadow-lg text-lg hover-lift-strong hover:from-teal-400 hover:to-teal-600"> Request a Demo </a>
                 </Link>
-                <Link href="#features" legacyBehavior>
-                    <a className="w-full sm:w-auto bg-white hover:bg-gray-50 text-gray-700 font-medium py-3.5 px-8 rounded-lg transition duration-150 ease-in-out shadow-md border border-gray-200 text-lg hover-lift-subtle"> Explore Features </a>
+                <Link href="/#features" legacyBehavior>
+                  <a className="w-full sm:w-auto bg-white hover:bg-gray-50 text-gray-700 font-medium py-3.5 px-8 rounded-lg transition duration-150 ease-in-out shadow-md border border-gray-200 text-lg hover-lift-subtle"> Explore Features </a>
                 </Link>
               </div>
-               {/* --- TEXT CHANGE: Updated Certifications --- */}
-              <p className="mt-6 text-sm text-gray-500 animate-fadeInUp delay-400">ISO27001 | DCB0129 | Cyber Essentials Plus | MHRA Class I</p>
+              <p className="mt-6 text-sm text-gray-500 animate-fadeInUp delay-400">Seeking Seed Funding & Pilot Partners.</p>
               <div className="mt-20 animate-fadeInUp delay-500">
-                  {/* --- IMAGE & STYLE CHANGE: Metrix to Ortus Overview, updated shadow --- */}
-                  <img
-                      src="/ortus-overview.png" // NEW IMAGE NAME
-                      alt="Ortus-iHealth Platform Overview" // UPDATED ALT TEXT
-                      width={1000}
-                      height={600}
-                      className="rounded-xl shadow-2xl mx-auto border border-gray-200 object-cover"
-                      // --- COLOR CHANGE: Teal shadow to Orange shadow ---
-                      style={{boxShadow: '0 25px 50px -12px rgba(249, 115, 22, 0.25)'}}
-                      onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src='/images/placeholder-1000x600-orange.png';}} // Fallback image suggestion
-                  />
+                <img
+                    src="/metrix-overview.png" // Local image path
+                    alt="Metrix Platform Overview"
+                    width={1000} // Specify width
+                    height={600} // Specify height
+                    className="rounded-xl shadow-2xl mx-auto border border-gray-200 object-cover" // Added object-cover
+                    style={{boxShadow: '0 25px 50px -12px rgba(59, 154, 156, 0.25)'}}
+                    onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src='/images/placeholder-1000x600.png';}} // Fallback image
+                />
               </div>
           </div>
       </section>
@@ -330,82 +297,60 @@ const LandingPage: React.FC = () => {
       {/* Features Section */}
       <section id="features" className="py-20 sm:py-28 lg:py-32 bg-white scroll-mt-20"> {/* Added scroll-mt */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* --- TEXT & COLOR CHANGE: Updated Headings --- */}
-          <div className="text-center mb-16 sm:mb-20 animate-fadeInUp"> <h2 className="text-sm font-semibold text-orange-600 tracking-wide uppercase">Ortus-iHealth Capabilities</h2> <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl"> Comprehensive Remote Patient Monitoring </p> <p className="mt-5 max-w-2xl text-xl text-gray-500 mx-auto"> A flexible platform designed to manage virtual wards and monitor patients remotely across various pathways. </p> </div>
+          <div className="text-center mb-16 sm:mb-20 animate-fadeInUp"> <h2 className="text-sm font-semibold text-teal-600 tracking-wide uppercase">Metrix Capabilities</h2> <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl"> Your Integrated Clinical Co-Pilot </p> <p className="mt-5 max-w-2xl text-xl text-gray-500 mx-auto"> A suite of powerful tools designed to augment clinical workflow and decision support, running securely on-site. </p> </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-             {/* --- FEATURE CARD CONTENT UPDATED for Ortus-iHealth --- */}
-            <FeatureCard delay="delay-100" icon={<svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" /> </svg>} title="Holistic Data Collection" description="Gather qualitative (symptoms, questionnaires) and quantitative data (vitals) via Bluetooth, manual entry, or integrated devices." />
-            <FeatureCard delay="delay-200" icon={<svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17.25v-.035L12 15l2.25 2.215V17.25h4.5A2.25 2.25 0 0021 15V6.75A2.25 2.25 0 0018.75 4.5h-13.5A2.25 2.25 0 003 6.75V15A2.25 2.25 0 005.25 17.25h4.5zm0 0H5.25" /> </svg>} title="Configurable Dashboard" description="Monitor patient data on a customizable dashboard with alerts flagging Red, Amber, or Gray based on set thresholds." />
-            <FeatureCard delay="delay-300" icon={<svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /> </svg>} title="In-Platform Actions & Audit" description="Action alerts directly within the platform, maintaining a clear audit trail for seamless team collaboration." />
-            <FeatureCard delay="delay-400" icon={<svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /> </svg>} title="Custom Questionnaires" description="Configure bespoke questionnaires tailored to specific pathways (Cardiac, Respiratory, Obstetric, etc.)." />
-            <FeatureCard delay="delay-500" icon={<svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" /> </svg>} title="Integrated Telehealth" description="Book and launch telehealth appointments directly within the platform for a unified patient experience." />
-            <FeatureCard delay="delay-600" icon={<svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /> </svg>} title="EHR Integration & Onboarding" description="Swift NHS Spine PDS integration for easy onboarding, plus existing integrations with multiple UK EHRs." />
+            <FeatureCard delay="delay-100" icon={<svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> </svg>} title="AI Clinical Scribe" description="Real-time, accurate documentation generated from patient conversations, customizable to your style." />
+            <FeatureCard delay="delay-200" icon={<svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /> </svg>} title="Clinical Chatbot" description="Access clinical knowledge, differential diagnoses, and summaries instantly (similar to Glass Health)." />
+            <FeatureCard delay="delay-300" icon={<svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 14h.01M9 11h.01M12 11h.01M15 11h.01M12 4v1m0 18v-1m4-14h1m-19 0h1m17 4v1m0 4v1m0 4v1m-1 4h-1m-4-1h-1m-4-1h-1m-4-1h-1m19-4h-1m-4-1h-1m-4-1h-1m-4-1h-1M4 12v-1m0-4V7m0-4V3m4 18v-1m4-1v-1m4-1v-1m4-1v-1" /> </svg>} title="Clinical Calculator" description="Integrated scoring systems and calculators at your fingertips (like MDCalc)." />
+            <FeatureCard delay="delay-400" icon={<svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /> <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 14h18" /> </svg>} title="Semantic Guideline Search" description="Instantly search local trust guidelines and policy documents using natural language queries." />
+            <FeatureCard delay="delay-500" icon={<svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /> </svg>} title="Predictive Insights (ED)" description="ML models trained on 160k ED visits predict wait times and admission likelihood." />
+            <FeatureCard delay="delay-600" icon={<svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}> <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /> </svg>} title="Secure On-Site Operation" description="Runs entirely within your local network, ensuring patient data never leaves your control." />
           </div>
         </div>
       </section>
 
-      {/* --- SECTION REFRAMED: On-Site Advantage -> Key Platform Benefits --- */}
-      <section id="platform-benefits" className="py-20 sm:py-28 lg:py-32 bg-gradient-to-b from-white to-orange-50 scroll-mt-20"> {/* Added scroll-mt, ID change, color change */}
+      {/* Workflow Streamlining Section */}
+      <section id="on-site" className="py-20 sm:py-28 lg:py-32 bg-gradient-to-b from-white to-teal-50 scroll-mt-20"> {/* Added scroll-mt */}
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              {/* --- TEXT & COLOR CHANGE: Updated Headings & Description --- */}
-              <div className="text-center mb-16 sm:mb-20 animate-fadeInUp"> <h3 className="text-sm font-semibold text-orange-600 tracking-wide uppercase">Key Platform Benefits</h3> <h2 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl"> Flexible & Secure Monitoring </h2> <p className="mt-5 max-w-3xl text-xl text-gray-500 mx-auto"> Ortus-iHealth is designed by clinicians to be intuitive, secure, and integrate smoothly into existing workflows, backed by robust compliance and proven results. </p> </div>
+              <div className="text-center mb-16 sm:mb-20 animate-fadeInUp"> <h3 className="text-sm font-semibold text-teal-600 tracking-wide uppercase">The On-Site Advantage</h3> <h2 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl"> Intelligence Where You Need It </h2> <p className="mt-5 max-w-3xl text-xl text-gray-500 mx-auto"> Metrix operates entirely on your local infrastructure. No cloud dependency means enhanced speed, reliability, and unparalleled data security for sensitive patient information. </p> </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-start">
-                  {/* --- CONTENT BLOCK 1: Updated for Ortus-iHealth --- */}
                   <div className="text-center animate-fadeInUp delay-200">
-                      {/* --- IMAGE CHANGE: Suggestion for Dashboard Mockup --- */}
-                      <img src="/ortus-dashboard-mockup.png" alt="Ortus-iHealth Dashboard" width={450} height={350} className="rounded-2xl shadow-xl mx-auto mb-8 border border-gray-200 w-full max-w-md object-contain bg-white p-2" onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src='/images/placeholder-450x350-orange.png';}}/>
-                      <h3 className="text-2xl font-semibold text-gray-900 mb-3 tracking-tight"> Clinician-Designed Workflow </h3> <p className="text-gray-600 max-w-md mx-auto"> Developed by a consultant cardiologist, featuring an intuitive dashboard with RAG flagging and in-platform actions to streamline care. </p>
+                    <img src="/local-network.png" alt="Local Network Security" width={400} height={300} className="rounded-2xl shadow-xl mx-auto mb-8 border border-gray-200 w-full max-w-sm object-cover" onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src='/images/placeholder-400x300.png';}}/>
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-3 tracking-tight"> Maximum Data Security </h3> <p className="text-gray-600 max-w-md mx-auto"> Patient data is processed and stored locally, meeting stringent privacy regulations and eliminating cloud-related risks. </p>
                   </div>
-                   {/* --- CONTENT BLOCK 2: Updated for Ortus-iHealth --- */}
                   <div className="text-center animate-fadeInUp delay-400">
-                       {/* --- IMAGE CHANGE: Suggestion for Integration/App Data Flow --- */}
-                      <img src="/ortus-integration-flow.png" alt="Data Integration Flow" width={450} height={350} className="rounded-2xl shadow-xl mx-auto mb-8 border border-gray-200 w-full max-w-md object-contain bg-white p-2" onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src='/images/placeholder-450x350-orange.png';}}/>
-                      <h3 className="text-2xl font-semibold text-gray-900 mb-3 tracking-tight"> Seamless Data Integration </h3> <p className="text-gray-600 max-w-md mx-auto"> Easily onboard patients via NHS Spine PDS and connect with various devices (Bluetooth/Manual). Integrates with existing UK EHRs. </p>
+                    <img src="/offline-capability.png" alt="Offline capability graphic" width={400} height={300} className="rounded-2xl shadow-xl mx-auto mb-8 border border-gray-200 w-full max-w-sm object-cover" onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src='/images/placeholder-400x300.png';}}/>
+                     <h3 className="text-2xl font-semibold text-gray-900 mb-3 tracking-tight"> Uninterrupted Performance </h3> <p className="text-gray-600 max-w-md mx-auto"> Network outages won't disrupt your workflow. Metrix continues to operate reliably within your local environment. </p>
                   </div>
               </div>
           </div>
       </section>
 
-      {/* --- SECTION REFRAMED: Personalize Notes -> Flexible Configuration --- */}
+      {/* Personalize Notes Section */}
       <section className="py-20 sm:py-28 lg:py-32 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              {/* --- TEXT & COLOR CHANGE: Updated Headings & Description --- */}
-              <div className="text-center mb-16 sm:mb-20 animate-fadeInUp"> <h3 className="text-sm font-semibold text-orange-600 tracking-wide uppercase">Flexible Configuration</h3> <h2 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl"> Adaptable to Your Pathways </h2> <p className="mt-5 max-w-3xl text-xl text-gray-500 mx-auto"> Tailor dashboards, alert thresholds, questionnaires, and patient content libraries to meet the specific needs of your clinical pathways and patient cohorts. </p> </div>
-               {/* Grid layout updated to potentially accommodate 3 items */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16 items-start">
-                   {/* --- CONTENT BLOCK 1: Updated for Ortus-iHealth --- */}
+              <div className="text-center mb-16 sm:mb-20 animate-fadeInUp"> <h3 className="text-sm font-semibold text-teal-600 tracking-wide uppercase">Customization</h3> <h2 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl"> Tailor Metrix to Your Needs </h2> <p className="mt-5 max-w-3xl text-xl text-gray-500 mx-auto"> Configure scribe outputs, chatbot knowledge sources, and predictive models to match your specific clinical context and preferences. </p> </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-start">
                   <div className="text-center animate-fadeInUp delay-200">
-                      {/* --- IMAGE CHANGE: Suggestion for Dashboard Config UI --- */}
-                      <img src="/ortus-dashboard-config.png" alt="UI showing dashboard configuration" width={500} height={350} className="rounded-2xl shadow-xl mx-auto mb-8 border border-gray-200 w-full bg-white p-4 object-contain" onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src='/images/placeholder-500x350-orange.png';}}/>
-                      <h3 className="text-2xl font-semibold text-gray-900 mb-3 tracking-tight"> Configurable Dashboards & Alerts </h3> <p className="text-gray-600 max-w-md mx-auto"> Customize data views and set specific Red/Amber/Gray thresholds for alerts tailored to individual patient needs or pathway protocols. </p>
+                    <img src="/scribe-settings-ui.png" alt="UI showing scribe settings" width={500} height={350} className="rounded-2xl shadow-xl mx-auto mb-8 border border-gray-200 w-full max-w-lg bg-white p-4 object-contain" onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src='/images/placeholder-500x350.png';}}/>
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-3 tracking-tight"> Customizable Scribe </h3> <p className="text-gray-600 max-w-md mx-auto"> Adjust templates, acronym expansions, and formatting rules for notes that fit your documentation style. </p>
                   </div>
-                  {/* --- CONTENT BLOCK 2: Updated for Ortus-iHealth --- */}
                   <div className="text-center animate-fadeInUp delay-400">
-                      {/* --- IMAGE CHANGE: Suggestion for Questionnaire Builder UI --- */}
-                      <img src="/ortus-questionnaire-builder.png" alt="UI showing questionnaire builder" width={500} height={350} className="rounded-2xl shadow-xl mx-auto mb-8 border border-gray-200 w-full bg-white p-4 object-contain" onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src='/images/placeholder-500x350-orange.png';}}/>
-                      <h3 className="text-2xl font-semibold text-gray-900 mb-3 tracking-tight"> Pathway-Specific Content </h3> <p className="text-gray-600 max-w-md mx-auto"> Build custom questionnaires and tag diagnoses to provide patients with relevant self-management resources from your library. </p>
-                  </div>
-                   {/* --- CONTENT BLOCK 3: Added for Patient App --- */}
-                  <div className="text-center animate-fadeInUp delay-600 lg:col-span-1 md:col-span-2"> {/* Adjust span if needed */}
-                      {/* --- IMAGE CHANGE: Suggestion for Patient App Screen --- */}
-                      <img src="/ortus-patient-app-screen.png" alt="Ortus-iHealth Patient App Screen" width={300} height={600} className="rounded-2xl shadow-xl mx-auto mb-8 border border-gray-200 max-w-xs w-full bg-white p-2 object-contain" onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src='/images/placeholder-300x600-orange.png';}}/>
-                      <h3 className="text-2xl font-semibold text-gray-900 mb-3 tracking-tight"> Engaging Patient Experience </h3> <p className="text-gray-600 max-w-md mx-auto"> User-friendly patient app drives high engagement and satisfaction. Features 2-way messaging, data entry, and access to self-help content. </p>
+                    <img src="/chatbot-knowledge-ui.png" alt="UI showing chatbot knowledge source selection" width={500} height={350} className="rounded-2xl shadow-xl mx-auto mb-8 border border-gray-200 w-full max-w-lg bg-white p-4 object-contain" onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src='/images/placeholder-500x350.png';}}/>
+                     <h3 className="text-2xl font-semibold text-gray-900 mb-3 tracking-tight"> Configurable Knowledge </h3> <p className="text-gray-600 max-w-md mx-auto"> Point the chatbot and semantic search towards your specific local guidelines, formularies, and protocols. </p>
                   </div>
               </div>
           </div>
       </section>
 
       {/* Testimonials Section */}
-       {/* --- COLOR CHANGE: Teal background gradient to Orange --- */}
-      <section className="py-20 sm:py-28 lg:py-32 bg-gradient-to-b from-orange-50 to-white">
+      <section className="py-20 sm:py-28 lg:py-32 bg-gradient-to-b from-teal-50 to-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-               {/* --- TEXT CHANGE: Updated Headings --- */}
-              <div className="text-center mb-16 sm:mb-20 animate-fadeInUp"> <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl"> Proven Results & Satisfaction </h2> <p className="mt-5 max-w-2xl text-xl text-gray-500 mx-auto"> Supporting over 13,000 patients with improved outcomes, organisational savings, and high user satisfaction. </p> </div>
+              <div className="text-center mb-16 sm:mb-20 animate-fadeInUp"> <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl"> Clinician Approved </h2> <p className="mt-5 max-w-2xl text-xl text-gray-500 mx-auto"> Hear from early adopters and collaborators. </p> </div>
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                   {/* --- TESTIMONIAL CONTENT & AVATAR SRC UPDATED --- */}
-                  <TestimonialCard delay="delay-200" quote="Ortus-iHealth's dashboard gives us a clear overview of our virtual ward patients. The configurable alerts are key for prioritising clinical attention effectively." name="Dr. Ben Carter" title="Consultant Cardiologist, St Barts Heart Centre" avatarSrc="/ortus-avatar-1.jpg" rating={5} />
-                  <TestimonialCard delay="delay-300" quote="The patient app is incredibly easy to use, which has led to fantastic engagement from our respiratory patients. Data flows seamlessly, saving our team valuable time." name="Sarah Jenkins" title="Respiratory Nurse Specialist, UK" avatarSrc="/ortus-avatar-2.jpg" rating={5} />
-                  <TestimonialCard delay="delay-400" quote="Implementing Ortus-iHealth for our post-natal monitoring has improved patient experience and allowed us to identify potential issues earlier. The integration was straightforward." name="Maria Garcia" title="Digital Midwife Lead, NHS Trust" avatarSrc="/ortus-avatar-3.jpg" rating={4} />
+                  <TestimonialCard delay="delay-200" quote="Metrix's on-site model was crucial for us. The AI scribe is excellent, and having integrated calculators and guideline search saves significant time during busy shifts." name="Dr. Aisha Khan" title="Emergency Medicine Consultant, UK" avatarSrc="/avatar-1.jpg" rating={5} />
+                  <TestimonialCard delay="delay-300" quote="The predictive insights for ED wait times have been surprisingly accurate, helping us manage patient flow more effectively. The chatbot is great for quick lookups." name="Mr. David Chen" title="Hospital Operations Manager, NZ" avatarSrc="/avatar-2.jpg" rating={4} />
+                  <TestimonialCard delay="delay-400" quote="As clinicians ourselves, the Metrix team understands the nuances of our workflow. The ability to search local guidelines securely is a feature we've needed for years." name="Dr. Olivia Wells" title="General Practitioner, UK" avatarSrc="/avatar-3.jpg" rating={5} />
               </div>
           </div>
       </section>
@@ -414,36 +359,29 @@ const LandingPage: React.FC = () => {
       <TrustedBy />
 
       {/* Contact Form Section */}
-       {/* --- COLOR CHANGE: Teal background gradient to Orange --- */}
-      <section id="contact" className="py-20 sm:py-28 lg:py-32 bg-gradient-to-b from-white to-orange-50 scroll-mt-20"> {/* Added scroll-mt, color change */}
+      <section id="contact" className="py-20 sm:py-28 lg:py-32 bg-gradient-to-b from-white to-teal-50 scroll-mt-20"> {/* Added scroll-mt */}
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              {/* --- TEXT CHANGE: Updated Heading --- */}
-              <div className="text-center mb-12 sm:mb-16 animate-fadeInUp"> <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl"> Connect With Ortus-iHealth </h2> <p className="mt-5 max-w-xl text-xl text-gray-500 mx-auto"> Interested in a demo or learning how Ortus-iHealth can support your remote monitoring or virtual ward initiatives? Reach out to our team. </p> </div>
+              <div className="text-center mb-12 sm:mb-16 animate-fadeInUp"> <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl"> Connect With Metrix </h2> <p className="mt-5 max-w-xl text-xl text-gray-500 mx-auto"> Interested in a demo, pilot program, or investment opportunities? Reach out to our team. </p> </div>
               <div className="max-w-2xl mx-auto animate-fadeInUp delay-200">
                   <form action="#" method="POST" className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                       <div> <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label> <input type="text" name="name" id="name" autoComplete="name" required className="form-input" placeholder="Your Name"/> </div>
-                      <div> <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Work Email Address</label> <input type="email" name="email" id="email" autoComplete="email" required className="form-input" placeholder="you@organisation.nhs.uk"/> </div>
-                      <div> <label htmlFor="organisation" className="block text-sm font-medium text-gray-700 mb-1">Organisation</label> <input type="text" name="organisation" id="organisation" required className="form-input" placeholder="Your NHS Trust / Organisation"/> </div>
-                      <div> <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">Subject</label> <input type="text" name="subject" id="subject" required className="form-input" placeholder="Demo Request / General Inquiry"/> </div>
-                      <div> <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Message</label> <textarea id="message" name="message" rows={4} required className="form-input" placeholder="Please provide some details about your interest (e.g., pathway, patient numbers)..."></textarea> </div>
-                      <div className="text-center">
-                          {/* --- COLOR CHANGE: Teal to Orange Gradient Button --- */}
-                          <button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-orange-600 to-orange-800 text-white font-semibold py-3 px-10 rounded-lg transition duration-300 ease-in-out shadow-lg text-lg hover-lift-strong hover:from-orange-500 hover:to-orange-700"> Send Message </button> </div>
+                      <div> <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Work Email Address</label> <input type="email" name="email" id="email" autoComplete="email" required className="form-input" placeholder="you@hospital.org"/> </div>
+                      <div> <label htmlFor="organisation" className="block text-sm font-medium text-gray-700 mb-1">Organisation</label> <input type="text" name="organisation" id="organisation" required className="form-input" placeholder="Your Hospital / Clinic"/> </div>
+                      <div> <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">Subject</label> <input type="text" name="subject" id="subject" required className="form-input" placeholder="Demo Request / Investment Inquiry / Pilot Program"/> </div>
+                      <div> <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Message</label> <textarea id="message" name="message" rows={4} required className="form-input" placeholder="Please provide some details about your interest..."></textarea> </div>
+                      <div className="text-center"> <button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-teal-600 to-teal-800 text-white font-semibold py-3 px-10 rounded-lg transition duration-300 ease-in-out shadow-lg text-lg hover-lift-strong hover:from-teal-400 hover:to-teal-600"> Send Message </button> </div>
                   </form>
               </div>
           </div>
       </section>
 
       {/* Call to Action Section */}
-      {/* --- COLOR CHANGE: Teal background gradient to Orange --- */}
-      <section className="bg-gradient-to-r from-orange-800 to-orange-600">
+      <section className="bg-gradient-to-r from-teal-800 to-teal-600">
           <div className="max-w-3xl mx-auto text-center py-16 px-4 sm:py-24 sm:px-6 lg:px-8 animate-fadeInUp">
-              <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl tracking-tight"> <span className="block text-white">Ready to Enhance Your Remote Care?</span> </h2>
-              {/* --- TEXT & COLOR CHANGE: Updated Text --- */}
-              <p className="mt-6 text-lg leading-7 text-orange-100 max-w-xl mx-auto"> Discover how Ortus-iHealth's clinician-built, secure platform can streamline virtual wards and improve patient monitoring at your organisation. </p>
+              <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl tracking-tight"> <span className="block text-white">Ready to Transform Your Clinical Workflow?</span> </h2>
+              <p className="mt-6 text-lg leading-7 text-teal-100 max-w-xl mx-auto"> Discover how Metrix's secure, on-site platform can enhance efficiency and clinical decision support at your organisation. </p>
               <Link href="/#contact" legacyBehavior>
-                  {/* --- COLOR CHANGE: Teal text to Orange text on button --- */}
-                  <a className="mt-10 w-full inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-semibold rounded-lg text-orange-700 bg-white hover:bg-gray-100 sm:w-auto shadow-lg transition duration-200 ease-in-out hover-lift-strong"> Request Demo or Information </a>
+                <a className="mt-10 w-full inline-flex items-center justify-center px-10 py-4 border border-transparent text-lg font-semibold rounded-lg text-teal-700 bg-white hover:bg-gray-100 sm:w-auto shadow-lg transition duration-200 ease-in-out hover-lift-strong"> Request Demo or Information </a>
               </Link>
           </div>
       </section>
