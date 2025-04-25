@@ -90,21 +90,15 @@ export const initialState: HomeInitialState = {
       description: 'A structured template for detailed discharge summary documentation.',
       content: `CHIEF COMPLAINT:
 
-HISTORY OF PRESENTING COMPLAINT:
-  - Details of main symptom(s):
-  - Duration of main symptom(s):
-  - Severity of main symptom(s):
-  - Exacerbating or ameliorating factors with respect to main symptom(s):
-  - Symptoms stated to NOT be present:
-  - Other aspects of presenting complaint history not specified above:
+HISTORY OF PRESENTING COMPLAINT: (This should include details of the main symptom(s), including duration, severity, exacerbating factors, ameliorating factors, and time-course, as well as signs or symptoms explivity stated as not present, and other information related to the presenting complaint - as reported by the patient Use short senteces and start each new line with a fixed indent of three spaces.)
 
-PAST MEDICAL HISTORY: (Generate as a list)
+PAST MEDICAL HISTORY: (Generate as a list, and start each new line with a fixed indent of three spaces.)
 
-DRUG HISTORY: (Generate as a list)
+DRUG HISTORY: (Generate as a list, and start each new line with a fixed indent of three spaces.)
 
-ALLERGIES: (Generate as a list)
+ALLERGIES: (Generate as a list, and start each new line with a fixed indent of three spaces.)
 
-REVIEW OF SYSTEMS: (This should include information reported by the patient, and should not include examination findings)
+REVIEW OF SYSTEMS: (This should include information reported by the patient, and should not include examination findings. Only show system headers if symptoms for thay system have been stated))
 Airway:
 Breathing:
 Circulation:
@@ -116,7 +110,7 @@ Head and neck:
 Dental:
 Skin:
 
-EXAMINATION FINDINGS
+EXAMINATION FINDINGS: (should not include aspects of medical history - only clinical findings noted during the current ED-based examination)
 Systemic findings (if stated):
 Abdominal findings (if stated):
 Cardiovascular findings (if stated):
@@ -129,7 +123,7 @@ Psychological symptoms (if stated):
 Ophthalmic symptoms (if stated):
 Musculoskeletal symptoms (if stated):
 
-INVESTIGATIONS:
+INVESTIGATIONS: (should only include investigation results from diagnostic studies performed during the current hospital visit)
 Vital signs:
 Imaging findings (including x-rays, computed tomography scans, MRI scans, and ultrasound scans:
 Blood test results:
@@ -137,8 +131,8 @@ Urinalysis:
 Microbiology results (such as culture and sensitivity results):
 Cerebrospinal fluid results (if stated):
 
-PRIMARY DIAGNOSIS (if stated):
-DIFFERENTIAL DIAGNOSES (if stated):
+PRIMARY DIAGNOSIS (if stated): (Never infer a primary diagnosis. This should only be included if explicitly stated)
+DIFFERENTIAL DIAGNOSES (if stated): (Never infer a differential diagnosis. This should only be included if explicitly stated)
 
 MANAGEMENT IN DEPARTMENT (outlining steps taken during the ED stay to manage or solve the presenting complaint):
 
