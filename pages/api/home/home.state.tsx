@@ -88,66 +88,51 @@ export const initialState: HomeInitialState = {
       id: 'temp-1-discharge-summary',
       name: 'Discharge Summary',
       description: 'A structured template for detailed discharge summary documentation.',
-      content: `CHIEF COMPLAINT:
+      content: `Chief Complaint:
 
-HISTORY OF PRESENTING COMPLAINT:
-  - Details of main symptom(s):
-  - Duration of main symptom(s):
-  - Severity of main symptom(s):
-  - Exacerbating or ameliorating factors with respect to main symptom(s):
-  - Symptoms stated to NOT be present:
-  - Other aspects of presenting complaint history not specified above:
+Duration (If Applicable):
 
-PAST MEDICAL HISTORY: (Generate as a list)
+History of Presenting Complaint:
 
-DRUG HISTORY: (Generate as a list)
+Past Medical History: (Generate as a list)
 
-ALLERGIES: (Generate as a list)
+Drug History: (Generate as a list)
 
-REVIEW OF SYSTEMS: (This should include information reported by the patient, and should not include examination findings)
+Assessment
+Vitals:
+General:
+Examination Findings:
+
+Review of Systems
 Airway:
 Breathing:
-Circulation:
-Abdominal:
-Pelvic:
-Musculoskeletal:
+Cardiovascular:
+Abdomen:
 Neurological:
-Head and neck:
+Head and Neck:
 Dental:
+Musculoskeletal:
+Pelvis:
 Skin:
+Other:
 
-EXAMINATION FINDINGS
-Systemic findings (if stated):
-Abdominal findings (if stated):
-Cardiovascular findings (if stated):
-Neurological findings (if stated):
-Integumentary findings (if stated):
-Gastrointestinal symptoms (if stated):
-Urological and genitourinary symptoms (if stated):
-Respiratory symptoms (if stated):
-Psychological symptoms (if stated):
-Ophthalmic symptoms (if stated):
-Musculoskeletal symptoms (if stated):
-
-INVESTIGATIONS:
-Vital signs:
-Imaging findings (including x-rays, computed tomography scans, MRI scans, and ultrasound scans:
-Blood test results:
+Investigations:
+Imaging:
+Bloods:
 Urinalysis:
-Microbiology results (such as culture and sensitivity results):
-Cerebrospinal fluid results (if stated):
+Wound Swab:
+Primary Diagnosis:
+Management in Department:
 
-PRIMARY DIAGNOSIS (if stated):
-DIFFERENTIAL DIAGNOSES (if stated):
+Clinical Status at Discharge:
 
-MANAGEMENT IN DEPARTMENT (outlining steps taken during the ED stay to manage or solve the presenting complaint):
-
-DISCHARGE PLAN:
-Medications given for use after discharge:
-Advice on post-discharge management and care (such as wound care, dietary advice, cast care, weightbearing status, and recommended actions):
-Referrals made to other healthcare destinations (such as district nurses, medical specialists, dentists, allied healthcare professionals, and/or the patient's GP):
-Follow-Up (advice on when the patient should be next reviewed):
-Return advice (criteria for seeking medical attention or returning to the Emergency Department):',
+Discharge Plan
+Medications:
+Advice:
+Wound Care (If Applicable):
+Referrals:
+Follow-Up:
+Advised to return to the Emergency Department if:`,
       model: {
         id: 'gpt-4',
         name: 'GPT-4',
