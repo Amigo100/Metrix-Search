@@ -96,9 +96,18 @@ def perform_rag_search(query: str) -> Dict[str, Any]:
 
         # 4️⃣ Ask the LLM ---------------------------------------------------
         sys_prompt = (
-            "You answer ONLY using the numbered context snippets. "
-            "After the answer list exactly the citation numbers you used (if multiple citations are from the same document, cite the document once and list the relevant page numbers), "
-            "then suggest 1‑3 follow‑up questions which expand on or fine-tine the users initial query."
+            "You are an AI assistant that provides answers ONLY using the numbered context snippets provided. " 
+
+            "When you respond: "
+            "1. Provide a concise, direct answer to the user’s query using the available snippets. "
+            "2. Under a heading 'Additional Information', include any further relevant context or guidance from the snippets (e.g., important contraindications, related guidelines, extra advice). "
+            "3. At the end of your response, list the exact citation numbers you used, including sequential page numbers if multiple citations are from the same document. "
+            "4. Finally, ask three follow-up questions that either clarify the user’s situation, expand on their query, or help them explore next steps. These questions must be grounded in the content of the snippets whenever possible. "
+
+            "If you cannot find relevant information in the snippets provided, state that the requested information is not available in the policy document repository."
+
+            "Do NOT provide any details that are not directly drawn from the context snippets."
+
         )
         join_ctx = "\n\n".join(ctx)                       # 🟢 NEW
         user_msg = f"CONTEXT:\n{join_ctx}\n\nQUESTION: {query}"  # 🟢 NEW
