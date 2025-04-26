@@ -25,7 +25,7 @@ openai = OpenAI(api_key=OPENAI_KEY)
 
 EMBED_MODEL  = os.getenv("EMBED_MODEL", "text-embedding-ada-002")
 CHAT_MODEL   = os.getenv("CHAT_MODEL",  "gpt-4o-mini")
-SEARCH_LIMIT = int(os.getenv("SEARCH_LIMIT", "5"))
+SEARCH_LIMIT = int(os.getenv("SEARCH_LIMIT", "10"))
 
 # ────────────── public function the router will call ───────────
 def perform_rag_search(query: str) -> Dict[str, Any]:
@@ -128,9 +128,9 @@ for e in agg.values():
 
             "When you respond: "
             "1. Provide a concise, direct answer to the user’s query using the available snippets. "
-            "2. Under a heading 'Additional Information', include any further relevant context or guidance from the snippets (e.g., important contraindications, related guidelines, extra advice). "
+            "2. Under a heading 'Additional Information', include any further relevant context or guidance from the snippets (e.g., important contraindications, related guidelines, extra advice, clincial pearls). "
             "3. At the end of your response, list the exact citation numbers you used, including sequential page numbers if multiple citations are from the same document. "
-            "4. Finally, ask three follow-up questions that either clarify the user’s situation, expand on their query, or help them explore next steps. These questions must be grounded in the content of the snippets whenever possible. The user is a medical professional and not a patient - formulate the questions as such and focus on the main aspect of their query i.e. prescribing, management, procedural, diagnostic etc. "
+            "4. Finally, ask three follow-up questions that expand on the query or explores next steps. These questions must be grounded in the content of the snippets whenever possible. "
 
             "If you cannot find relevant information in the snippets provided, state that the requested information is not available in the policy document repository."
 
