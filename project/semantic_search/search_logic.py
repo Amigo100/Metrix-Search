@@ -97,8 +97,8 @@ def perform_rag_search(query: str) -> Dict[str, Any]:
         # 4️⃣ Ask the LLM ---------------------------------------------------
         sys_prompt = (
             "You answer ONLY using the numbered context snippets. "
-            "After the answer list exactly the citation numbers you used, "
-            "then suggest 1‑3 follow‑up questions."
+            "After the answer list exactly the citation numbers you used (if multiple citations are from the same document, cite the document once and list the relevant page numbers), "
+            "then suggest 1‑3 follow‑up questions which expand on or fine-tine the users initial query."
         )
         join_ctx = "\n\n".join(ctx)                       # 🟢 NEW
         user_msg = f"CONTEXT:\n{join_ctx}\n\nQUESTION: {query}"  # 🟢 NEW
