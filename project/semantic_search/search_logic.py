@@ -64,35 +64,63 @@ def perform_rag_search(query: str) -> Dict[str, Any]:
                     "citations": [], "error": None}
 
         # 3️⃣ Prep context & citation objects ------------------------------
-        ctx:   List[str] = []
-        cites: List[Dict[str, Any]] = []
-        for i, h in enumerate(hits, 1):
-            pl   = h.payload or {}
-            text = pl.get("content") or pl.get("text") or "[NO TEXT]"
-            doc  = pl.get("document_title", "Unknown Document")
-            page = pl.get("page_number")
-            head = pl.get("heading", "N/A")
+        from collections import OrderedDict
+import urllib.parse
 
-            ctx.append(f"[{i}] {text}")
+# 1. Aggregate by document
+agg: "OrderedDict[str, Dict[str, Any]]" = OrderedDict()
 
-            url = None
-            if doc and doc != "Unknown Document":
-                safe = urllib.parse.quote_plus(doc.replace(" ", "_"))
-                if not safe.lower().endswith(".pdf"):
-                    safe += ".pdf"
-                url = f"/predictive/api/documents/view/{safe}"
+for i, h in enumerate(hits, 1):
+    pl   = h.payload or {}
+    text = pl.get("content") or pl.get("text") or "[NO TEXT]"
+    doc  = pl.get("document_title", "Unknown Document")
+    page = pl.get("page_number")
+    head = pl.get("heading", "N/A")
+    # build url once per document
+    safe = urllib.parse.quote_plus(doc.replace(" ", "_"))
+    if not safe.lower().endswith(".pdf"):
+        safe += ".pdf"
+    url = f"/predictive/api/documents/view/{safe}" if doc != "Unknown Document" else None
+    # initialize agg entry if first time seeing this document
+    if doc not in agg:
+        agg[doc] = {
+            "source_ids":    [i],
+            "document_title": doc,
+            "page_numbers":   {page} if page is not None else set(),
+            "headings":       [head],
+            "qdrant_ids":     [h.id],
+            "scores":         [h.score],
+            "url":            url,
+        }
+    else:
+        e = agg[doc]
+        e["source_ids"].append(i)
+        if page is not None:
+            e["page_numbers"].add(page)
+        e["headings"].append(head)
+        e["qdrant_ids"].append(h.id)
+        e["scores"].append(h.score)
+    # still populate your ctx in the original order
+    ctx.append(f"[{i}] {text}")
 
-            cites.append(
-                {
-                    "source_id": i,
-                    "document_title": doc,
-                    "page_number": page,
-                    "heading": head,
-                    "qdrant_id": h.id,
-                    "score": h.score,
-                    "url": url,
-                }
-            )
+
+# 2. Build your final cites list, formatting page numbers
+cites: "List[Dict[str, Any]]" = []
+for e in agg.values():
+    # turn the set of pages into a sorted, comma-joined string
+    pages = sorted(e["page_numbers"])
+    e["page_number"] = ", ".join(str(p) for p in pages) if pages else None
+    # if you only want one heading or one score per doc, you could pick e.g. the first:
+    # e["heading"] = e["headings"][0]
+    # e["score"]   = max(e["scores"])
+    # e["qdrant_id"] = e["qdrant_ids"][0]
+    # or keep them all as lists if you want more detail:
+    e["heading"]   = e["headings"] [0]
+    e["score"]     = e["scores"] [0]
+    e["qdrant_id"] = e["qdrant_ids"] [0]
+    # drop the intermediate collections
+    del e["page_numbers"], e["headings"], e["scores"], e["qdrant_ids"], e["source_ids"]
+    cites.append(e)
 
         # 4️⃣ Ask the LLM ---------------------------------------------------
         sys_prompt = (
