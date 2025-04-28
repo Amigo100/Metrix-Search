@@ -385,7 +385,24 @@ export const PatientCard: React.FC<PatientCardProps> = ({
     const [isEditingPatientNotes, setIsEditingPatientNotes] = useState<boolean>(false);
     const [editPatientNotes, setEditPatientNotes] = useState<string>(patient.notes || '');
     const patientNotesTextareaRef = useRef<HTMLTextAreaElement>(null);
-    useEffect(() => { /* ... LOS effect ... */ }, [patient.arrivalTime]);
+    useEffect(() => {
+  // helper to recalc both raw minutes and a human-readable string
+    const updateLOS = () => {
+    const now = new Date();
+    const mins = differenceInMinutes(now, patient.arrivalTime);
+    setLengthOfStayMinutes(mins);
+    // e.g. “5 minutes”, “1 hour 2 minutes”
+    setLengthOfStayFormatted(
+      formatDistanceToNowStrict(patient.arrivalTime, { addSuffix: false })
+    );
+  };
+
+  updateLOS();                  // initial set
+  const id = setInterval(updateLOS, 60_000);  // refresh every minute
+
+  return () => clearInterval(id);
+}, [patient.arrivalTime]);
+
     useEffect(() => { /* ... focus notes effect ... */ }, [isEditingPatientNotes, patient.notes]);
     const handleAddTaskSubmit = (e?: FormEvent<HTMLFormElement>) => { e?.preventDefault(); if (newTaskText.trim() === '') return; addTaskToPatient(patient.id, newTaskText, newTaskTimerMinutes); setNewTaskText(''); setNewTaskTimerMinutes(''); };
     const handleNewTaskKeyDown = (e: KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddTaskSubmit(); } };
