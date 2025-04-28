@@ -3,9 +3,8 @@
 
 /* -------------------------------------------------------------------------- */
 /*  NOTE: 29‑Apr‑2025                                                          */
-/*  – Added collapsible PatientCard support with chevron toggle                */
-/*  – Injected overdue‑task indicator (AlertCircle) in header                  */
-/*  The rest of the file is identical to your previous version.               */
+/*  – Collapsible PatientCard + overdue indicator                              */
+/*  – ✅ FIXED: added `children` and `onOpenChange` props to Dialog typing      */
 /* -------------------------------------------------------------------------- */
 
 import React, {
@@ -31,7 +30,6 @@ import {
   MessageSquare,
   BellOff,
   AlarmClockOff,
-  /* NEW icons */
   ChevronDown,
   ChevronRight,
   AlertCircle,
@@ -50,10 +48,16 @@ import HomeContext from '@/pages/api/home/home.context';
 import { Patient, Task, TaskCompletionStatus } from '@/types/patient';
 
 /* -------------------------------------------------------------------------- */
-/*  Mock shadcn/ui components (unchanged)                                     */
+/*  Mock shadcn/ui components                                                 */
 /* -------------------------------------------------------------------------- */
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  variant?:
+    | 'default'
+    | 'destructive'
+    | 'outline'
+    | 'secondary'
+    | 'ghost'
+    | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
 }
@@ -68,13 +72,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
       ghost: 'hover:bg-accent',
       link: 'text-primary underline-offset-4 hover:underline',
-    };
+    } as const;
     const sizes = {
       default: 'h-10 px-4 py-2',
       sm: 'h-9 px-3 rounded-md',
       lg: 'h-11 px-8 rounded-md',
       icon: 'h-6 w-6',
-    };
+    } as const;
     return (
       <button
         ref={ref}
@@ -107,32 +111,46 @@ const Label = React.forwardRef<
   <label ref={ref} className={`text-sm font-medium ${className ?? ''}`} {...props} />
 ));
 Label.displayName = 'Label';
-/* Dialog and Card mocks below – unchanged for brevity */
-const Dialog: React.FC<{ open: boolean }> = ({ open, children }) =>
+
+/* --- FIXED Dialog typing --------------------------------------------------- */
+interface DialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  children: React.ReactNode;
+}
+const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) =>
   open ? (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 p-4">
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black/50 p-4"
+      onClick={() => onOpenChange(false)}
+    >
       {children}
     </div>
   ) : null;
-const DialogContent: React.FC<{ className?: string }> = ({ children, className }) => (
-  <div className={`bg-white rounded-lg shadow-lg p-6 ${className ?? ''}`}>{children}</div>
-);
-const DialogHeader: React.FC<{ className?: string }> = ({ children, className }) => (
-  <div className={`mb-4 ${className ?? ''}`}>{children}</div>
-);
-const DialogFooter: React.FC<{ className?: string }> = ({ children, className }) => (
-  <div className={`mt-6 flex justify-end space-x-2 ${className ?? ''}`}>{children}</div>
-);
-const DialogTitle: React.FC<{ className?: string }> = ({ children, className }) => (
-  <h2 className={`text-lg font-semibold ${className ?? ''}`}>{children}</h2>
-);
-const DialogDescription: React.FC<{ className?: string }> = ({ children, className }) => (
-  <p className={`text-sm text-muted-foreground ${className ?? ''}`}>{children}</p>
-);
-const DialogClose: React.FC<{
-  children: React.ReactElement;
-  onClick?: () => void;
-}> = ({ children, onClick }) => React.cloneElement(children, { onClick });
+const DialogContent: React.FC<{ className?: string; children: React.ReactNode }> = ({
+  children,
+  className,
+}) => <div className={`bg-white rounded-lg shadow-lg p-6 ${className ?? ''}`}>{children}</div>;
+const DialogHeader: React.FC<{ className?: string; children: React.ReactNode }> = ({
+  children,
+  className,
+}) => <div className={`mb-4 ${className ?? ''}`}>{children}</div>;
+const DialogFooter: React.FC<{ className?: string; children: React.ReactNode }> = ({
+  children,
+  className,
+}) => <div className={`mt-6 flex justify-end space-x-2 ${className ?? ''}`}>{children}</div>;
+const DialogTitle: React.FC<{ className?: string; children: React.ReactNode }> = ({
+  children,
+  className,
+}) => <h2 className={`text-lg font-semibold ${className ?? ''}`}>{children}</h2>;
+const DialogDescription: React.FC<{ className?: string; children: React.ReactNode }> = ({
+  children,
+  className,
+}) => <p className={`text-sm text-muted-foreground ${className ?? ''}`}>{children}</p>;
+const DialogClose: React.FC<{ children: React.ReactElement; onClick?: () => void }> = ({
+  children,
+  onClick,
+}) => React.cloneElement(children, { onClick });
 
 const Card = React.forwardRef<
   HTMLDivElement,
