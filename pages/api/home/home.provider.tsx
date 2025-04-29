@@ -103,10 +103,192 @@ export default function HomeContextProvider({ children }: { children: React.Reac
     dispatch({ type: 'change', field: 'patients', value: updated });
   }, [state.patients, dispatch]);
 
-  /* Other handlers (removePatient, updateTaskTimerState, etc.) would be here – omitted for brevity */
+  /* ------------------------------------------------------------------ */
+  /* Remaining patient/task handlers (restored)                        */
+  /* ------------------------------------------------------------------ */
+  const removePatient = useCallback((id: string) => {
+    dispatch({
+      type: 'change',
+      field: 'patients',
+      value: state.patients.filter(p => p.id !== id),
+    });
+  }, [state.patients, dispatch]);
+
+  const updateTaskTimerState = useCallback(
+    (pid: string, tid: string | number, expired: boolean) => {
+      const updated = state.patients.map(p =>
+        p.id === pid
+          ? {
+              ...p,
+              tasks: p.tasks.map(t =>
+                t.id === tid ? { ...t, isTimerExpired: expired } : t,
+              ),
+            }
+          : p,
+      );
+      dispatch({ type: 'change', field: 'patients', value: updated });
+    },
+    [state.patients, dispatch],
+  );
+
+  const addTaskToPatient = useCallback(
+    (pid: string, text: string, mins: string) => {
+      const m = parseInt(mins, 10);
+      const timerEnd = !isNaN(m) && m > 0 ? addMinutes(new Date(), m) : null;
+      const updated = state.patients.map(p =>
+        p.id === pid
+          ? {
+              ...p,
+              tasks: [
+                ...p.tasks,
+                {
+                  id: `task-${Date.now()}`,
+                  text,
+                  timerEnd,
+                  isTimerExpired: !!(timerEnd && timerEnd <= new Date()),
+                  completionStatus: 'incomplete',
+                  createdAt: new Date(),
+                  completedAt: null,
+                  notes: '',
+                  isAcknowledged: false,
+                },
+              ],
+            }
+          : p,
+      );
+      dispatch({ type: 'change', field: 'patients', value: updated });
+    },
+    [state.patients, dispatch],
+  );
+
+  const updateTaskTimer = useCallback(
+    (pid: string, tid: string | number, mins: string | null) => {
+      const newEnd = mins ? addMinutes(new Date(), parseInt(mins, 10)) : null;
+      const updated = state.patients.map(p =>
+        p.id === pid
+          ? {
+              ...p,
+              tasks: p.tasks.map(t =>
+                t.id === tid
+                  ? {
+                      ...t,
+                      timerEnd: newEnd,
+                      isTimerExpired: !!(newEnd && newEnd <= new Date()),
+                      isAcknowledged: false,
+                    }
+                  : t,
+              ),
+            }
+          : p,
+      );
+      dispatch({ type: 'change', field: 'patients', value: updated });
+    },
+    [state.patients, dispatch],
+  );
+
+  const removeTaskFromPatient = useCallback(
+    (pid: string, tid: string | number) => {
+      const updated = state.patients.map(p =>
+        p.id === pid ? { ...p, tasks: p.tasks.filter(t => t.id !== tid) } : p,
+      );
+      dispatch({ type: 'change', field: 'patients', value: updated });
+    },
+    [state.patients, dispatch],
+  );
+
+  const updateTaskCompletion = useCallback(
+    (pid: string, tid: string | number, status: TaskCompletionStatus) => {
+      const completedAt = status === 'complete' ? new Date() : null;
+      const updated = state.patients.map(p =>
+        p.id === pid
+          ? {
+              ...p,
+              tasks: p.tasks.map(t =>
+                t.id === tid ? { ...t, completionStatus: status, completedAt } : t,
+              ),
+            }
+          : p,
+      );
+      dispatch({ type: 'change', field: 'patients', value: updated });
+    },
+    [state.patients, dispatch],
+  );
+
+  const acknowledgeTaskTimer = useCallback(
+    (pid: string, tid: string | number) => {
+      const updated = state.patients.map(p =>
+        p.id === pid
+          ? {
+              ...p,
+              tasks: p.tasks.map(t =>
+                t.id === tid ? { ...t, isAcknowledged: true } : t,
+              ),
+            }
+          : p,
+      );
+      dispatch({ type: 'change', field: 'patients', value: updated });
+    },
+    [state.patients, dispatch],
+  );
+
+  const updatePatientNotes = useCallback(
+    (pid: string, notes: string) => {
+      const updated = state.patients.map(p =>
+        p.id === pid ? { ...p, notes } : p,
+      );
+      dispatch({ type: 'change', field: 'patients', value: updated });
+    },
+    [state.patients, dispatch],
+  );
+
+  const updateTaskNotes = useCallback(
+    (pid: string, tid: string | number, notes: string) => {
+      const updated = state.patients.map(p =>
+        p.id === pid
+          ? {
+              ...p,
+              tasks: p.tasks.map(t =>
+                t.id === tid ? { ...t, notes } : t,
+              ),
+            }
+          : p,
+      );
+      dispatch({ type: 'change', field: 'patients', value: updated });
+    },
+    [state.patients, dispatch],
+  );
 
   /* ------------------------------------------------------------------ */
   /* Provider value                                                      */
+  /* ------------------------------------------------------------------ */
+  const contextValue = {
+    state,
+    dispatch,
+    // conversation handlers (omitted for brevity)
+    // patient handlers
+    addPatient,
+    removePatient,
+    updateTaskTimerState,
+    addTaskToPatient,
+    updateTaskTimer,
+    removeTaskFromPatient,
+    updateTaskCompletion,
+    acknowledgeTaskTimer,
+    updatePatientNotes,
+    updateTaskNotes,
+    updatePatientStatus,
+  };
+
+  return (
+    <HomeContext.Provider value={contextValue}>{children}</HomeContext.Provider>
+  );
+
+  /* ------------------------------------------------------------------ */
+  /* END file                                                            */
+  /* ------------------------------------------------------------------ */
+}
+
+// Provider value                                                      */
   /* ------------------------------------------------------------------ */
   const contextValue = {
     state,
