@@ -479,7 +479,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
   const [editNotes, setEditNotes] = useState(patient.notes || '');
   const notesRef = useRef<HTMLTextAreaElement>(null);
   const saveNotes = () => {
-    rest.updatePatientNotes(patient.id, editNotes);
+    updatePatientNotes(patient.id, editNotes);
     setEditingNotes(false);
   };
 
@@ -533,7 +533,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
           variant="ghost"
           size="icon"
           className="text-black hover:text-red-500"
-          onClick={() => rest.removePatient(patient.id)}
+          onClick={() => removePatient(patient.id)}
         >
           <X className="h-4 w-4" />
         </Button>
@@ -594,12 +594,12 @@ export const PatientCard: React.FC<PatientCardProps> = ({
                     task={t}
                     patientId={patient.id}
                     patientName={patient.name}
-                    updateTaskTimerState={rest.updateTaskTimerState}
-                    updateTaskTimer={rest.updateTaskTimer}
-                    removeTask={rest.removeTaskFromPatient}
-                    updateTaskCompletion={rest.updateTaskCompletion}
-                    acknowledgeTimer={rest.acknowledgeTaskTimer}
-                    updateTaskNotes={rest.updateTaskNotes}
+                    updateTaskTimerState={updateTaskTimerState}
+                    updateTaskTimer={updateTaskTimer}
+                    removeTask={removeTaskFromPatient}
+                    updateTaskCompletion={updateTaskCompletion}
+                    acknowledgeTimer={acknowledgeTaskTimer}
+                    updateTaskNotes={updateTaskNotes}
                   />
                 ))
               )}
@@ -615,12 +615,12 @@ export const PatientCard: React.FC<PatientCardProps> = ({
                     task={t}
                     patientId={patient.id}
                     patientName={patient.name}
-                    updateTaskTimerState={rest.updateTaskTimerState}
-                    updateTaskTimer={rest.updateTaskTimer}
-                    removeTask={rest.removeTaskFromPatient}
-                    updateTaskCompletion={rest.updateTaskCompletion}
-                    acknowledgeTimer={rest.acknowledgeTaskTimer}
-                    updateTaskNotes={rest.updateTaskNotes}
+                    updateTaskTimerState={updateTaskTimerState}
+                    updateTaskTimer={updateTaskTimer}
+                    removeTask={removeTaskFromPatient}
+                    updateTaskCompletion={updateTaskCompletion}
+                    acknowledgeTimer={acknowledgeTaskTimer}
+                    updateTaskNotes={updateTaskNotes}
                   />
                 ))}
               </div>
@@ -633,7 +633,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
               onSubmit={e => {
                 e.preventDefault();
                 if (newTaskText.trim() === '') return;
-                rest.addTaskToPatient(patient.id, newTaskText, newTaskTimer);
+                addTaskToPatient(patient.id, newTaskText, newTaskTimer);
                 setNewTaskText('');
                 setNewTaskTimer('');
               }}
