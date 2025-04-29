@@ -121,38 +121,13 @@ interface DialogProps {
 const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) =>
   open ? (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4"
       onClick={() => onOpenChange(false)}
     >
-      {children}
+      {/* inner panel stops propagation so inputs don't close the modal */}
+      <div onClick={(e) => e.stopPropagation()}>{children}</div>
     </div>
   ) : null;
-const DialogContent: React.FC<{ className?: string; children: React.ReactNode }> = ({
-  children,
-  className,
-}) => <div className={`bg-white rounded-lg shadow-lg p-6 ${className ?? ''}`}>{children}</div>;
-const DialogHeader: React.FC<{ className?: string; children: React.ReactNode }> = ({
-  children,
-  className,
-}) => <div className={`mb-4 ${className ?? ''}`}>{children}</div>;
-const DialogFooter: React.FC<{ className?: string; children: React.ReactNode }> = ({
-  children,
-  className,
-}) => <div className={`mt-6 flex justify-end space-x-2 ${className ?? ''}`}>{children}</div>;
-const DialogTitle: React.FC<{ className?: string; children: React.ReactNode }> = ({
-  children,
-  className,
-}) => <h2 className={`text-lg font-semibold ${className ?? ''}`}>{children}</h2>;
-const DialogDescription: React.FC<{ className?: string; children: React.ReactNode }> = ({
-  children,
-  className,
-}) => <p className={`text-sm text-muted-foreground ${className ?? ''}`}>{children}</p>;
-const DialogClose: React.FC<{
-  children: React.ReactElement;
-  onClick?: () => void;
-  asChild?: boolean;
-}> = ({ children, onClick }) =>
-  React.cloneElement(children, { onClick });
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -728,3 +703,4 @@ const Tasks: React.FC = () => {
 };
 
 export default Tasks;
+
