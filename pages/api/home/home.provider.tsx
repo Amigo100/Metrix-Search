@@ -259,13 +259,29 @@ export default function HomeContextProvider({ children }: { children: React.Reac
   );
 
   /* ------------------------------------------------------------------ */
+  /* Conversation & folder handlers  (minimal no‑ops to satisfy type)  */
+  /* ------------------------------------------------------------------ */
+  const handleNewConversation = () => {};
+  const handleCreateFolder = () => {};
+  const handleDeleteFolder = () => {};
+  const handleUpdateFolder = () => {};
+  const handleSelectConversation = () => {};
+  const handleUpdateConversation = () => {};
+
+  /* ------------------------------------------------------------------ */
   /* Provider value                                                      */
   /* ------------------------------------------------------------------ */
   const contextValue = {
     state,
     dispatch,
-    // conversation handlers (omitted for brevity)
-    // patient handlers
+    /* conversation handlers */
+    handleNewConversation,
+    handleCreateFolder,
+    handleDeleteFolder,
+    handleUpdateFolder,
+    handleSelectConversation,
+    handleUpdateConversation,
+    /* patient handlers */
     addPatient,
     removePatient,
     updateTaskTimerState,
@@ -277,7 +293,7 @@ export default function HomeContextProvider({ children }: { children: React.Reac
     updatePatientNotes,
     updateTaskNotes,
     updatePatientStatus,
-  };
+  } as const;
 
   return (
     <HomeContext.Provider value={contextValue}>{children}</HomeContext.Provider>
@@ -288,26 +304,4 @@ export default function HomeContextProvider({ children }: { children: React.Reac
   /* ------------------------------------------------------------------ */
 }
 
-// Provider value                                                      */
-  /* ------------------------------------------------------------------ */
-  const contextValue = {
-    state,
-    dispatch,
-    // conversation handlers (omitted for brevity)
-    // patient handlers (only ones relevant for this snippet)
-    addPatient,
-    removePatient: () => {},
-    updateTaskTimerState: () => {},
-    addTaskToPatient: () => {},
-    updateTaskTimer: () => {},
-    removeTaskFromPatient: () => {},
-    updateTaskCompletion: () => {},
-    acknowledgeTaskTimer: () => {},
-    updatePatientNotes: () => {},
-    updateTaskNotes: () => {},
-    /* NEW */
-    updatePatientStatus,
-  } as any; // cast for brevity
 
-  return <HomeContext.Provider value={contextValue}>{children}</HomeContext.Provider>;
-}
