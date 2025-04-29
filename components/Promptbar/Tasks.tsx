@@ -442,7 +442,6 @@ interface PatientCardProps {
   /** other handlers forwarded via rest */
   [key: string]: any;
   updatePatientStatus: (pid: string, status: 'active' | 'discharged' | 'admitted') => void;
-: (pid: string, status: 'active' | 'discharged' | 'admitted') => void;
 }
 
 export const PatientCard: React.FC<PatientCardProps> = ({ patient, updatePatientStatus, ...rest }) => {
@@ -765,7 +764,7 @@ const Tasks: React.FC = () => {
     acknowledgeTaskTimer,
     updatePatientNotes,
     updateTaskNotes,
-    updatePatientStatus } = useContext(HomeContext)(HomeContext);
+    updatePatientStatus } = useContext(HomeContext);
   const { showSidePromptbar, patients } = state;
 
   // --- Local State (Same as before) ---
