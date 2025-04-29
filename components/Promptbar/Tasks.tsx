@@ -33,6 +33,7 @@ import {
   ChevronDown,
   ChevronRight,
   AlertCircle,
+  ArrowUp,
 } from 'lucide-react';
 import {
   format,
@@ -198,7 +199,6 @@ const getBorderColor = (mins: number) => {
   return 'border-green-500';
 };
 const bgNeutral = 'bg-neutral-50';
-
 
 // ===----------------------------------===
 // === Start: Restored TaskItem Component ===
@@ -433,37 +433,15 @@ const TaskItem: React.FC<TaskItemProps> = ({
 // === End: Restored TaskItem Component ===
 // ===--------------------------------===
 
-
 // ===-------------------------------------===
 // === Start: Restored PatientCard Component ===
 // === (Copied from PatientCard.tsx)       ===
 // ===-------------------------------------===
 interface PatientCardProps {
-  patient: Patient;
-  removePatient: (id: string) => void;
-  updateTaskTimerState: (
-    pid: string,
-    tid: string | number,
-    expired: boolean
-  ) => void;
-  addTaskToPatient: (pid: string, text: string, mins: string) => void;
-  updateTaskTimer: (
-    pid: string,
-    tid: string | number,
-    mins: string | null
-  ) => void;
-  removeTaskFromPatient: (pid: string, tid: string | number) => void;
-  updateTaskCompletion: (
-    pid: string,
-    tid: string | number,
-    status: TaskCompletionStatus
-  ) => void;
-  acknowledgeTaskTimer: (pid: string, tid: string | number) => void;
-  updatePatientNotes: (pid: string, notes: string) => void;
-  updateTaskNotes: (pid: string, tid: string | number, notes: string) => void;
+  updatePatientStatus: (pid: string, status: 'active' | 'discharged' | 'admitted') => void;
 }
 
-export const PatientCard: React.FC<PatientCardProps> = ({ patient, ...rest }) => {
+export const PatientCard: React.FC<PatientCardProps> = ({ patient, updatePatientStatus, ...rest }) => {
   /* LOS calc */
   const [los, setLos] = useState<string>('');
   useEffect(() => {
@@ -520,6 +498,14 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient, ...rest }) =>
           <CardTitle className="text-base font-medium flex-1 break-words whitespace-normal">
             {patient.name}
           </CardTitle>
+
+          {/* status controls */}
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-green-500" title="Mark Discharged" onClick={() => updatePatientStatus(patient.id,'discharged')}>
+            ✓
+          </Button>
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-blue-500" title="Mark Admitted" onClick={() => updatePatientStatus(patient.id,'admitted')}>
+            <ArrowUp className="h-3 w-3" />
+          </Button>
 
           {hasOverdue && (
             <AlertCircle
@@ -677,7 +663,6 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient, ...rest }) =>
 // === End: Restored PatientCard Component ===
 // ===-----------------------------------===
 
-
 // ===-------------------------------------===
 // === Start: Restored AddPatientModal Comp. ===
 // === (Using original internal definition) ===
@@ -762,12 +747,10 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
 // === End: Restored AddPatientModal Comp. ===
 // ===-----------------------------------===
 
-
-
 // --- MAIN SIDEBAR COMPONENT (Consumes Context, Renders Internal Components) ---
 const Tasks: React.FC = () => {
   // --- Consume Context (Same as before) ---
-  const { state, addPatient, removePatient, updateTaskTimerState, addTaskToPatient, updateTaskTimer, removeTaskFromPatient, updateTaskCompletion, acknowledgeTaskTimer, updatePatientNotes, updateTaskNotes } = useContext(HomeContext);
+  const { state, updatePatientStatus } = useContext(HomeContext);
   const { showSidePromptbar, patients } = state;
 
   // --- Local State (Same as before) ---
@@ -775,8 +758,15 @@ const Tasks: React.FC = () => {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>( typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default' );
   useEffect(() => { if (typeof window !== 'undefined' && 'Notification' in window && notificationPermission === 'default') { Notification.requestPermission().then(setNotificationPermission); } }, [notificationPermission]);
 
-    const sortedPatients = [...patients].sort(
-    (a, b) => b.arrivalTime.getTime() - a.arrivalTime.getTime()
+    const [viewFilter,setViewFilter] = useState<'all'|'active'|'inactive'>('active');
+
+  const visiblePatients = patients.filter(p => {
+    if(viewFilter==='all') return true;
+    if(viewFilter==='active') return p.status==='active';
+    return p.status!=='active';
+  });
+  const sortedPatients = [...visiblePatients].sort(
+    (a,b)=>b.arrivalTime.getTime()-a.arrivalTime.getTime()
   );
 
   const sidebarWidth = showSidePromptbar ? 'w-40 lg:w-80' : 'w-0';
@@ -787,6 +777,24 @@ const Tasks: React.FC = () => {
         <>
           {/* Header - Uses *internal* mock Button */}
           <div className="flex justify-between items-center p-4 shadow-md border-b border-gray-200 flex-shrink-0">
+            {/* view toggle */}
+            <div className="inline-flex rounded-md overflow-hidden mr-2">
+              <Button
+                size="sm"
+                variant={viewFilter==='active'?'secondary':'outline'}
+                onClick={()=>setViewFilter('active')}
+              >Active</Button>
+              <Button
+                size="sm"
+                variant={viewFilter==='inactive'?'secondary':'outline'}
+                onClick={()=>setViewFilter('inactive')}
+              >Inactive</Button>
+              <Button
+                size="sm"
+                variant={viewFilter==='all'?'secondary':'outline'}
+                onClick={()=>setViewFilter('all')}
+              >All</Button>
+            </div>
             <h2 className="text-lg font-semibold text-black">Patient Tracker</h2>
             <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)} className="bg-[#008080] hover:bg-[#009999] border-gray-400 text-white"> <Plus className="h-4 w-4 mr-2" /> Add Patient </Button>
           </div>
@@ -797,19 +805,7 @@ const Tasks: React.FC = () => {
               <div className="flex flex-col items-center justify-center h-full text-gray-500 text-center"> <AlertTriangle className="w-10 h-10 mb-4 text-gray-600" /> <p className="font-medium">No patients being tracked.</p> <p className="text-sm mt-1">Click &quot;Add Patient&quot; to start.</p> </div>
             ) : (
               sortedPatients.map((patient) => (
-                <PatientCard // Renders internal PatientCard
-                  key={patient.id}
-                  patient={patient}
-                  // Pass handlers obtained from context down
-                  removePatient={removePatient}
-                  updateTaskTimerState={updateTaskTimerState}
-                  addTaskToPatient={addTaskToPatient}
-                  updateTaskTimer={updateTaskTimer}
-                  removeTaskFromPatient={removeTaskFromPatient}
-                  updateTaskCompletion={updateTaskCompletion}
-                  acknowledgeTaskTimer={acknowledgeTaskTimer}
-                  updatePatientNotes={updatePatientNotes}
-                  updateTaskNotes={updateTaskNotes}
+                <PatientCard $1updateTaskNotes={updateTaskNotes} updatePatientStatus={updatePatientStatus}
                 />
               ))
             )}
