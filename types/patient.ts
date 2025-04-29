@@ -41,6 +41,9 @@ export interface Patient {
   arrivalTime: Date;
   /** An array of tasks associated with the patient */
   tasks: Task[];
+  /** Patient workflow status */
+  status: 'active' | 'discharged' | 'admitted';
   /** General notes or details about the patient */
   notes: string;
+}
 }
