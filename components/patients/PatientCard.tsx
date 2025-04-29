@@ -32,7 +32,7 @@ import {
 
 import { Patient, Task, TaskCompletionStatus } from '@/types/patient';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 
@@ -117,14 +117,26 @@ const PatientCard: React.FC<PatientCardProps> = ({
 
   return (
     <Card className={`mb-4 border-2 ${getBorderColor(minsSinceArrival)} bg-neutral-50`}>
-      <CardHeader className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          {/* name */}
+      <CardHeader className="pb-2">
+        {/* top row: name + delete */}
+        <div className="flex items-start justify-between">
           <CardTitle className="text-base font-medium flex-1 break-words whitespace-normal">
             {patient.name}
           </CardTitle>
 
-          {/* status badge & controls */}
+          {/* remove card */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 text-black hover:text-red-500 flex-shrink-0"
+            onClick={() => removePatient(patient.id)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* second row: status badge & controls */}
+        <div className="mt-1 flex items-center space-x-1">
           {patient.status !== 'active' && (
             <Badge className="text-xs capitalize" variant="secondary">
               {patient.status}
@@ -149,16 +161,6 @@ const PatientCard: React.FC<PatientCardProps> = ({
             ↑
           </Button>
         </div>
-
-        {/* remove card */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 w-6 text-black hover:text-red-500"
-          onClick={() => removePatient(patient.id)}
-        >
-          <X className="h-4 w-4" />
-        </Button>
       </CardHeader>
 
       {/* rest of card content (omitted) */}
