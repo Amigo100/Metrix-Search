@@ -147,6 +147,12 @@ export const DialogFooter: React.FC<DialogSubProps> = ({ className, children }) 
   <div className={`mt-6 flex justify-end space-x-2 ${className ?? ''}`}>{children}</div>
 );
 
+// Add missing DialogClose so <DialogClose asChild> works in AddPatientModal
+export const DialogClose: React.FC<{ children: React.ReactElement; onClick?: () => void; asChild?: boolean }> = ({
+  children,
+  onClick,
+}) => React.cloneElement(children, { onClick });
+
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
