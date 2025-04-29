@@ -510,23 +510,15 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient, ...rest }) =>
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setCollapsed((c) => !c)}
-            title={collapsed ? 'Expand' : 'Collapse'}
+            onClick={() => setCollapsed(!collapsed)}
+            className="flex-shrink-0"
           >
-            {collapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
+            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
 
-          {/* patient name */}
-          <CardTitle>{patient.name}</CardTitle>
-
-          {/* overdue icon */}
           {hasOverdue && (
             <AlertCircle
-              className="h-4 w-4 text-red-500"
+              className="h-4 w-4 text-red-500 flex-shrink-0"
               aria-label="Overdue task"
             />
           )}
