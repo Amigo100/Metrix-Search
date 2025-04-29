@@ -516,6 +516,11 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient, ...rest }) =>
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
 
+          {/* patient name */}
+          <CardTitle className="text-base font-medium flex-shrink-0">
+            {patient.name}
+          </CardTitle>
+
           {hasOverdue && (
             <AlertCircle
               className="h-4 w-4 text-red-500 flex-shrink-0"
