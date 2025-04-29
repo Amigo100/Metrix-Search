@@ -32,7 +32,7 @@ import {
 
 import { Patient, Task, TaskCompletionStatus } from '@/types/patient';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 
