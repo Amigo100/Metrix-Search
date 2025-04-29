@@ -7,6 +7,17 @@ import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
 import { ActionType } from '@/hooks/useCreateReducer';
 
+// -------------------------------------------------------------------
+// Extend the base reducer action with UPDATE_PATIENT_STATUS
+// -------------------------------------------------------------------
+export type UpdateStatusAction = {
+  type: 'UPDATE_PATIENT_STATUS';
+  id: string;
+  status: 'active' | 'discharged' | 'admitted';
+};
+
+type ExtendedAction = ActionType<HomeInitialState> | UpdateStatusAction;
+
 import { Conversation } from '@/types/chat';
 import { OpenAIModels } from '@/types/openai';
 import { Patient, Task, TaskCompletionStatus } from '@/types/patient';
@@ -23,7 +34,10 @@ type ReducerAction = ActionType<HomeInitialState> & {
   status?: 'active' | 'discharged' | 'admitted';
 };
 
-function homeReducer(state: HomeInitialState, action: ReducerAction): HomeInitialState {
+function homeReducer(
+  state: HomeInitialState,
+  action: ExtendedAction,
+): HomeInitialState: HomeInitialState {
   switch (action.type) {
     case 'reset':
       return { ...initialState, patients: [] };
@@ -67,7 +81,7 @@ export default function HomeContextProvider({ children }: { children: React.Reac
   /* ------------------------------------------------------------------ */
   const updatePatientStatus = useCallback(
     (id: string, status: 'active' | 'discharged' | 'admitted') => {
-      dispatch({ type: 'UPDATE_PATIENT_STATUS', id, status });
+      dispatch({ type: 'UPDATE_PATIENT_STATUS', id, status } as UpdateStatusAction);
     },
     [dispatch],
   );
