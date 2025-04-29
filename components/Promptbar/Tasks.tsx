@@ -517,7 +517,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient, ...rest }) =>
           </Button>
 
           {/* patient name */}
-          <CardTitle className="text-base font-medium flex-shrink-0">
+          <CardTitle className="text-base font-medium flex-1 break-words whitespace-normal">
             {patient.name}
           </CardTitle>
 
