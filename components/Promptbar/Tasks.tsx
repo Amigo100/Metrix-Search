@@ -439,26 +439,33 @@ const TaskItem: React.FC<TaskItemProps> = ({
 // ===-------------------------------------===
 interface PatientCardProps {
   patient: Patient;
-  /** other handlers forwarded via rest */
-  [key: string]: any;
-  updatePatientStatus: (pid: string, status: 'active' | 'discharged' | 'admitted') => void;
-  updateTaskTimerState: (patientId: string, taskId: string | number, isExpired: boolean) => void;
-} (pid: string, status: 'active' | 'discharged' | 'admitted') => void;
-}
-
-export const PatientCard: React.FC<PatientCardProps> = ({
-  patient,
-  updatePatientStatus,
-  removePatient,
-  addTaskToPatient,
-  updateTaskTimerState,
-  updateTaskTimer,
-  removeTaskFromPatient,
-  updateTaskCompletion,
-  acknowledgeTaskTimer,
-  updatePatientNotes,
-  updateTaskNotes,
-}) => {
+  // task & patient handlers
+  removePatient: (id: string) => void;
+  addTaskToPatient: (pid: string, text: string, mins: string) => void;
+  updateTaskTimerState: (
+    pid: string,
+    tid: string | number,
+    expired: boolean
+  ) => void;
+  updateTaskTimer: (
+    pid: string,
+    tid: string | number,
+    mins: string | null
+  ) => void;
+  removeTaskFromPatient: (pid: string, tid: string | number) => void;
+  updateTaskCompletion: (
+    pid: string,
+    tid: string | number,
+    status: TaskCompletionStatus
+  ) => void;
+  acknowledgeTaskTimer: (pid: string, tid: string | number) => void;
+  updatePatientNotes: (pid: string, notes: string) => void;
+  updateTaskNotes: (pid: string, tid: string | number, notes: string) => void;
+  updatePatientStatus: (
+    pid: string,
+    status: 'active' | 'discharged' | 'admitted'
+  ) => void;
+} => {
   /* LOS calc */
   const [los, setLos] = useState<string>('');
   useEffect(() => {
