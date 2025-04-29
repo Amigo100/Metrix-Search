@@ -438,7 +438,11 @@ const TaskItem: React.FC<TaskItemProps> = ({
 // === (Copied from PatientCard.tsx)       ===
 // ===-------------------------------------===
 interface PatientCardProps {
+  patient: Patient;
+  /** other handlers forwarded via rest */
+  [key: string]: any;
   updatePatientStatus: (pid: string, status: 'active' | 'discharged' | 'admitted') => void;
+: (pid: string, status: 'active' | 'discharged' | 'admitted') => void;
 }
 
 export const PatientCard: React.FC<PatientCardProps> = ({ patient, updatePatientStatus, ...rest }) => {
@@ -750,7 +754,18 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
 // --- MAIN SIDEBAR COMPONENT (Consumes Context, Renders Internal Components) ---
 const Tasks: React.FC = () => {
   // --- Consume Context (Same as before) ---
-  const { state, updatePatientStatus } = useContext(HomeContext);
+  const { state,
+    addPatient,
+    removePatient,
+    updateTaskTimerState,
+    addTaskToPatient,
+    updateTaskTimer,
+    removeTaskFromPatient,
+    updateTaskCompletion,
+    acknowledgeTaskTimer,
+    updatePatientNotes,
+    updateTaskNotes,
+    updatePatientStatus } = useContext(HomeContext)(HomeContext);
   const { showSidePromptbar, patients } = state;
 
   // --- Local State (Same as before) ---
@@ -805,7 +820,19 @@ const Tasks: React.FC = () => {
               <div className="flex flex-col items-center justify-center h-full text-gray-500 text-center"> <AlertTriangle className="w-10 h-10 mb-4 text-gray-600" /> <p className="font-medium">No patients being tracked.</p> <p className="text-sm mt-1">Click &quot;Add Patient&quot; to start.</p> </div>
             ) : (
               sortedPatients.map((patient) => (
-                <PatientCard $1updateTaskNotes={updateTaskNotes} updatePatientStatus={updatePatientStatus}
+                <PatientCard
+                  key={patient.id}
+                  patient={patient}
+                  removePatient={removePatient}
+                  updateTaskTimerState={updateTaskTimerState}
+                  addTaskToPatient={addTaskToPatient}
+                  updateTaskTimer={updateTaskTimer}
+                  removeTaskFromPatient={removeTaskFromPatient}
+                  updateTaskCompletion={updateTaskCompletion}
+                  acknowledgeTaskTimer={acknowledgeTaskTimer}
+                  updatePatientNotes={updatePatientNotes}
+                  updateTaskNotes={updateTaskNotes}
+                  updatePatientStatus={updatePatientStatus}
                 />
               ))
             )}
