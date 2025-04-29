@@ -37,7 +37,7 @@ type ReducerAction = ActionType<HomeInitialState> & {
 function homeReducer(
   state: HomeInitialState,
   action: ExtendedAction,
-): HomeInitialState: HomeInitialState {
+): HomeInitialState {
   switch (action.type) {
     case 'reset':
       return { ...initialState, patients: [] };
