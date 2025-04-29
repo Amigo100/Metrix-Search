@@ -444,7 +444,18 @@ interface PatientCardProps {
   updatePatientStatus: (pid: string, status: 'active' | 'discharged' | 'admitted') => void;
 }
 
-export const PatientCard: React.FC<PatientCardProps> = ({ patient, updatePatientStatus, ...rest }) => {
+export const PatientCard: React.FC<PatientCardProps> = ({
+  patient,
+  updatePatientStatus,
+  removePatient,            // ← add every handler you call
+  addTaskToPatient,
+  updateTaskTimer,
+  removeTaskFromPatient,
+  updateTaskCompletion,
+  acknowledgeTaskTimer,
+  updatePatientNotes,
+  updateTaskNotes,
+}) => {
   /* LOS calc */
   const [los, setLos] = useState<string>('');
   useEffect(() => {
