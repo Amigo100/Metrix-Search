@@ -497,6 +497,10 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient, ...rest }) =>
 
   const minutesSinceArrival = differenceInMinutes(new Date(), patient.arrivalTime);
 
+  // derive task lists
+  const pendingTasks = patient.tasks.filter(t => t.completionStatus !== 'complete');
+  const completedTasks = patient.tasks.filter(t => t.completionStatus === 'complete');
+
   return (
     <Card className={`mb-4 border-2 ${getBorderColor(minutesSinceArrival)} ${bgNeutral}`}>
       {/* HEADER ROW */}
@@ -579,8 +583,93 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient, ...rest }) =>
       {/* COLLAPSIBLE SECTION – hidden when collapsed */}
       {!collapsed && (
         <CardContent className="pt-0">
-          {/* pending/completed tasks, add‑task form – keep your existing TaskItem & form markup */}
-          {/* … existing implementation unchanged – paste here from your previous code … */}
+          {{/* TASK LISTS & ADD FORM */}
+        <CardContent className="pt-0">
+          {/* Pending tasks */}
+          <div className="flex-1 mt-2 border-t border-gray-700 pt-2 overflow-y-auto">
+            <div>
+              <h4 className="text-sm font-medium mb-1">Pending Tasks:</h4>
+              {pendingTasks.length === 0 ? (
+                <p className="text-xs italic">No pending tasks.</p>
+              ) : (
+                pendingTasks.map(t => (
+                  <TaskItem
+                    key={t.id}
+                    task={t}
+                    patientId={patient.id}
+                    patientName={patient.name}
+                    updateTaskTimerState={rest.updateTaskTimerState}
+                    updateTaskTimer={rest.updateTaskTimer}
+                    removeTask={rest.removeTaskFromPatient}
+                    updateTaskCompletion={rest.updateTaskCompletion}
+                    acknowledgeTimer={rest.acknowledgeTaskTimer}
+                    updateTaskNotes={rest.updateTaskNotes}
+                  />
+                ))
+              )}
+            </div>
+
+            {/* Completed tasks */}
+            {completedTasks.length > 0 && (
+              <div className="mt-2 border-t border-gray-700/50 pt-2">
+                <h4 className="text-sm font-medium mb-1">Completed Tasks:</h4>
+                {completedTasks.map(t => (
+                  <TaskItem
+                    key={t.id}
+                    task={t}
+                    patientId={patient.id}
+                    patientName={patient.name}
+                    updateTaskTimerState={rest.updateTaskTimerState}
+                    updateTaskTimer={rest.updateTaskTimer}
+                    removeTask={rest.removeTaskFromPatient}
+                    updateTaskCompletion={rest.updateTaskCompletion}
+                    acknowledgeTimer={rest.acknowledgeTaskTimer}
+                    updateTaskNotes={rest.updateTaskNotes}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Add task form */}
+          <div className="mt-3 pt-3 border-t border-gray-700/50">
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                if (newTaskText.trim() === '') return;
+                rest.addTaskToPatient(patient.id, newTaskText, newTaskTimer);
+                setNewTaskText('');
+                setNewTaskTimer('');
+              }}
+              className="flex items-center gap-2"
+            >
+              <Input
+                type="text"
+                placeholder="Add Task"
+                value={newTaskText}
+                onChange={e => setNewTaskText(e.target.value)}
+                className="flex-grow h-8 text-sm"
+              />
+              <Input
+                type="number"
+                min="1"
+                max="999"
+                placeholder="Min"
+                value={newTaskTimer}
+                onChange={e => setNewTaskTimer(e.target.value)}
+                className="w-16 h-8 text-xs"
+              />
+              <Button
+                type="submit"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                disabled={newTaskText.trim() === ''}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
         </CardContent>
       )}
     </Card>
