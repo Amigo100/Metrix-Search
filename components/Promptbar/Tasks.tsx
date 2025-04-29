@@ -582,7 +582,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient, ...rest }) =>
 
       {/* COLLAPSIBLE SECTION – hidden when collapsed */}
       {!collapsed && (
-          {/* TASK LISTS & ADD FORM */}
+        <>
         <CardContent className="pt-0">
           {/* Pending tasks */}
           <div className="flex-1 mt-2 border-t border-gray-700 pt-2 overflow-y-auto">
@@ -670,6 +670,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient, ...rest }) =>
             </form>
           </div>
         </CardContent>
+        </>
       )}
     </Card>
   );
