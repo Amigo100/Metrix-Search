@@ -442,13 +442,16 @@ interface PatientCardProps {
   /** other handlers forwarded via rest */
   [key: string]: any;
   updatePatientStatus: (pid: string, status: 'active' | 'discharged' | 'admitted') => void;
+  updateTaskTimerState: (patientId: string, taskId: string | number, isExpired: boolean) => void;
+} (pid: string, status: 'active' | 'discharged' | 'admitted') => void;
 }
 
 export const PatientCard: React.FC<PatientCardProps> = ({
   patient,
   updatePatientStatus,
-  removePatient,            // ← add every handler you call
+  removePatient,
   addTaskToPatient,
+  updateTaskTimerState,
   updateTaskTimer,
   removeTaskFromPatient,
   updateTaskCompletion,
