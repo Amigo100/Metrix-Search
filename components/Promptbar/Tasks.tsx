@@ -147,9 +147,12 @@ const DialogDescription: React.FC<{ className?: string; children: React.ReactNod
   children,
   className,
 }) => <p className={`text-sm text-muted-foreground ${className ?? ''}`}>{children}</p>;
-const DialogClose: React.FC<{ children: React.ReactElement; onClick?: () => void; asChild?: boolean }> = ({
-  children,
-  onClick,
+const DialogClose: React.FC<{
+  children: React.ReactElement;
+  onClick?: () => void;
+  asChild?: boolean;
+}> = ({ children, onClick }) =>
+  React.cloneElement(children, { onClick });
 }) => React.cloneElement(children, { onClick });{
   children,
   onClick,
