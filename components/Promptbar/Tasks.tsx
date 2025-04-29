@@ -153,11 +153,6 @@ const DialogClose: React.FC<{
   asChild?: boolean;
 }> = ({ children, onClick }) =>
   React.cloneElement(children, { onClick });
-}) => React.cloneElement(children, { onClick });{
-  children,
-  onClick,
-}) => React.cloneElement(children, { onClick });
-
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
