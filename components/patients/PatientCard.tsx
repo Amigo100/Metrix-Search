@@ -32,7 +32,7 @@ import {
 
 import { Patient, Task, TaskCompletionStatus } from '@/types/patient';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 
@@ -126,6 +126,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
 
           {/* remove card */}
           <Button
+            type = "button"
             variant="ghost"
             size="sm"
             className="h-6 w-6 text-black hover:text-red-500 flex-shrink-0"
@@ -142,7 +143,8 @@ const PatientCard: React.FC<PatientCardProps> = ({
               {patient.status}
             </Badge>
           )}
-          <Button
+          <Button 
+            type = "button"
             variant="ghost"
             size="sm"
             className="h-6 w-6 text-green-500"
@@ -152,6 +154,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
             ✓
           </Button>
           <Button
+            type = "button"
             variant="ghost"
             size="sm"
             className="h-6 w-6 text-blue-500"
