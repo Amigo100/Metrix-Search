@@ -769,6 +769,10 @@ const Tasks: React.FC = () => {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>( typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default' );
   useEffect(() => { if (typeof window !== 'undefined' && 'Notification' in window && notificationPermission === 'default') { Notification.requestPermission().then(setNotificationPermission); } }, [notificationPermission]);
 
+    const sortedPatients = [...patients].sort(
+    (a, b) => b.arrivalTime.getTime() - a.arrivalTime.getTime()
+  );
+
   const sidebarWidth = showSidePromptbar ? 'w-40 lg:w-80' : 'w-0';
 
   return (
@@ -786,7 +790,7 @@ const Tasks: React.FC = () => {
             {patients.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-500 text-center"> <AlertTriangle className="w-10 h-10 mb-4 text-gray-600" /> <p className="font-medium">No patients being tracked.</p> <p className="text-sm mt-1">Click &quot;Add Patient&quot; to start.</p> </div>
             ) : (
-              patients.map((patient) => (
+              sortedPatients.map((patient) => (
                 <PatientCard // Renders internal PatientCard
                   key={patient.id}
                   patient={patient}
