@@ -715,7 +715,13 @@ const AddPatientModal: React.FC<AddPatientModalProps> = ({ isOpen, onClose, addP
         return { text: task.text, timerEnd: timerEndDate, isTimerExpired: !!(timerEndDate && timerEndDate <= new Date()), completionStatus: 'incomplete', createdAt: new Date(), completedAt: null, notes: '', isAcknowledged: false };
       });
 
-     const newPatientData: Omit<Patient, 'id' | 'tasks'> & { tasks: Omit<Task, 'id'>[] } = { name: patientName, arrivalTime: arrivalDateTime, tasks: processedModalTasks, notes: patientNotes };
+     const newPatientData: Omit<Patient, 'id' | 'tasks'> & { tasks: Omit<Task, 'id'>[] } = {
+      name: patientName,
+      arrivalTime: arrivalDateTime,
+      tasks: processedModalTasks,
+      notes: patientNotes,
+      status: 'active', // default status on creation
+    };
     addPatientHandler(newPatientData); // Call the prop
 
     setPatientName(''); setArrivalTime(format(new Date(), 'HH:mm')); setTasks([{ id: Date.now(), text: '', timerMinutes: '' }]); setPatientNotes(''); onClose();
