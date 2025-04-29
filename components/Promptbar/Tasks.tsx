@@ -128,6 +128,25 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) =>
       <div onClick={(e) => e.stopPropagation()}>{children}</div>
     </div>
   ) : null;
+
+/* --- Dialog sub‑components used by AddPatientModal ----------------------- */
+interface DialogSubProps { className?: string; children: React.ReactNode }
+export const DialogContent: React.FC<DialogSubProps> = ({ className, children }) => (
+  <div className={`bg-white rounded-lg shadow-lg p-6 ${className ?? ''}`}>{children}</div>
+);
+export const DialogHeader: React.FC<DialogSubProps> = ({ className, children }) => (
+  <div className={`mb-4 ${className ?? ''}`}>{children}</div>
+);
+export const DialogTitle: React.FC<DialogSubProps> = ({ className, children }) => (
+  <h2 className={`text-lg font-semibold ${className ?? ''}`}>{children}</h2>
+);
+export const DialogDescription: React.FC<DialogSubProps> = ({ className, children }) => (
+  <p className={`text-sm text-muted-foreground ${className ?? ''}`}>{children}</p>
+);
+export const DialogFooter: React.FC<DialogSubProps> = ({ className, children }) => (
+  <div className={`mt-6 flex justify-end space-x-2 ${className ?? ''}`}>{children}</div>
+);
+
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -703,4 +722,3 @@ const Tasks: React.FC = () => {
 };
 
 export default Tasks;
-
