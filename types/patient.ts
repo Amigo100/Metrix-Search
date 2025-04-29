@@ -46,4 +46,3 @@ export interface Patient {
   /** General notes or details about the patient */
   notes: string;
 }
-}
