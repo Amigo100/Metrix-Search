@@ -821,64 +821,83 @@ const Tasks: React.FC = () => {
   const sidebarWidth = showSidePromptbar ? 'w-40 lg:w-80' : 'w-0';
 
   return (
-    <div className={`flex flex-col h-full overflow-y-auto transition-all duration-300 bg-neutral-50 shadow-md border-l border-gray-200 ${sidebarWidth} ${showSidePromptbar ? 'visible' : 'invisible'}`}>
-      {showSidePromptbar && (
-        <>
-          {/* Header - Uses *internal* mock Button */}
-          <div className="flex flex-col p-4 shadow-md border-b border-gray-200 flex-shrink-0">
-            {/* view toggle */}
-            <div className="inline-flex rounded-md overflow-hidden mr-2">
-              <Button
-                size="sm"
-                variant={viewFilter==='active'?'secondary':'outline'}
-                onClick={()=>setViewFilter('active')}
-              >Active</Button>
-              <Button
-                size="sm"
-                variant={viewFilter==='inactive'?'secondary':'outline'}
-                onClick={()=>setViewFilter('inactive')}
-              >Inactive</Button>
-              <Button
-                size="sm"
-                variant={viewFilter==='all'?'secondary':'outline'}
-                onClick={()=>setViewFilter('all')}
-              >All</Button>
+  <div
+    className={`flex flex-col h-full overflow-y-auto transition-all duration-300 bg-neutral-50 shadow-md border-l border-gray-200 ${sidebarWidth} ${
+      showSidePromptbar ? 'visible' : 'invisible'
+    }`}
+  >
+    {showSidePromptbar && (
+      <>
+        {/* Header */}
+        <div className="flex flex-col p-4 shadow-md border-b border-gray-200 flex-shrink-0">
+          <h2 className="text-lg font-semibold text-black">Patient Tracker</h2>
+
+          {/* view toggle now below the title */}
+          <div className="mt-2 inline-flex rounded-md overflow-hidden">
+            <Button
+              type="button"
+              size="sm"
+              variant={viewFilter === 'active' ? 'secondary' : 'outline'}
+              onClick={() => setViewFilter('active')}
+            >
+              Active
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={viewFilter === 'inactive' ? 'secondary' : 'outline'}
+              onClick={() => setViewFilter('inactive')}
+            >
+              Inactive
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={viewFilter === 'all' ? 'secondary' : 'outline'}
+              onClick={() => setViewFilter('all')}
+            >
+              All
+            </Button>
+          </div>
+        </div> {/* ← closed the header div */}
+
+        {/* Patient List */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {patients.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-gray-500 text-center">
+              <AlertTriangle className="w-10 h-10 mb-4 text-gray-600" />
+              <p className="font-medium">No patients being tracked.</p>
+              <p className="text-sm mt-1">Click &quot;Add Patient&quot; to start.</p>
             </div>
-            <h2 className="text-lg font-semibold text-black">Patient Tracker</h2>
+          ) : (
+            sortedPatients.map((patient) => (
+              <PatientCard
+                key={patient.id}
+                patient={patient}
+                removePatient={removePatient}
+                updateTaskTimerState={updateTaskTimerState}
+                addTaskToPatient={addTaskToPatient}
+                updateTaskTimer={updateTaskTimer}
+                removeTaskFromPatient={removeTaskFromPatient}
+                updateTaskCompletion={updateTaskCompletion}
+                acknowledgeTaskTimer={acknowledgeTaskTimer}
+                updatePatientNotes={updatePatientNotes}
+                updateTaskNotes={updateTaskNotes}
+                updatePatientStatus={updatePatientStatus}
+              />
+            ))
+          )}
+        </div>
 
-            <div className="mt-2 inline-flex rounded-md overflow-hidden">
-  {/* Active / Inactive / All buttons */}
-          </div>
-
-          {/* Patient List - Renders *internal* PatientCard */}
-          <div className="flex-1 overflow-y-auto p-4">
-            {patients.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500 text-center"> <AlertTriangle className="w-10 h-10 mb-4 text-gray-600" /> <p className="font-medium">No patients being tracked.</p> <p className="text-sm mt-1">Click &quot;Add Patient&quot; to start.</p> </div>
-            ) : (
-              sortedPatients.map((patient) => (
-                <PatientCard
-                  key={patient.id}
-                  patient={patient}
-                  removePatient={removePatient}
-                  updateTaskTimerState={updateTaskTimerState}
-                  addTaskToPatient={addTaskToPatient}
-                  updateTaskTimer={updateTaskTimer}
-                  removeTaskFromPatient={removeTaskFromPatient}
-                  updateTaskCompletion={updateTaskCompletion}
-                  acknowledgeTaskTimer={acknowledgeTaskTimer}
-                  updatePatientNotes={updatePatientNotes}
-                  updateTaskNotes={updateTaskNotes}
-                  updatePatientStatus={updatePatientStatus}
-                />
-              ))
-            )}
-          </div>
-
-          {/* Renders *internal* AddPatientModal */}
-          <AddPatientModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} addPatientHandler={addPatient} />
-        </>
-      )}
-    </div>
-  );
+        {/* Add-patient modal */}
+        <AddPatientModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          addPatientHandler={addPatient}
+        />
+      </>
+    )}
+  </div>
+);
 
 export default Tasks;
