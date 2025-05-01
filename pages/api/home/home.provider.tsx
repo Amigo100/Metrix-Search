@@ -69,25 +69,6 @@ export default function HomeContextProvider({
   const [state, dispatch] = React.useReducer(homeReducer, initialState);
 
   /* ------------------------------------------------------------------ */
-  /* Derived task counters – recompute whenever patients array changes  */
-  /* ------------------------------------------------------------------ */
-  const { pendingTaskCount, overdueTaskCount } = React.useMemo(() => {
-    let pending = 0;
-    let overdue = 0;
-
-    state.patients.forEach((p) =>
-      p.tasks.forEach((t) => {
-        if (t.completionStatus !== 'complete') {
-          pending += 1;
-          if (t.isTimerExpired) overdue += 1;
-        }
-      }),
-    );
-
-    return { pendingTaskCount: pending, overdueTaskCount: overdue };
-  }, [state.patients]);
-
-  /* ------------------------------------------------------------------ */
   /* Local-storage load/save                                            */
   /* ------------------------------------------------------------------ */
   useEffect(() => {
