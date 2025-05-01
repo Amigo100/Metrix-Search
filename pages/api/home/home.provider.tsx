@@ -207,8 +207,8 @@ export default function HomeContextProvider({
     [state.patients, dispatch],
   );
 
-/* ------------------------------------------------------------------ */
-/* updateTaskTimer - change the timerEnd on an existing task           */
+  /* ------------------------------------------------------------------ */
+/* updateTaskTimer – change timerEnd on an existing task               */
 /* ------------------------------------------------------------------ */
 const updateTaskTimer = useCallback(
   (pid: string, tid: string | number, mins: string | null) => {
@@ -241,7 +241,35 @@ const updateTaskTimer = useCallback(
 );
 
 /* ------------------------------------------------------------------ */
-/* updateTaskCompletion                                               */
+/* removeTaskFromPatient                                              */
+/* ------------------------------------------------------------------ */
+const removeTaskFromPatient = useCallback(
+  (pid: string, tid: string | number) => {
+    const updated = state.patients.map((p) =>
+      p.id === pid ? { ...p, tasks: p.tasks.filter((t) => t.id !== tid) } : p,
+    );
+
+    dispatch({ type: 'change', field: 'patients', value: updated });
+  },
+  [state.patients, dispatch],
+);
+
+/* ------------------------------------------------------------------ */
+/* removeTaskFromPatient                                               */
+/* ------------------------------------------------------------------ */
+const removeTaskFromPatient = useCallback(
+  (pid: string, tid: string | number) => {
+    const updated = state.patients.map((p) =>
+      p.id === pid ? { ...p, tasks: p.tasks.filter((t) => t.id !== tid) } : p,
+    );
+
+    dispatch({ type: 'change', field: 'patients', value: updated });
+  },
+  [state.patients, dispatch],
+);
+
+/* ------------------------------------------------------------------ */
+/* updateTaskCompletion                                                */
 /* ------------------------------------------------------------------ */
 const updateTaskCompletion = useCallback(
   (pid: string, tid: string | number, status: TaskCompletionStatus) => {
@@ -266,7 +294,7 @@ const updateTaskCompletion = useCallback(
 );
 
 /* ------------------------------------------------------------------ */
-/* acknowledgeTaskTimer                                               */
+/* acknowledgeTaskTimer                                                */
 /* ------------------------------------------------------------------ */
 const acknowledgeTaskTimer = useCallback(
   (pid: string, tid: string | number) => {
@@ -285,6 +313,27 @@ const acknowledgeTaskTimer = useCallback(
   },
   [state.patients, dispatch],
 );
+
+/* ------------------------------------------------------------------ */
+/* Derived global task counters                                        */
+/* ------------------------------------------------------------------ */
+const { pendingTaskCount, overdueTaskCount } = React.useMemo(() => {
+  let pending = 0;
+  let overdue = 0;
+
+  state.patients.forEach((p) =>
+    p.tasks.forEach((t) => {
+      if (t.completionStatus !== 'complete') {
+        pending += 1;
+        if (t.isTimerExpired) overdue += 1;
+      }
+    }),
+  );
+
+  return { pendingTaskCount: pending, overdueTaskCount: overdue };
+}, [state.patients]);
+
+  /* … (all other task handlers remain unchanged) … */
 
   /* ------------------------------------------------------------------ */
   /* Conversation & folder handlers  (minimal no-ops to satisfy type)   */
