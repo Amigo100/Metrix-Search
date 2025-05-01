@@ -830,7 +830,21 @@ const Tasks: React.FC = () => {
       <>
         {/* Header */}
         <div className="flex flex-col p-4 shadow-md border-b border-gray-200 flex-shrink-0">
-          <h2 className="text-lg font-semibold text-black">Patient Tracker</h2>
+          {/* first row: title + add-patient */}
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-black">Patient Tracker</h2>
+  
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="bg-[#008080] hover:bg-[#009999] border-gray-400 text-white"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add&nbsp;Patient
+            </Button>
+          </div>
 
           {/* view toggle now below the title */}
           <div className="mt-2 inline-flex rounded-md overflow-hidden">
