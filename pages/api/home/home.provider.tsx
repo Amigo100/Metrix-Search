@@ -207,15 +207,12 @@ export default function HomeContextProvider({
     [state.patients, dispatch],
   );
 
-  /* ------------------------------------------------------------------ */
-/* Restore missing updateTaskTimer handler                            */
 /* ------------------------------------------------------------------ */
-const updateTaskTimer = useCallback(
-  (pid: string, tid: string | number, mins: string | null) => {
-    const newEnd =
-      mins && !isNaN(parseInt(mins, 10))
-        ? addMinutes(new Date(), parseInt(mins, 10))
-        : null;
+/* updateTaskCompletion                                               */
+/* ------------------------------------------------------------------ */
+const updateTaskCompletion = useCallback(
+  (pid: string, tid: string | number, status: TaskCompletionStatus) => {
+    const completedAt = status === 'complete' ? new Date() : null;
 
     const updated = state.patients.map((p) =>
       p.id === pid
@@ -223,12 +220,7 @@ const updateTaskTimer = useCallback(
             ...p,
             tasks: p.tasks.map((t) =>
               t.id === tid
-                ? {
-                    ...t,
-                    timerEnd: newEnd,
-                    isTimerExpired: !!(newEnd && newEnd <= new Date()),
-                    isAcknowledged: false,
-                  }
+                ? { ...t, completionStatus: status, completedAt }
                 : t,
             ),
           }
@@ -240,7 +232,26 @@ const updateTaskTimer = useCallback(
   [state.patients, dispatch],
 );
 
-  /* … (all other task handlers remain unchanged) … */
+/* ------------------------------------------------------------------ */
+/* acknowledgeTaskTimer                                               */
+/* ------------------------------------------------------------------ */
+const acknowledgeTaskTimer = useCallback(
+  (pid: string, tid: string | number) => {
+    const updated = state.patients.map((p) =>
+      p.id === pid
+        ? {
+            ...p,
+            tasks: p.tasks.map((t) =>
+              t.id === tid ? { ...t, isAcknowledged: true } : t,
+            ),
+          }
+        : p,
+    );
+
+    dispatch({ type: 'change', field: 'patients', value: updated });
+  },
+  [state.patients, dispatch],
+);
 
   /* ------------------------------------------------------------------ */
   /* Conversation & folder handlers  (minimal no-ops to satisfy type)   */
