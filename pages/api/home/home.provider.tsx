@@ -208,6 +208,39 @@ export default function HomeContextProvider({
   );
 
 /* ------------------------------------------------------------------ */
+/* updateTaskTimer - change the timerEnd on an existing task           */
+/* ------------------------------------------------------------------ */
+const updateTaskTimer = useCallback(
+  (pid: string, tid: string | number, mins: string | null) => {
+    const newEnd =
+      mins && !isNaN(parseInt(mins, 10))
+        ? addMinutes(new Date(), parseInt(mins, 10))
+        : null;
+
+    const updated = state.patients.map((p) =>
+      p.id === pid
+        ? {
+            ...p,
+            tasks: p.tasks.map((t) =>
+              t.id === tid
+                ? {
+                    ...t,
+                    timerEnd: newEnd,
+                    isTimerExpired: !!(newEnd && newEnd <= new Date()),
+                    isAcknowledged: false,
+                  }
+                : t,
+            ),
+          }
+        : p,
+    );
+
+    dispatch({ type: 'change', field: 'patients', value: updated });
+  },
+  [state.patients, dispatch],
+);
+
+/* ------------------------------------------------------------------ */
 /* updateTaskCompletion                                               */
 /* ------------------------------------------------------------------ */
 const updateTaskCompletion = useCallback(
