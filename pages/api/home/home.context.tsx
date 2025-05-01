@@ -37,51 +37,54 @@ export interface HomeContextProps {
   /* Patient / task handlers                                            */
   /* ------------------------------------------------------------------ */
   addPatient: (
-    newPatient: Omit<Patient, 'id' | 'tasks'> & {
-      tasks: Omit<Task, 'id'>[];
-    },
+    newPatient: Omit<Patient, 'id' | 'tasks'> & { tasks: Omit<Task, 'id'>[] }
   ) => void;
   removePatient: (patientId: string) => void;
   updateTaskTimerState: (
     patientId: string,
     taskId: string | number,
-    isExpired: boolean,
+    isExpired: boolean
   ) => void;
   addTaskToPatient: (
     patientId: string,
     taskText: string,
-    timerMinutes: string,
+    timerMinutes: string
   ) => void;
   updateTaskTimer: (
     patientId: string,
     taskId: string | number,
-    newTimerMinutes: string | null,
+    newTimerMinutes: string | null
   ) => void;
   removeTaskFromPatient: (patientId: string, taskId: string | number) => void;
   updateTaskCompletion: (
     patientId: string,
     taskId: string | number,
-    status: TaskCompletionStatus,
+    status: TaskCompletionStatus
   ) => void;
-  acknowledgeTaskTimer: (patientId: string, taskId: string | number) => void;
+  acknowledgeTaskTimer: (
+    patientId: string,
+    taskId: string | number
+  ) => void;
   updatePatientNotes: (patientId: string, notes: string) => void;
   updateTaskNotes: (
     patientId: string,
     taskId: string | number,
-    notes: string,
+    notes: string
   ) => void;
-
-  /**
-   * NEW — change a patient's high‑level status (active / discharged / admitted).
-   */
   updatePatientStatus: (
     patientId: string,
-    status: 'active' | 'discharged' | 'admitted',
+    status: 'active' | 'discharged' | 'admitted'
   ) => void;
+
+  /* ------------------------------------------------------------------ */
+  /* NEW: global task counters                                          */
+  /* ------------------------------------------------------------------ */
+  /** # pending tasks across all patients (status ≠ complete) */
+  pendingTaskCount: number;
+
+  /** # overdue tasks (pending + timer expired) */
+  overdueTaskCount: number;
 }
 
-/**
- * Undefined default satisfies TS; Provider supplies the real value.
- */
 const HomeContext = createContext<HomeContextProps>(undefined!);
 export default HomeContext;
