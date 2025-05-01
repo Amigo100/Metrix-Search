@@ -222,20 +222,6 @@ const updateTaskTimer = useCallback(
 );
 
 /* ------------------------------------------------------------------ */
-/* removeTaskFromPatient                                              */
-/* ------------------------------------------------------------------ */
-const removeTaskFromPatient = useCallback(
-  (pid: string, tid: string | number) => {
-    const updated = state.patients.map((p) =>
-      p.id === pid ? { ...p, tasks: p.tasks.filter((t) => t.id !== tid) } : p,
-    );
-
-    dispatch({ type: 'change', field: 'patients', value: updated });
-  },
-  [state.patients, dispatch],
-);
-
-/* ------------------------------------------------------------------ */
 /* removeTaskFromPatient                                               */
 /* ------------------------------------------------------------------ */
 const removeTaskFromPatient = useCallback(
