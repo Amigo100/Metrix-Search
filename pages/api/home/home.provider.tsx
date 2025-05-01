@@ -236,6 +236,27 @@ const removeTaskFromPatient = useCallback(
 );
 
 /* ------------------------------------------------------------------ */
+/* updateTaskNotes                                                    */
+/* ------------------------------------------------------------------ */
+const updateTaskNotes = useCallback(
+  (pid: string, tid: string | number, notes: string) => {
+    const updated = state.patients.map((p) =>
+      p.id === pid
+        ? {
+            ...p,
+            tasks: p.tasks.map((t) =>
+              t.id === tid ? { ...t, notes } : t,
+            ),
+          }
+        : p,
+    );
+
+    dispatch({ type: 'change', field: 'patients', value: updated });
+  },
+  [state.patients, dispatch],
+);
+  
+/* ------------------------------------------------------------------ */
 /* updateTaskCompletion                                                */
 /* ------------------------------------------------------------------ */
 const updateTaskCompletion = useCallback(
@@ -299,6 +320,20 @@ const { pendingTaskCount, overdueTaskCount } = React.useMemo(() => {
 
   return { pendingTaskCount: pending, overdueTaskCount: overdue };
 }, [state.patients]);
+
+/* ------------------------------------------------------------------ */
+/* updatePatientNotes                                                 */
+/* ------------------------------------------------------------------ */
+const updatePatientNotes = useCallback(
+  (pid: string, notes: string) => {
+    const updated = state.patients.map((p) =>
+      p.id === pid ? { ...p, notes } : p,
+    );
+
+    dispatch({ type: 'change', field: 'patients', value: updated });
+  },
+  [state.patients, dispatch],
+);
 
   /* … (all other task handlers remain unchanged) … */
 
