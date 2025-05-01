@@ -880,6 +880,5 @@ const Tasks: React.FC = () => {
       )}
     </div>
   );
-};
 
 export default Tasks;
