@@ -1,33 +1,35 @@
 // file: /pages/dashboard.tsx
 
-import React from 'react';
+import React, { useContext } from 'react';
 import Link from 'next/link';
+import HomeContext from '@/pages/api/home/home.context';   // adjust path if needed
+
 import {
-    LayoutGrid, // General Dashboard/Layout
-    ClipboardCheck, // Tasks/Tracker
-    Activity, // Activity Log
-    FileText, // Scribe
-    TrendingUp, // Predictive
-    Calculator, // Scoring
-    BrainCircuit, // Diagnostic/Chatbot
-    Search, // Guideline Search (replace if needed)
-    Bell, // Notifications/Alerts
-    CheckCircle2, // Completed Tasks
-    AlertCircle, // Expired/Alert Tasks
-    ArrowRight, // Links
-    BarChart3, // Stats/Analytics Icon (Can be used as placeholder)
-    Server, // System Status Icon
-    Clock, // Wait times
-    LogIn, // Admission Likelihood
+  LayoutGrid,      // General Dashboard/Layout
+  ClipboardCheck,  // Tasks/Tracker
+  Activity,        // Activity Log
+  FileText,        // Scribe
+  TrendingUp,      // Predictive
+  Calculator,      // Scoring
+  BrainCircuit,    // Diagnostic/Chatbot
+  Search,          // Guideline Search
+  Bell,            // Notifications/Alerts
+  CheckCircle2,    // Completed Tasks
+  AlertCircle,     // Expired/Alert Tasks
+  ArrowRight,      // Links
+  BarChart3,       // Stats/Analytics (placeholder)
+  Server,          // System-status icon
+  Clock,           // Wait times
+  LogIn            // Admission likelihood
 } from 'lucide-react';
+
 // --- Removed Recharts Import ---
 // import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 // --- Placeholder Data (Replace with actual data fetching) ---
-const userName = "Dr. Deighton"; // Fetch actual user name
-const pendingTaskCount = 3; // Fetch from task state/context
-const overdueTaskCount = 1; // Fetch from task state/context
-const systemStatus = { online: true, message: "All systems operational." }; // Fetch status
+const userName = 'Dr. Deighton';
+const systemStatus = { online: true, message: 'All systems operational.' };
+
 const recentActivities = [
     { id: 1, text: "Calculated Wells Score for Patient ID 789012", time: "1h ago", href: "/clinical-scoring-tools" },
     { id: 2, text: "Generated ED note for Patient ID 345678", time: "3h ago", href: "/clinical-scribe" },
@@ -98,6 +100,7 @@ const QuickAccessCard: React.FC<QuickAccessCardProps> = ({ title, description, h
 
 // --- Dashboard Page Component ---
 export default function DashboardPage() {
+  const { pendingTaskCount, overdueTaskCount } = useContext(HomeContext);
   return (
     // Main container with consistent padding and background
     <div className="w-full min-h-[calc(100vh-72px)] overflow-y-auto p-6 md:p-8 bg-gradient-to-b from-white via-teal-50 to-gray-50">
