@@ -851,7 +851,12 @@ const Tasks: React.FC = () => {
             <Button
               type="button"
               size="sm"
-              variant={viewFilter === 'active' ? 'secondary: 'bg-[#008080] text-white hover:bg-[#009999] border-gray-400',' : 'outline'}
+              variant="outline"
+              className={`${
+                viewFilter==='active'
+                  ? 'bg-[#008080] text-white hover:bg-[#009999] border-gray-400'
+                  : ''
+              }`}
               onClick={() => setViewFilter('active')}
             >
               Active
@@ -859,18 +864,28 @@ const Tasks: React.FC = () => {
             <Button
               type="button"
               size="sm"
-              variant={viewFilter === 'inactive' ? 'secondary: 'bg-[#008080] text-white hover:bg-[#009999] border-gray-400',' : 'outline'}
-              onClick={() => setViewFilter('inactive')}
+              variant="outline"
+              className={`${
+                viewFilter==='inactive'
+                  ? 'bg-[#008080] text-white hover:bg-[#009999] border-gray-400'
+                  : ''
+              }`}
+              onClick={() => setViewFilter('active')}
             >
-              Inactive
+              Active
             </Button>
             <Button
               type="button"
               size="sm"
-              variant={viewFilter === 'all' ? 'secondary: 'bg-[#008080] text-white hover:bg-[#009999] border-gray-400',' : 'outline'}
-              onClick={() => setViewFilter('all')}
+              variant="outline"
+              className={`${
+                viewFilter==='all'
+                  ? 'bg-[#008080] text-white hover:bg-[#009999] border-gray-400'
+                  : ''
+              }`}
+              onClick={() => setViewFilter('active')}
             >
-              All
+              Active
             </Button>
           </div>
         </div> {/* ← closed the header div */}
@@ -907,12 +922,4 @@ const Tasks: React.FC = () => {
         <AddPatientModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          addPatientHandler={addPatient}
-        />
-      </>
-    )}
-  </div>
- );
-}
-
-export default Tasks;
+          addPatientHandler={addPati
