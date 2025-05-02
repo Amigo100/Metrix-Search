@@ -810,8 +810,10 @@ const Tasks: React.FC = () => {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>( typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default' );
   useEffect(() => { if (typeof window !== 'undefined' && 'Notification' in window && notificationPermission === 'default') { Notification.requestPermission().then(setNotificationPermission); } }, [notificationPermission]);
 
-    const [viewFilter,setViewFilter] = useState<'all'|'active'|'inactive'>('active');
+  const [viewFilter,setViewFilter] = useState<'all'|'active'|'inactive'>('active');
 
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  
   const visiblePatients = patients.filter(p => {
     if(viewFilter==='all') return true;
     if(viewFilter==='active') return p.status==='active';
