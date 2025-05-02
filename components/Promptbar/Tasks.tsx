@@ -847,7 +847,7 @@ const Tasks: React.FC = () => {
           </div>
 
           {/* view toggle now below the title */}
-          <div className="mt-2 inline-flex rounded-md overflow-hidden">
+          <div className="mt-2 inline-flex rounded-md overflow-hidden space-x-2">
             <Button
               type="button"
               size="sm"
