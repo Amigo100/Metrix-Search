@@ -850,24 +850,39 @@ const Tasks: React.FC = () => {
           <div className="mt-2 inline-flex space-x-2">
             <Button
               size="sm"
-              variant={viewFilter === 'active' ? 'secondary' : 'outline'}
+              variant="outline"
+              className={
+                viewFilter === 'active'
+                  ? 'bg-[#008080] hover:bg-[#009999] border-gray-400 text-white'
+                  : ''
+              }
               onClick={() => setViewFilter('active')}
             >
               Active
             </Button>
             <Button
               size="sm"
-              variant={viewFilter === 'inactive' ? 'secondary' : 'outline'}
-              onClick={() => setViewFilter('inactive')}
+              variant="outline"
+              className={
+                viewFilter === 'inactive'
+                  ? 'bg-[#008080] hover:bg-[#009999] border-gray-400 text-white'
+                  : ''
+              }
+              onClick={() => setViewFilter('active')}
             >
-              Inactive
+              Active
             </Button>
             <Button
               size="sm"
-              variant={viewFilter === 'all' ? 'secondary' : 'outline'}
-              onClick={() => setViewFilter('all')}
+              variant="outline"
+              className={
+                viewFilter === 'all'
+                  ? 'bg-[#008080] hover:bg-[#009999] border-gray-400 text-white'
+                  : ''
+              }
+              onClick={() => setViewFilter('active')}
             >
-              All
+              Active
             </Button>
           </div>
         </div> {/* ← closed the header div */}
@@ -900,8 +915,15 @@ const Tasks: React.FC = () => {
           )}
         </div>
 
-        {/* Add-patient modal */}
         <AddPatientModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          addPatientHandler={addPati
+          addPatientHandler={addPatient}
+        />
+      </>
+    )}
+  </div>
+ );
+}
+
+export default Tasks;
