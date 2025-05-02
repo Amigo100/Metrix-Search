@@ -847,6 +847,7 @@ const Tasks: React.FC = () => {
           </div>
 
           {/* view toggle now below the title */}
+          {/* view toggle now below the title */}
           <div className="mt-2 inline-flex space-x-2">
             <Button
               size="sm"
@@ -868,9 +869,9 @@ const Tasks: React.FC = () => {
                   ? 'bg-[#008080] hover:bg-[#009999] border-gray-400 text-white'
                   : ''
               }
-              onClick={() => setViewFilter('active')}
+              onClick={() => setViewFilter('inactive')}
             >
-              Active
+              Inactive
             </Button>
             <Button
               size="sm"
@@ -880,9 +881,9 @@ const Tasks: React.FC = () => {
                   ? 'bg-[#008080] hover:bg-[#009999] border-gray-400 text-white'
                   : ''
               }
-              onClick={() => setViewFilter('active')}
+              onClick={() => setViewFilter('all')}
             >
-              Active
+              All
             </Button>
           </div>
         </div> {/* ← closed the header div */}
