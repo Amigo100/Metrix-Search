@@ -846,35 +846,32 @@ const Tasks: React.FC = () => {
           </div>
 
           {/* view toggle now below the title */}
-<div className="mt-2 inline-flex space-x-2">
-  <Button
-    type="button"
-    size="sm"
-    variant="outline"
-    className={viewFilter === 'active' ? 'bg-[#008080] text-white hover:bg-[#009999]' : ''}
-    onClick={() => setViewFilter('active')}
-  >
-    Active
-  </Button>
-  <Button
-    type="button"
-    size="sm"
-    variant="outline"
-    className={viewFilter === 'inactive' ? 'bg-[#008080] text-white hover:bg-[#009999]' : ''}
-    onClick={() => setViewFilter('inactive')}
-  >
-    Inactive
-  </Button>
-  <Button
-    type="button"
-    size="sm"
-    variant="outline"
-    className={viewFilter === 'all' ? 'bg-[#008080] text-white hover:bg-[#009999]' : ''}
-    onClick={() => setViewFilter('all')}
-  >
-    All
-  </Button>
-</div>
+          <div className="mt-2 inline-flex rounded-md overflow-hidden space-x-2">
+            <Button
+              type="button"
+              size="sm"
+              variant={viewFilter === 'active' ? 'secondary' : 'outline'}
+              onClick={() => setViewFilter('active')}
+            >
+              Active
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={viewFilter === 'inactive' ? 'secondary' : 'outline'}
+              onClick={() => setViewFilter('inactive')}
+            >
+              Inactive
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={viewFilter === 'all' ? 'secondary' : 'outline'}
+              onClick={() => setViewFilter('all')}
+            >
+              All
+            </Button>
+          </div>
         </div> {/* ← closed the header div */}
 
         {/* Patient List */}
