@@ -70,7 +70,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       default: 'bg-primary text-primary-foreground hover:bg-primary/90',
       destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
       outline: 'border bg-background hover:bg-accent',
-      secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+      secondary: 'bg-[#008080] text-white border-gray-400 hover:bg-[#009999]',
       ghost: 'hover:bg-accent',
       link: 'text-primary underline-offset-4 hover:underline',
     } as const;
@@ -847,45 +847,27 @@ const Tasks: React.FC = () => {
           </div>
 
           {/* view toggle now below the title */}
-          <div className="mt-2 inline-flex rounded-md overflow-hidden space-x-2">
+          <div className="mt-2 inline-flex space-x-2">
             <Button
-              type="button"
               size="sm"
-              variant="outline"
-              className={`${
-                viewFilter==='active'
-                  ? 'bg-[#008080] text-white hover:bg-[#009999] border-gray-400'
-                  : ''
-              }`}
+              variant={viewFilter === 'active' ? 'secondary' : 'outline'}
               onClick={() => setViewFilter('active')}
             >
               Active
             </Button>
             <Button
-              type="button"
               size="sm"
-              variant="outline"
-              className={`${
-                viewFilter==='inactive'
-                  ? 'bg-[#008080] text-white hover:bg-[#009999] border-gray-400'
-                  : ''
-              }`}
-              onClick={() => setViewFilter('active')}
+              variant={viewFilter === 'inactive' ? 'secondary' : 'outline'}
+              onClick={() => setViewFilter('inactive')}
             >
-              Active
+              Inactive
             </Button>
             <Button
-              type="button"
               size="sm"
-              variant="outline"
-              className={`${
-                viewFilter==='all'
-                  ? 'bg-[#008080] text-white hover:bg-[#009999] border-gray-400'
-                  : ''
-              }`}
-              onClick={() => setViewFilter('active')}
+              variant={viewFilter === 'all' ? 'secondary' : 'outline'}
+              onClick={() => setViewFilter('all')}
             >
-              Active
+              All
             </Button>
           </div>
         </div> {/* ← closed the header div */}
