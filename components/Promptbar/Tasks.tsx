@@ -16,6 +16,7 @@ import React, {
   useRef,
   KeyboardEvent,
 } from 'react';
+import { Settings as Cog } from 'lucide-react';
 import {
   Plus,
   Clock,
@@ -341,6 +342,8 @@ const TaskItem: React.FC<TaskItemProps> = ({
       setIsEditingTimer(false);
     }
   };
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleNotesEditSubmit = () => {
     if (!isEditingNotes) return;
@@ -847,7 +850,6 @@ const Tasks: React.FC = () => {
           </div>
 
           {/* view toggle now below the title */}
-          {/* view toggle now below the title */}
           <div className="mt-2 inline-flex space-x-2">
             <Button
               size="sm"
@@ -886,7 +888,31 @@ const Tasks: React.FC = () => {
               All
             </Button>
           </div>
+            <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsSettingsOpen(true)}
+                title="Open settings"
+                className="text-gray-600 hover:text-gray-800"
+              >
+                <Cog className="h-5 w-5" />
+              </Button>
+            </div>
         </div> {/* ← closed the header div */}
+       
+        <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Settings</DialogTitle>
+            </DialogHeader>
+            {/* …settings fields… */}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Patient List */}
         <div className="flex-1 overflow-y-auto p-4">
