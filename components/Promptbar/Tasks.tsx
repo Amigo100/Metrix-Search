@@ -851,7 +851,7 @@ const Tasks: React.FC = () => {
             <Button
               type="button"
               size="sm"
-              variant={viewFilter === 'active' ? 'secondary' : 'outline'}
+              variant={viewFilter === 'active' ? 'secondary: 'bg-[#008080] text-white hover:bg-[#009999] border-gray-400',' : 'outline'}
               onClick={() => setViewFilter('active')}
             >
               Active
@@ -859,7 +859,7 @@ const Tasks: React.FC = () => {
             <Button
               type="button"
               size="sm"
-              variant={viewFilter === 'inactive' ? 'secondary' : 'outline'}
+              variant={viewFilter === 'inactive' ? 'secondary: 'bg-[#008080] text-white hover:bg-[#009999] border-gray-400',' : 'outline'}
               onClick={() => setViewFilter('inactive')}
             >
               Inactive
@@ -867,7 +867,7 @@ const Tasks: React.FC = () => {
             <Button
               type="button"
               size="sm"
-              variant={viewFilter === 'all' ? 'secondary' : 'outline'}
+              variant={viewFilter === 'all' ? 'secondary: 'bg-[#008080] text-white hover:bg-[#009999] border-gray-400',' : 'outline'}
               onClick={() => setViewFilter('all')}
             >
               All
