@@ -1,4 +1,3 @@
-// components/Promptbar/Tasks.tsx
 'use client';
 
 /* -------------------------------------------------------------------------- */
@@ -83,7 +82,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        className={`${base} ${variants[variant]} ${sizes[size]} ${className ?? ''}`}
+        className={`\${base} \${variants[variant]} \${sizes[size]} \${className ?? ''}`}
         {...props}
       />
     );
@@ -98,7 +97,7 @@ const Input = React.forwardRef<
   <input
     ref={ref}
     type={type}
-    className={`flex h-10 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 disabled:opacity-50 ${
+    className={`flex h-10 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 disabled:opacity-50 \${
       className ?? ''
     }`}
     {...props}
@@ -109,7 +108,7 @@ const Label = React.forwardRef<
   HTMLLabelElement,
   React.LabelHTMLAttributes<HTMLLabelElement>
 >(({ className, ...props }, ref) => (
-  <label ref={ref} className={`text-sm font-medium ${className ?? ''}`} {...props} />
+  <label ref={ref} className={`text-sm font-medium \${className ?? ''}`} {...props} />
 ));
 Label.displayName = 'Label';
 
@@ -133,19 +132,19 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) =>
 /* --- Dialog sub‑components used by AddPatientModal ----------------------- */
 interface DialogSubProps { className?: string; children: React.ReactNode }
 export const DialogContent: React.FC<DialogSubProps> = ({ className, children }) => (
-  <div className={`bg-white rounded-lg shadow-lg p-6 ${className ?? ''}`}>{children}</div>
+  <div className={`bg-white rounded-lg shadow-lg p-6 \${className ?? ''}`}>{children}</div>
 );
 export const DialogHeader: React.FC<DialogSubProps> = ({ className, children }) => (
-  <div className={`mb-4 ${className ?? ''}`}>{children}</div>
+  <div className={`mb-4 \${className ?? ''}`}>{children}</div>
 );
 export const DialogTitle: React.FC<DialogSubProps> = ({ className, children }) => (
-  <h2 className={`text-lg font-semibold ${className ?? ''}`}>{children}</h2>
+  <h2 className={`text-lg font-semibold \${className ?? ''}`}>{children}</h2>
 );
 export const DialogDescription: React.FC<DialogSubProps> = ({ className, children }) => (
-  <p className={`text-sm text-muted-foreground ${className ?? ''}`}>{children}</p>
+  <p className={`text-sm text-muted-foreground \${className ?? ''}`}>{children}</p>
 );
 export const DialogFooter: React.FC<DialogSubProps> = ({ className, children }) => (
-  <div className={`mt-6 flex justify-end space-x-2 ${className ?? ''}`}>{children}</div>
+  <div className={`mt-6 flex justify-end space-x-2 \${className ?? ''}`}>{children}</div>
 );
 
 // Add missing DialogClose so <DialogClose asChild> works in AddPatientModal
@@ -160,7 +159,7 @@ const Card = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={`rounded-lg border bg-card text-card-foreground shadow-sm ${
+    className={`rounded-lg border bg-card text-card-foreground shadow-sm \${
       className ?? ''
     }`}
     {...props}
@@ -171,21 +170,21 @@ const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={`p-4 ${className ?? ''}`} {...props} />
+  <div ref={ref} className={`p-4 \${className ?? ''}`} {...props} />
 ));
 CardHeader.displayName = 'CardHeader';
 const CardTitle = React.forwardRef<
   HTMLHeadingElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
-  <h3 ref={ref} className={`text-lg font-semibold ${className ?? ''}`} {...props} />
+  <h3 ref={ref} className={`text-lg font-semibold \${className ?? ''}`} {...props} />
 ));
 CardTitle.displayName = 'CardTitle';
 const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={`p-4 pt-0 ${className ?? ''}`} {...props} />
+  <div ref={ref} className={`p-4 pt-0 \${className ?? ''}`} {...props} />
 ));
 CardContent.displayName = 'CardContent';
 
@@ -242,7 +241,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
   const notesTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Timer check effect
-  useEffect(() => {
+    useEffect(() => {
     if (!task.timerEnd || task.completionStatus === 'complete') {
       if (isTimerExpired) setIsTimerExpired(false);
       setTimeRemaining('');
@@ -847,32 +846,35 @@ const Tasks: React.FC = () => {
           </div>
 
           {/* view toggle now below the title */}
-          <div className="mt-2 inline-flex rounded-md overflow-hidden">
-            <Button
-              type="button"
-              size="sm"
-              variant={viewFilter === 'active' ? 'secondary' : 'outline'}
-              onClick={() => setViewFilter('active')}
-            >
-              Active
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant={viewFilter === 'inactive' ? 'secondary' : 'outline'}
-              onClick={() => setViewFilter('inactive')}
-            >
-              Inactive
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant={viewFilter === 'all' ? 'secondary' : 'outline'}
-              onClick={() => setViewFilter('all')}
-            >
-              All
-            </Button>
-          </div>
+<div className="mt-2 inline-flex space-x-2">
+  <Button
+    type="button"
+    size="sm"
+    variant="outline"
+    className={viewFilter === 'active' ? 'bg-[#008080] text-white hover:bg-[#009999]' : ''}
+    onClick={() => setViewFilter('active')}
+  >
+    Active
+  </Button>
+  <Button
+    type="button"
+    size="sm"
+    variant="outline"
+    className={viewFilter === 'inactive' ? 'bg-[#008080] text-white hover:bg-[#009999]' : ''}
+    onClick={() => setViewFilter('inactive')}
+  >
+    Inactive
+  </Button>
+  <Button
+    type="button"
+    size="sm"
+    variant="outline"
+    className={viewFilter === 'all' ? 'bg-[#008080] text-white hover:bg-[#009999]' : ''}
+    onClick={() => setViewFilter('all')}
+  >
+    All
+  </Button>
+</div>
         </div> {/* ← closed the header div */}
 
         {/* Patient List */}
