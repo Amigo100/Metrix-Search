@@ -851,55 +851,41 @@ const Tasks: React.FC = () => {
             </Button>
           </div>
 
-          {/* view toggle now below the title */}
-          <div className="mt-2 inline-flex space-x-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className={
-                viewFilter === 'active'
-                  ? 'bg-[#008080] hover:bg-[#009999] border-gray-400 text-white'
-                  : ''
-              }
-              onClick={() => setViewFilter('active')}
-            >
-              Active
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className={
-                viewFilter === 'inactive'
-                  ? 'bg-[#008080] hover:bg-[#009999] border-gray-400 text-white'
-                  : ''
-              }
-              onClick={() => setViewFilter('inactive')}
-            >
-              Inactive
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className={
-                viewFilter === 'all'
-                  ? 'bg-[#008080] hover:bg-[#009999] border-gray-400 text-white'
-                  : ''
-              }
-              onClick={() => setViewFilter('all')}
-            >
-              All
-            </Button>
-          </div>
-            <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsSettingsOpen(true)}
-                title="Open settings"
-                className="text-gray-600 hover:text-gray-800"
+          {/* view toggle and settings */}
+          <div className="mt-2 flex items-center justify-between">
+            <div className="inline-flex space-x-2">
+              <Button
+                size="sm"
+                variant={viewFilter === 'active' ? 'secondary' : 'outline'}
+                onClick={() => setViewFilter('active')}
               >
-                <Cog className="h-5 w-5" />
+                Active
+              </Button>
+              <Button
+                size="sm"
+                variant={viewFilter === 'inactive' ? 'secondary' : 'outline'}
+                onClick={() => setViewFilter('inactive')}
+              >
+                Inactive
+              </Button>
+              <Button
+                size="sm"
+                variant={viewFilter === 'all' ? 'secondary' : 'outline'}
+                onClick={() => setViewFilter('all')}
+              >
+                All
               </Button>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsSettingsOpen(true)}
+              title="Open settings"
+              className="text-gray-600 hover:text-gray-800"
+            >
+              <Cog className="h-5 w-5" />
+            </Button>
+          </div>
         </div> {/* ← closed the header div */}
        
         <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
