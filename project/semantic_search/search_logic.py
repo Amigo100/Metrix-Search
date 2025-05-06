@@ -65,7 +65,7 @@ def perform_rag_search(query: str) -> Dict[str, Any]:
 
         # 3️⃣ Prep context & citation objects ------------------------------
         from collections import OrderedDict
-import urllib.parse
+        import urllib.parse
 
 # 1. Aggregate by document
 agg: "OrderedDict[str, Dict[str, Any]]" = OrderedDict()
