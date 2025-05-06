@@ -4,7 +4,7 @@ High‑level RAG helper – **pure Python, no FastAPI imports here**.
 
  1) embed user query with OpenAI
  2) cosine‑search in Qdrant
- 3) ask GPT‑4 (or GPT‑3.5‑turbo) to answer, citing numbered chunks
+ 3) ask GPT‑4 (or GPT‑3.5‑turbo) to answer
 """
 
 from __future__ import annotations
@@ -25,12 +25,12 @@ openai = OpenAI(api_key=OPENAI_KEY)
 
 EMBED_MODEL  = os.getenv("EMBED_MODEL", "text-embedding-ada-002")
 CHAT_MODEL   = os.getenv("CHAT_MODEL",  "gpt-4o-mini")
-SEARCH_LIMIT = int(os.getenv("SEARCH_LIMIT", "10"))
+SEARCH_LIMIT = int(os.getenv("SEARCH_LIMIT", "20"))
 
 # ────────────── public function the router will call ───────────
 def perform_rag_search(query: str) -> Dict[str, Any]:
     """
-    returns dict(answer:str, citations:list[dict], error:str|None)
+    returns dict(answer:str, error:str|None)
     """
     try:
         qc = get_qdrant_client()
