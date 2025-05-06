@@ -60,7 +60,7 @@ def perform_rag_search(query: str) -> Dict[str, Any]:
             return {"answer": "", "citations": [], "error": err}
 
         if not hits:
-            return {"answer": "No matching policy text found.",
+            return {"answer": "No matching policy text has been found.",
                     "citations": [], "error": None}
 
         # 3️⃣ Prep context & citation objects ------------------------------
@@ -128,7 +128,7 @@ for e in agg.values():
 
             "When you respond: "
             "1. Provide a concise, direct answer to the user’s query using the available snippets. "
-            "2. Under a heading 'Additional Information', include any further relevant context or guidance from the snippets (e.g., important contraindications, related guidelines, extra advice, clincial pearls). "
+            "2. Under a heading 'Additional Information', raise important considerations likely to be useful and relevant to the user. "
             "3. Finally, ask three follow-up questions that expand on the query or explores next steps. These questions must be grounded in the content of the snippets whenever possible. "
 
             "If you cannot find relevant information in the snippets provided, state that the requested information is not available in the policy document repository."
@@ -151,11 +151,11 @@ for e in agg.values():
         except (APIError, RateLimitError) as e:
             err = f"ChatCompletion error: {e}"
             log.error(err, exc_info=True)
-            return {"answer": "", "citations": cites, "error": err}
+            return {"answer": "", "error": err}
 
-        return {"answer": answer, "citations": cites, "error": None}
+        return {"answer": answer, "error": None}
 
     except Exception as ex:
         log.error("perform_rag_search failed: %s", ex, exc_info=True)
-        return {"answer": "", "citations": [], "error": str(ex)}
+        return {"answer": "", "error": str(ex)}
 # ───────────────────────────────────────────────────────────────
