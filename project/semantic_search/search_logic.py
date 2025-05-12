@@ -16,7 +16,7 @@ openai = OpenAI(api_key=OPENAI_KEY)
 
 EMBED_MODEL  = os.getenv("EMBED_MODEL", "text-embedding-ada-002")
 CHAT_MODEL   = os.getenv("CHAT_MODEL",  "gpt-4o-mini")
-SEARCH_LIMIT = int(os.getenv("SEARCH_LIMIT", "10"))
+SEARCH_LIMIT = int(os.getenv("SEARCH_LIMIT", "20"))
 
 # ────────────── public function the router will call ───────────
 def perform_rag_search(query: str) -> Dict[str, Any]:
@@ -127,6 +127,7 @@ def perform_rag_search(query: str) -> Dict[str, Any]:
                     {"role": "system", "content": sys_prompt},
                     {"role": "user", "content": user_msg},
                 ],
+                max_tokens=512,
             )
             answer = chat.choices[0].message.content.strip()
         except (APIError, RateLimitError) as e:
