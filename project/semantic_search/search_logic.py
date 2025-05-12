@@ -21,7 +21,7 @@ SEARCH_LIMIT = int(os.getenv("SEARCH_LIMIT", "20"))
 # ────────────── public function the router will call ───────────
 def perform_rag_search(query: str) -> Dict[str, Any]:
     """
-    returns dict(answer:str, error:str|None)
+    returns dict(answer:str, citations:List[Dict], error:str|None)
     """
     try:
         qc = get_qdrant_client()
@@ -35,7 +35,7 @@ def perform_rag_search(query: str) -> Dict[str, Any]:
         except (APIError, RateLimitError) as e:
             err = f"OpenAI embedding error: {e}"
             log.error(err, exc_info=True)
-            return {"answer": "", "error": err}
+            return {"answer": "", "citations": [], "error": err}
 
         # 2️⃣ Vector search -------------------------------------------------
         try:
@@ -48,29 +48,70 @@ def perform_rag_search(query: str) -> Dict[str, Any]:
         except Exception as e:
             err = f"Qdrant search failed: {e}"
             log.error(err, exc_info=True)
-            return {"answer": "", "error": err}
+            return {"answer": "", "citations": [], "error": err}
 
         if not hits:
-            return {"answer": "No matching policy text has been found.", "error": None}
+            return {"answer": "No matching policy text has been found.", "citations": [], "error": None}
 
-        # 3️⃣ Build context snippets ---------------------------------------
+        # 3️⃣ Build context snippets and aggregate citations ------------
+        from collections import OrderedDict
+
         ctx: List[str] = []
+        agg: OrderedDict[str, Dict[str, Any]] = OrderedDict()
+
         for i, h in enumerate(hits, 1):
             pl = h.payload or {}
             text = pl.get("content") or pl.get("text") or "[NO TEXT]"
+            doc = pl.get("document_title", "Unknown Document")
+            page = pl.get("page_number")
+            head = pl.get("heading", "N/A")
+
+            safe = urllib.parse.quote_plus(doc.replace(" ", "_"))
+            if not safe.lower().endswith(".pdf"):
+                safe += ".pdf"
+            url = f"/predictive/api/documents/view/{safe}" if doc != "Unknown Document" else None
+
+            if doc not in agg:
+                agg[doc] = {
+                    "document_title": doc,
+                    "page_numbers": {page} if page is not None else set(),
+                    "headings": [head],
+                    "qdrant_ids": [h.id],
+                    "scores": [h.score],
+                    "url": url,
+                }
+            else:
+                e = agg[doc]
+                if page is not None:
+                    e["page_numbers"].add(page)
+                e["headings"].append(head)
+                e["qdrant_ids"].append(h.id)
+                e["scores"].append(h.score)
+
             ctx.append(f"[{i}] {text}")
+
+        # finalize citations list
+        cites: List[Dict[str, Any]] = []
+        for e in agg.values():
+            pages = sorted(e["page_numbers"])
+            page_str = ", ".join(str(p) for p in pages) if pages else None
+            cites.append({
+                "document_title": e["document_title"],
+                "page_number": page_str,
+                "heading": e["headings"][0],
+                "score": e["scores"][0],
+                "qdrant_id": e["qdrant_ids"][0],
+                "url": e["url"],
+            })
 
         # 4️⃣ Ask the LLM ---------------------------------------------------
         sys_prompt = (
             "You are an AI assistant that provides answers ONLY using the numbered context snippets provided. "
             "When you respond: "
-            "1. Provide a concise, direct answer to the user’s query using the available snippets. "
+            "1. Provide a concise, direct answer to the user’s query using the available snippets, but do NOT include any reference markers like [1] or [2] in your answer. "
             "2. Under a heading 'Additional Information', raise important considerations likely to be useful and relevant to the user. "
-            "3. Finally, ask three follow-up questions that expand on the query or explores next steps. These questions must be grounded in the content of the snippets whenever possible. "
-
-            "If you cannot find relevant information in the snippets provided, state that the requested information is not available in the policy document repository. "
-
-            "Do NOT provide any details that are not directly drawn from the context snippets."
+            "3. Finally, ask three follow-up questions that expand on the query or explore next steps. "
+            "If you cannot find relevant information in the snippets provided, state that the requested information is not available in the policy document repository."
         )
         join_ctx = "\n\n".join(ctx)
         user_msg = f"CONTEXT:\n{join_ctx}\n\nQUESTION: {query}"
@@ -87,10 +128,10 @@ def perform_rag_search(query: str) -> Dict[str, Any]:
         except (APIError, RateLimitError) as e:
             err = f"ChatCompletion error: {e}"
             log.error(err, exc_info=True)
-            return {"answer": "", "error": err}
+            return {"answer": "", "citations": cites, "error": err}
 
-        return {"answer": answer, "error": None}
+        return {"answer": answer, "citations": cites, "error": None}
 
     except Exception as ex:
         log.error("perform_rag_search failed: %s", ex, exc_info=True)
-        return {"answer": "", "error": str(ex)}
+        return {"answer": "", "citations": [], "error": str(ex)}
