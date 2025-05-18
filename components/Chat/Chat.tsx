@@ -187,6 +187,7 @@ export const Chat = memo(function Chat({ stopConversationRef }: Props) {
   } = useContext(HomeContext);
 
   /* -------------------- local state --------------------- */
+  const [transcriptTokens, setTranscriptTokens] = useState<TranscriptToken[]>([]);
   const [transcript, setTranscript] = useState('');
   const [clinicalDoc, setClinicalDoc] = useState('');
 
@@ -565,9 +566,10 @@ ${headings}`.trim();
   const handleInitialInput = async (msg: Message) => {
     const text = msg.content.trim();
     if (!text) return;
-    setTranscript(text); // Set the transcript state
-    await handleCreateDocFromTranscript(text); // Start the document creation process
-  };
+  setTranscript(text);                       // keep string
+  setTranscriptTokens(msg.tokens || []);     // NEW
+  await handleCreateDocFromTranscript(text);
+};
 
   // Regenerates the document and analyses based on the existing transcript
   const handleRegenerate = async () => {
@@ -583,6 +585,7 @@ ${headings}`.trim();
   // Clears all state related to the current scribe session
   const handleClearScribe = () => {
     setTranscript('');
+    setTranscriptTokens([]);  
     setClinicalDoc('');
     setAnalysisErrors('');
     setAnalysisTerms('');
@@ -597,6 +600,15 @@ ${headings}`.trim();
     dispatch({ type: 'change', field: 'modelError', value: null }); // Clear any errors
   };
 
+  const settings = getSettings();
+
+  const renderToken = (t: TranscriptToken, i: number) => {
+    if (!settings.highlightConfidence) return t.text;
+    if (t.confidence < 0.60) return <span key={i} className="bg-red-300">{t.text}</span>;
+    if (t.confidence < 0.80) return <span key={i} className="bg-yellow-300">{t.text}</span>;
+    return t.text;
+  };
+  
   /* ========================================================================
      JSX
    ======================================================================== */
@@ -668,7 +680,9 @@ ${headings}`.trim();
             {/* Transcript content */}
             {isTranscriptExpanded && (
               <div className="w-full bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm whitespace-pre-wrap">
-                {transcript}
+                {transcriptTokens.length
+                  ? transcriptTokens.map(renderToken)
+                  : transcript}
               </div>
             )}
           </div>
