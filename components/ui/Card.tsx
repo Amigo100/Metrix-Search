@@ -8,7 +8,7 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, ...props }, ref) => {
-    const baseStyle = 'rounded-lg border bg-card text-card-foreground shadow-sm';
+    const baseStyle = 'rounded-lg border bg-white text-gray-900 shadow-sm';
     const combinedClassName = `${baseStyle} ${className ?? ''}`;
 
     return (

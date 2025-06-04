@@ -13,11 +13,11 @@ export function AISummary({ searchQuery, summary, loading }: AISummaryProps) {
   // Show default explanation if no search query
   if (!searchQuery.trim()) {
     return (
-      <Card className="p-6 mb-6 bg-gradient-to-r from-primary-50 to-accent-50 border border-primary-200">
+      <Card className="p-6 mb-6 bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200">
         <div className="flex items-center space-x-2 mb-4">
-          <Info className="w-5 h-5 text-primary-600" />
+          <Info className="w-5 h-5 text-teal-600" />
           <h3 className="text-lg font-semibold text-gray-900">How Metrix Works</h3>
-          <Badge variant="outline" className="bg-primary-100 text-primary-700 border-primary-300">
+          <Badge variant="outline" className="bg-teal-100 text-teal-700 border-teal-300">
             AI Powered
           </Badge>
         </div>
@@ -45,7 +45,7 @@ export function AISummary({ searchQuery, summary, loading }: AISummaryProps) {
 
   if (loading) {
     return (
-      <Card className="p-6 mb-6 bg-gradient-to-r from-primary-50 to-accent-50 border border-primary-200">
+      <Card className="p-6 mb-6 bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200">
         <div className="animate-pulse">
           <div className="flex items-center space-x-2 mb-4">
             <div className="w-5 h-5 bg-gray-300 rounded"></div>
@@ -67,11 +67,11 @@ export function AISummary({ searchQuery, summary, loading }: AISummaryProps) {
 
   return (
     <div className="mb-6">
-      <Card className="p-6 bg-gradient-to-r from-primary-50 to-accent-50 border border-primary-200">
+      <Card className="p-6 bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200">
         <div className="flex items-center space-x-2 mb-4">
-          <Bot className="w-5 h-5 text-primary-600" />
+          <Bot className="w-5 h-5 text-teal-600" />
           <h3 className="text-lg font-semibold text-gray-900">AI Summary: Clinical Guidelines for "{searchQuery}"</h3>
-          <Badge variant="outline" className="bg-primary-100 text-primary-700 border-primary-300">
+          <Badge variant="outline" className="bg-teal-100 text-teal-700 border-teal-300">
             AI Generated
           </Badge>
         </div>

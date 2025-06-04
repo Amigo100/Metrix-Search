@@ -42,7 +42,7 @@ export function SearchSection({
               placeholder="Search clinical guidelines..."
               value={searchQuery}
               onChange={handleSearchChange}
-              className="pl-12 pr-4 py-4 w-full text-lg border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="pl-12 pr-4 py-4 w-full text-lg border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
           </div>
         </div>
@@ -52,7 +52,6 @@ export function SearchSection({
           <Button
             variant="outline"
             onClick={onFilterToggle}
-            className="border-gray-300 text-gray-700 hover:bg-gray-50"
           >
             <Filter className="w-4 h-4 mr-2" />
             {showFilters ? 'Hide Filters' : 'Show Filters'}

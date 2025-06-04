@@ -16,11 +16,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'default', size = 'md', children, ...props }, ref) => {
 
     const baseStyles =
-      'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2';
+      'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500';
     const variantStyles = {
-      default: 'bg-blue-600 hover:bg-blue-700 text-white border border-transparent',
-      outline: 'bg-transparent border border-gray-500 text-gray-100 hover:bg-gray-800',
-      ghost: 'bg-transparent text-gray-100 hover:bg-gray-800',
+      default: 'bg-teal-600 hover:bg-teal-700 text-white border border-transparent',
+      outline: 'bg-white border border-teal-600 text-teal-700 hover:bg-teal-50',
+      ghost: 'bg-transparent text-teal-700 hover:bg-teal-50',
     };
     const sizeStyles = {
       sm: 'px-3 py-1 text-sm',
