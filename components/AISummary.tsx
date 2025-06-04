@@ -1,7 +1,15 @@
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { AlertTriangle, Bot, Info } from 'lucide-react';
+import {
+  AlertTriangle,
+  Bot,
+  Info,
+  ChevronDown,
+  ChevronUp,
+  ClipboardCopy,
+} from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -14,6 +22,13 @@ interface AISummaryProps {
 }
 
 export function AISummary({ searchQuery, summary, loading }: AISummaryProps) {
+  const [collapsed, setCollapsed] = useState(false);
+
+  const toggleCollapsed = () => setCollapsed((prev) => !prev);
+
+  const copySummary = () => {
+    navigator.clipboard.writeText(summary);
+  };
   // Show default explanation if no search query
   if (!searchQuery.trim()) {
     return (
@@ -72,29 +87,57 @@ export function AISummary({ searchQuery, summary, loading }: AISummaryProps) {
   return (
     <div className="mb-6">
       <Card className="p-6 bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200">
-        <div className="flex items-center space-x-2 mb-4">
-          <Bot className="w-5 h-5 text-teal-600" />
-          <h3 className="text-lg font-semibold text-gray-900">AI Summary: Clinical Guidelines for "{searchQuery}"</h3>
-          <Badge variant="outline" className="bg-teal-100 text-teal-700 border-teal-300">
-            AI Generated
-          </Badge>
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <Bot className="w-5 h-5 text-teal-600" />
+            <h3 className="text-lg font-semibold text-gray-900">
+              AI Summary: Clinical Guidelines for "{searchQuery}"
+            </h3>
+            <Badge variant="outline" className="bg-teal-100 text-teal-700 border-teal-300">
+              AI Generated
+            </Badge>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={copySummary}
+              title="Copy summary"
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <ClipboardCopy className="w-4 h-4" />
+            </button>
+            <button
+              onClick={toggleCollapsed}
+              title={collapsed ? 'Show summary' : 'Hide summary'}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              {collapsed ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronUp className="w-4 h-4" />
+              )}
+            </button>
+          </div>
         </div>
 
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm, remarkMath]}
-          rehypePlugins={[rehypeMathjax]}
-          className="prose prose-sm max-w-none mb-4 text-gray-700 leading-relaxed"
-        >
-          {summary}
-        </ReactMarkdown>
+        {!collapsed && (
+          <>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm, remarkMath]}
+              rehypePlugins={[rehypeMathjax]}
+              className="prose prose-sm max-w-none mb-4 text-gray-700 leading-relaxed"
+            >
+              {summary}
+            </ReactMarkdown>
 
-        <Alert className="bg-yellow-50 border-yellow-200">
-          <AlertTriangle className="h-4 w-4 text-yellow-600" />
-          <AlertDescription className="text-yellow-800 text-sm">
-            <strong>Important Disclaimer:</strong> This AI-generated summary is for informational purposes only and may contain errors.
-            Always verify information against the original guidelines below and consult with qualified healthcare professionals for clinical decisions.
-          </AlertDescription>
-        </Alert>
+            <Alert className="bg-yellow-50 border-yellow-200">
+              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+              <AlertDescription className="text-yellow-800 text-sm">
+                <strong>Important Disclaimer:</strong> This AI-generated summary is for informational purposes only and may contain errors.
+                Always verify information against the original guidelines below and consult with qualified healthcare professionals for clinical decisions.
+              </AlertDescription>
+            </Alert>
+          </>
+        )}
       </Card>
     </div>
   );
