@@ -2,6 +2,10 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { AlertTriangle, Bot, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeMathjax from 'rehype-mathjax';
 
 interface AISummaryProps {
   searchQuery: string;
@@ -76,9 +80,13 @@ export function AISummary({ searchQuery, summary, loading }: AISummaryProps) {
           </Badge>
         </div>
 
-        <div className="prose prose-sm max-w-none mb-4">
-          <p className="text-gray-700 leading-relaxed">{summary}</p>
-        </div>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeMathjax]}
+          className="prose prose-sm max-w-none mb-4 text-gray-700 leading-relaxed"
+        >
+          {summary}
+        </ReactMarkdown>
 
         <Alert className="bg-yellow-50 border-yellow-200">
           <AlertTriangle className="h-4 w-4 text-yellow-600" />

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 
 import { AISummary } from '@/components/AISummary';
-import { FollowUpSearchBar } from '@/components/FollowUpSearchBar';
 import { Header } from '@/components/Header';
 import { PopularSearches } from '@/components/PopularSearches';
 import { SearchResults } from '@/components/SearchResults';
@@ -24,7 +23,6 @@ const SemanticSearch = () => {
   });
   const [results, setResults] = useState<any[]>([]);
   const [summary, setSummary] = useState('');
-  const [followUpQuery, setFollowUpQuery] = useState('');
 
   const fetchResults = async (query: string) => {
     setLoading(true);
@@ -67,13 +65,6 @@ const SemanticSearch = () => {
     fetchResults(query);
   };
 
-  const handleFollowUpSubmit = () => {
-    const q = followUpQuery.trim();
-    if (!q) return;
-    setSearchQuery(q);
-    setFollowUpQuery('');
-    fetchResults(q);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50">
@@ -110,13 +101,6 @@ const SemanticSearch = () => {
           />
         )}
       </main>
-      {searchQuery && !loading && (
-        <FollowUpSearchBar
-          query={followUpQuery}
-          onQueryChange={setFollowUpQuery}
-          onSubmit={handleFollowUpSubmit}
-        />
-      )}
     </div>
   );
 };
