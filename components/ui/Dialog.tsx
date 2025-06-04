@@ -1,14 +1,16 @@
 // components/ui/Dialog.tsx
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 // --- Dialog Root ---
 interface DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
+  className?: string;
 }
 
-const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
+const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children, className }) => {
   // Basic modal logic: render if open. onOpenChange would typically be
   // connected to close buttons or overlay clicks in a real implementation.
   // This mock version relies on the parent controlling the 'open' prop.
@@ -20,7 +22,11 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
     // Basic overlay and centering structure
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
       {/* Dialog container - basic styling */}
-      <div className="bg-card rounded-lg shadow-lg w-full max-w-md" role="dialog" aria-modal="true">
+      <div
+        className={cn('bg-card rounded-lg shadow-lg w-full max-w-md', className)}
+        role="dialog"
+        aria-modal="true"
+      >
         {children}
       </div>
     </div>
