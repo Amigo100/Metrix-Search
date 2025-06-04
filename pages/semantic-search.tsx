@@ -9,6 +9,7 @@ import {
   Search as SearchIcon,
 } from 'lucide-react';
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 
 /* ──────────────── Types ───────────────── */
@@ -92,6 +93,11 @@ function PolicySearchPage() {
           <PageHeader
             title="Policy Document Search"
             subtitle="Powered by Metrix AI"
+            leftSlot={
+              <Link href="/clinical-scoring-tools" className="text-sm text-teal-600 hover:underline">
+                Risk &amp; Scoring Tools
+              </Link>
+            }
           />
         </div>
 

@@ -7,6 +7,7 @@ import {
   FileText,
 } from 'lucide-react';                       // Using Lucide icons
 
+import Link from 'next/link';
 import PageHeader from '@/components/PageHeader'; // ⭐ NEW – canonical header
 import { Label } from '@/components/ui/label';
 
@@ -140,6 +141,11 @@ export default function ClinicalScoringToolsPage() {
       <PageHeader
         title="Clinical Risk & Scoring Tools"
         subtitle="Access a wide range of validated scoring systems and calculators to aid in clinical decision‑making. Select a tool below or search by name."
+        leftSlot={
+          <Link href="/" className="text-sm text-teal-600 hover:underline">
+            Policy Search
+          </Link>
+        }
       />
 
       {/* Main content follows – identical to your original implementation */}
