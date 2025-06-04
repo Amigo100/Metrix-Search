@@ -16,6 +16,7 @@ const SemanticSearch = () => {
   const [filters, setFilters] = useState({
     sources: [],
     specialties: [],
+    trust: '',
     dateRange: '',
     evidenceLevel: '',
   });

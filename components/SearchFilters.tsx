@@ -6,6 +6,7 @@ interface SearchFiltersProps {
   filters: {
     sources: string[];
     specialties: string[];
+    trust: string;
     dateRange: string;
     evidenceLevel: string;
   };
@@ -15,7 +16,22 @@ interface SearchFiltersProps {
 export function SearchFilters({ isOpen, filters, onFiltersChange }: SearchFiltersProps) {
   if (!isOpen) return null;
 
-  const sources = ['AHA/ACC Guidelines', 'WHO Guidelines', 'NICE Guidelines'];
+  const sources = [
+    'AHA/ACC Guidelines',
+    'WHO Guidelines',
+    'NICE Guidelines',
+    'BMJ Best Practice',
+    'European Society of Cardiology',
+    'Canadian Medical Association',
+  ];
+
+  const trusts = [
+    "Guy's and St Thomas' NHS Foundation Trust",
+    'Imperial College Healthcare NHS Trust',
+    'Manchester University NHS Foundation Trust',
+    'University Hospitals Birmingham NHS Foundation Trust',
+  ];
+
   const specialties = ['Cardiology', 'Emergency Medicine'];
 
   const toggle = (group: 'sources' | 'specialties', value: string) => {
@@ -42,6 +58,23 @@ export function SearchFilters({ isOpen, filters, onFiltersChange }: SearchFilter
             </label>
           ))}
         </div>
+      </div>
+      <div>
+        <p className="font-semibold mb-2">Local Hospital Trust</p>
+        <select
+          className="w-full border border-gray-300 rounded-md p-2 text-sm"
+          value={filters.trust}
+          onChange={(e) =>
+            onFiltersChange({ ...filters, trust: e.target.value })
+          }
+        >
+          <option value="">All trusts</option>
+          {trusts.map((trust) => (
+            <option key={trust} value={trust}>
+              {trust}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <p className="font-semibold mb-2">Specialties</p>
