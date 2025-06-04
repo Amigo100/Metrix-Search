@@ -1,10 +1,10 @@
 # project/semantic_search/ingest_policy_docs.py
 """
-Run once to ingest PDFs in policy_documents/ into Qdrant.
+Run once to ingest PDFs in policy_documents/ into Qdrant.
 
     $ python -m project.semantic_search.ingest_policy_docs
 
-Keeps your predictive_backend code untouched.
+Works independently of other backends.
 """
 
 from __future__ import annotations

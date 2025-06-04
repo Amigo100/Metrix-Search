@@ -13,7 +13,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # original sub‑apps (keep absolute imports inside them happy)
 from my_rag_app.main import app as rag_app
-from predictive_backend.app.main import app as predictive_app
 from semantic_search.router import semantic_router
 
 logging.basicConfig(level=logging.INFO)
@@ -22,8 +21,7 @@ logger = logging.getLogger(__name__)
 combined_app = FastAPI(
     title="Unified Clinical Platform",
     description=(
-        "Single service hosting the RAG chatbot, Predictive Analytics, "
-        "and Policy Semantic Search."
+        "Single service hosting the RAG chatbot and Policy Semantic Search."
     ),
     version="1.1.0",
 )
@@ -43,14 +41,13 @@ combined_app.add_middleware(
 )
 
 combined_app.mount("/rag", rag_app)
-combined_app.mount("/predictive", predictive_app)
 combined_app.include_router(semantic_router, prefix="/semantic")
 
 @combined_app.get("/")
 def root_check():
     logger.info("[/] Root check endpoint called.")
     return {
-        "message": "Unified service for RAG + Predictive + Semantic Search",
+        "message": "Unified service for RAG Chatbot and Semantic Search",
         "allowed_origins": allowed_origins,
     }
 # ────────────────────────────────────────────────────────────
