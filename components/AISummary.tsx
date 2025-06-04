@@ -1,19 +1,22 @@
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import {
   AlertTriangle,
   Bot,
-  Info,
   ChevronDown,
   ChevronUp,
   ClipboardCopy,
+  Info,
 } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+
+import { Badge } from '@/components/ui/Badge';
+import { Card } from '@/components/ui/Card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+
+import rehypeMathjax from 'rehype-mathjax';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import rehypeMathjax from 'rehype-mathjax';
 
 interface AISummaryProps {
   query: string;
@@ -23,6 +26,7 @@ interface AISummaryProps {
 
 export function AISummary({ query, summary, loading }: AISummaryProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [howCollapsed, setHowCollapsed] = useState(true);
 
   const toggleCollapsed = () => setCollapsed((prev) => !prev);
 
@@ -31,31 +35,60 @@ export function AISummary({ query, summary, loading }: AISummaryProps) {
   };
   // Show default explanation if no search query
   if (!query.trim()) {
+    if (howCollapsed) {
+      return (
+        <div className="mb-6 text-center">
+          <Button variant="outline" onClick={() => setHowCollapsed(false)}>
+            How it works
+          </Button>
+        </div>
+      );
+    }
+
     return (
       <Card className="p-6 mb-6 bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200">
-        <div className="flex items-center space-x-2 mb-4">
-          <Info className="w-5 h-5 text-teal-600" />
-          <h3 className="text-lg font-semibold text-gray-900">How Metrix Works</h3>
-          <Badge variant="outline" className="bg-teal-100 text-teal-700 border-teal-300">
-            AI Powered
-          </Badge>
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <Info className="w-5 h-5 text-teal-600" />
+            <h3 className="text-lg font-semibold text-gray-900">
+              How Metrix Works
+            </h3>
+            <Badge
+              variant="outline"
+              className="bg-teal-100 text-teal-700 border-teal-300"
+            >
+              AI Powered
+            </Badge>
+          </div>
+          <button
+            onClick={() => setHowCollapsed(true)}
+            title="Hide section"
+            className="text-gray-600 hover:text-gray-900"
+          >
+            <ChevronUp className="w-4 h-4" />
+          </button>
         </div>
 
         <div className="prose prose-sm max-w-none mb-4">
           <p className="text-gray-700 leading-relaxed">
-            Metrix combines the power of AI with comprehensive clinical guideline databases to provide you with both
-            <strong> natural language explanations</strong> and <strong>indexed clinical results</strong>. When you search
-            for a clinical topic, you'll receive an AI-generated summary of the key management principles followed by
-            relevant guidelines from trusted sources like AHA/ACC, WHO, NICE, and leading medical institutions.
-            This dual approach ensures greater speed and accuracy in accessing critical clinical information.
+            Metrix combines the power of AI with comprehensive clinical
+            guideline databases to provide you with both
+            <strong> natural language explanations</strong> and{' '}
+            <strong>indexed clinical results</strong>. When you search for a
+            clinical topic, you'll receive an AI-generated summary of the key
+            management principles followed by relevant guidelines from trusted
+            sources like AHA/ACC, WHO, NICE, and leading medical institutions.
+            This dual approach ensures greater speed and accuracy in accessing
+            critical clinical information.
           </p>
         </div>
 
         <Alert className="bg-blue-50 border-blue-200">
           <Info className="h-4 w-4 text-blue-600" />
           <AlertDescription className="text-blue-800 text-sm">
-            <strong>Getting Started:</strong> Try searching for conditions like "sepsis", "myocardial infarction",
-            or "cellulitis" to see how Metrix provides comprehensive clinical guidance.
+            <strong>Getting Started:</strong> Try searching for conditions like
+            "sepsis", "myocardial infarction", or "cellulitis" to see how Metrix
+            provides comprehensive clinical guidance.
           </AlertDescription>
         </Alert>
       </Card>
@@ -93,7 +126,10 @@ export function AISummary({ query, summary, loading }: AISummaryProps) {
             <h3 className="text-lg font-semibold text-gray-900">
               AI Summary: Clinical Guidelines for "{query}"
             </h3>
-            <Badge variant="outline" className="bg-teal-100 text-teal-700 border-teal-300">
+            <Badge
+              variant="outline"
+              className="bg-teal-100 text-teal-700 border-teal-300"
+            >
               AI Generated
             </Badge>
           </div>
@@ -132,8 +168,11 @@ export function AISummary({ query, summary, loading }: AISummaryProps) {
             <Alert className="bg-yellow-50 border-yellow-200">
               <AlertTriangle className="h-4 w-4 text-yellow-600" />
               <AlertDescription className="text-yellow-800 text-sm">
-                <strong>Important Disclaimer:</strong> This AI-generated summary is for informational purposes only and may contain errors.
-                Always verify information against the original guidelines below and consult with qualified healthcare professionals for clinical decisions.
+                <strong>Important Disclaimer:</strong> This AI-generated summary
+                is for informational purposes only and may contain errors.
+                Always verify information against the original guidelines below
+                and consult with qualified healthcare professionals for clinical
+                decisions.
               </AlertDescription>
             </Alert>
           </>

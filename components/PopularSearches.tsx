@@ -1,6 +1,7 @@
+import { TrendingUp } from 'lucide-react';
+
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/button';
-import { TrendingUp } from 'lucide-react';
 
 interface PopularSearchesProps {
   onSearchSelect: (query: string) => void;
@@ -33,20 +34,29 @@ export function PopularSearches({ onSearchSelect }: PopularSearchesProps) {
       <div className="mb-6 text-center">
         <div className="flex items-center justify-center space-x-2 mb-2">
           <TrendingUp className="w-5 h-5 text-teal-600" />
-          <h2 className="text-xl font-semibold text-gray-900">Popular Searches</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Popular Searches
+          </h2>
         </div>
-        <p className="text-gray-600">Get started with these commonly searched clinical guidelines</p>
+        <p className="text-gray-600">
+          Get started with these commonly searched clinical guidelines
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         {popularSearches.map((search, index) => (
-          <Card key={index} className="p-4 hover:shadow-md transition-shadow duration-200 border border-gray-200">
+          <Card
+            key={index}
+            className="p-4 flex flex-col hover:shadow-md transition-shadow duration-200 border border-gray-200"
+          >
             <h3 className="font-semibold text-gray-900 mb-2">{search.title}</h3>
-            <p className="text-sm text-gray-600 mb-4 line-clamp-3">{search.description}</p>
+            <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-grow">
+              {search.description}
+            </p>
             <Button
               size="sm"
               onClick={() => onSearchSelect(search.searchQuery)}
-              className="w-full"
+              className="w-full mt-auto"
             >
               Search Guidelines
             </Button>
