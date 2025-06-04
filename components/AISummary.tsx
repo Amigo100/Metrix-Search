@@ -16,12 +16,12 @@ import remarkMath from 'remark-math';
 import rehypeMathjax from 'rehype-mathjax';
 
 interface AISummaryProps {
-  searchQuery: string;
+  query: string;
   summary: string;
   loading: boolean;
 }
 
-export function AISummary({ searchQuery, summary, loading }: AISummaryProps) {
+export function AISummary({ query, summary, loading }: AISummaryProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   const toggleCollapsed = () => setCollapsed((prev) => !prev);
@@ -30,7 +30,7 @@ export function AISummary({ searchQuery, summary, loading }: AISummaryProps) {
     navigator.clipboard.writeText(summary);
   };
   // Show default explanation if no search query
-  if (!searchQuery.trim()) {
+  if (!query.trim()) {
     return (
       <Card className="p-6 mb-6 bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200">
         <div className="flex items-center space-x-2 mb-4">
@@ -91,7 +91,7 @@ export function AISummary({ searchQuery, summary, loading }: AISummaryProps) {
           <div className="flex items-center space-x-2">
             <Bot className="w-5 h-5 text-teal-600" />
             <h3 className="text-lg font-semibold text-gray-900">
-              AI Summary: Clinical Guidelines for "{searchQuery}"
+              AI Summary: Clinical Guidelines for "{query}"
             </h3>
             <Badge variant="outline" className="bg-teal-100 text-teal-700 border-teal-300">
               AI Generated

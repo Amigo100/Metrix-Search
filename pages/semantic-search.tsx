@@ -12,6 +12,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
 
 const SemanticSearch = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [submittedQuery, setSubmittedQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
@@ -53,15 +54,18 @@ const SemanticSearch = () => {
   const handleSearchSubmit = () => {
     const q = searchQuery.trim();
     if (q.length >= 3) {
+      setSubmittedQuery(q);
       fetchResults(q);
     } else {
       setResults([]);
       setSummary('');
+      setSubmittedQuery('');
     }
   };
 
   const handlePopularSearchSelect = (query: string) => {
     setSearchQuery(query);
+    setSubmittedQuery(query);
     fetchResults(query);
   };
 
@@ -72,7 +76,7 @@ const SemanticSearch = () => {
 
       <main
         className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${
-          searchQuery ? 'pb-24' : ''
+          submittedQuery ? 'pb-24' : ''
         }`}
       >
         <SearchSection
@@ -86,12 +90,12 @@ const SemanticSearch = () => {
         />
 
         <AISummary
-          searchQuery={searchQuery}
+          query={submittedQuery}
           summary={summary}
           loading={loading}
         />
 
-        {!searchQuery ? (
+        {!submittedQuery ? (
           <PopularSearches onSearchSelect={handlePopularSearchSelect} />
         ) : (
           <SearchResults
