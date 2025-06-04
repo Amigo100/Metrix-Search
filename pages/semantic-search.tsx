@@ -1,234 +1,88 @@
-// file: /pages/semantic_search.tsx
 'use client';
 
-import React, { useState } from 'react';
-import {
-  Send,
-  Loader2,
-  AlertTriangle,
-  Search as SearchIcon,
-} from 'lucide-react';
-import { InformationCircleIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import PageHeader from '@/components/PageHeader';
+import { useState } from 'react';
+import { Header } from '@/components/Header';
+import { SearchSection } from '@/components/SearchSection';
+import { SearchResults } from '@/components/SearchResults';
+import { AISummary } from '@/components/AISummary';
+import { PopularSearches } from '@/components/PopularSearches';
 
-/* ──────────────── Types ───────────────── */
-interface Citation {
-  source_id: number;
-  document_title: string;
-  page_number: number | null;
-  heading: string;
-  qdrant_id: string | number;
-  score: number;
-  url: string | null;
-}
-interface SearchResult {
-  answer: string;
-  citations: Citation[];
-  error?: string | null;
-}
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
 
-/* ─────────────── Config ──────────────── */
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
+const SemanticSearch = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState({
+    sources: [],
+    specialties: [],
+    dateRange: '',
+    evidenceLevel: '',
+  });
+  const [results, setResults] = useState<any[]>([]);
+  const [summary, setSummary] = useState('');
 
-/* ─────────────── Styles ──────────────── */
-const primaryBtn =
-  'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold rounded-full text-white bg-gradient-to-r from-teal-600 to-teal-800 hover:from-teal-500 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-300 ease-in-out shadow-md disabled:opacity-70';
-const inputCls =
-  'flex-grow block w-full rounded-full border border-gray-300 bg-white py-2.5 px-5 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500 placeholder-gray-400 text-base';
-const errAlert =
-  'bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-4 flex items-center gap-2';
-const linkCls =
-  'text-teal-600 hover:text-teal-700 hover:underline text-sm';
-
-/* ───────────────── Component ──────────────── */
-function PolicySearchPage() {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<SearchResult | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  /* ───────────── Handlers ───────────── */
-  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setResults(null);
-
-    const trimmed = query.trim();
-    if (trimmed.length < 3) {
-      setError('Please enter a search query with at least 3 characters.');
-      return;
-    }
-
-    setIsLoading(true);
+  const fetchResults = async (query: string) => {
+    setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/semantic/search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: trimmed }),
+        body: JSON.stringify({ query }),
       });
-
       if (!res.ok) {
-        const detail =
-          (await res.json().catch(() => ({}))).detail ?? `HTTP ${res.status}`;
-        throw new Error(detail);
+        throw new Error(`HTTP ${res.status}`);
       }
-
-      const data: SearchResult = await res.json();
-      if (data.error) throw new Error(data.error);
-      setResults(data);
+      const data = await res.json();
+      setResults(data.citations || []);
+      setSummary(data.answer || '');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error.');
+      setResults([]);
+      setSummary('');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  /* ───────────── Render ───────────── */
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim().length >= 3) {
+      fetchResults(query.trim());
+    } else {
+      setResults([]);
+      setSummary('');
+    }
+  };
+
+  const handlePopularSearchSelect = (query: string) => {
+    setSearchQuery(query);
+    fetchResults(query);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-teal-50 to-white p-4 md:p-8 pb-16">
-      <div className="max-w-4xl mx-auto">
-        <div className="pt-12">
-          <PageHeader
-            title="Policy Document Search"
-            subtitle="Powered by Metrix AI"
-            leftSlot={
-              <Link href="/clinical-scoring-tools" className="text-sm text-teal-600 hover:underline">
-                Risk &amp; Scoring Tools
-              </Link>
-            }
-          />
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50">
+      <Header />
 
-        {/* explanatory banner */}
-        <div className="bg-teal-50 border border-teal-200 text-teal-900 rounded-lg p-4 mt-6 flex items-start gap-2">
-          <InformationCircleIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
-          <p className="text-sm">
-            Enter a question to search <strong>internal hospital policies,
-            guidelines, and SOPs</strong>. Metrix AI uses semantic search to
-            surface the most locally relevant information in seconds.
-          </p>
-        </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <SearchSection
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          showFilters={showFilters}
+          onFilterToggle={() => setShowFilters(!showFilters)}
+          filters={filters}
+          onFiltersChange={setFilters}
+        />
 
-        {/* form */}
-        <form
-          onSubmit={handleSearch}
-          className="flex flex-col sm:flex-row items-center gap-3 mb-6 max-w-3xl mx-auto mt-6"
-        >
-          <div className="relative flex-grow w-full sm:w-auto">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <SearchIcon size={18} />
-            </span>
-            <input
-              type="search"
-              className={`${inputCls} pl-10`}
-              placeholder="Search policy documents..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={isLoading || !query.trim()}
-            className={`${primaryBtn} w-full sm:w-auto h-[46px]`}
-          >
-            {isLoading ? (
-              <Loader2 size={18} className="animate-spin" />
-            ) : (
-              <Send size={18} />
-            )}
-            <span className="ml-2">
-              {isLoading ? 'Searching...' : 'Search'}
-            </span>
-          </button>
-        </form>
+        <AISummary searchQuery={searchQuery} summary={summary} loading={loading} />
 
-        {/* feedback */}
-        <div className="max-w-4xl mx-auto mt-8">
-          {isLoading && (
-            <div className="text-center text-teal-600 font-medium py-4 flex items-center justify-center gap-2">
-              <Loader2 size={16} className="animate-spin" />
-              <span>Loading results…</span>
-            </div>
-          )}
-
-          {error && !isLoading && (
-            <div className={errAlert} role="alert">
-              <AlertTriangle size={18} className="text-yellow-600" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {results && !isLoading && (
-            <div className="space-y-6">
-              <section>
-                <h2 className="text-xl font-semibold mb-3 text-gray-800">
-                  Answer:
-                </h2>
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 whitespace-pre-wrap">
-                  {results.answer || (
-                    <span className="text-gray-500 italic">
-                      No answer generated.
-                    </span>
-                  )}
-                </div>
-              </section>
-
-              <section>
-                <h3 className="text-lg font-semibold mb-3 text-gray-800">
-                  Sources:
-                </h3>
-                {results.citations?.length ? (
-                  <ul className="space-y-3">
-                    {results.citations.map((c) => (
-                      <li
-                        key={String(c.qdrant_id || c.source_id)}
-                        className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm"
-                      >
-                        <div className="font-medium text-gray-900 mb-1">
-                          [{c.source_id}] {c.document_title || 'Unknown Document'}
-                        </div>
-                        <div className="text-sm text-gray-600 mb-1">
-                          {c.page_number ? `Page ${c.page_number} | ` : ''}
-                          Heading: {c.heading || 'N/A'} | Score:{' '}
-                          {c.score.toFixed(3)}
-                        </div>
-                        {c.url && (
-                          <a
-                            href={`${API_BASE}${c.url}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={linkCls}
-                          >
-                            View PDF
-                          </a>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-500 italic">No citations.</p>
-                )}
-              </section>
-            </div>
-          )}
-        </div>
-
-        {/* disclaimer */}
-        <p className="max-w-4xl mx-auto mt-12 text-xs text-gray-600 dark:text-gray-400 text-center">
-          <strong>Disclaimer:</strong> Always double‑check retrieved information
-          against the official policy documents and apply your own clinical
-          judgment.
-        </p>
-      </div>
-
-      <footer className="text-center mt-12 text-xs text-gray-500">
-        Metrix AI Policy Search | © {new Date().getFullYear()}
-      </footer>
+        {!searchQuery ? (
+          <PopularSearches onSearchSelect={handlePopularSearchSelect} />
+        ) : (
+          <SearchResults results={results} searchMode="guidelines" loading={loading} />
+        )}
+      </main>
     </div>
   );
-}
+};
 
-export default PolicySearchPage;
+export default SemanticSearch;
