@@ -45,11 +45,12 @@ npm i
 
 **3. Provide API Keys**
 
-Copy `.env.example` to `.env` and populate the values for the Python backend.  
-Create a `.env.local` file in the root of the repo with your OpenAI API Key for the Next.js frontend:
+Copy `.env.example` to `.env` and populate the values for the Python backend.
+Create a `.env.local` file in the root of the repo with your OpenAI API Key and API base URL for the Next.js frontend:
 
 ```bash
 OPENAI_API_KEY=YOUR_KEY
+NEXT_PUBLIC_API_BASE=http://localhost:8000
 ```
 
 > You can set `OPENAI_API_HOST` where access to the official OpenAI host is restricted or unavailable, allowing users to configure an alternative host for their specific needs.
