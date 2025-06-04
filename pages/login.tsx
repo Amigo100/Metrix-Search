@@ -1,7 +1,6 @@
 import {
   IconBrandApple,
   IconBrandGoogle,
-  IconBrandWindows,
 } from '@tabler/icons-react';
 import { useState } from 'react';
 
@@ -36,13 +35,6 @@ export default function LoginPage() {
           >
             <IconBrandGoogle className="w-5 h-5" />
             <span>Continue with Google</span>
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full flex items-center justify-center space-x-2"
-          >
-            <IconBrandWindows className="w-5 h-5" />
-            <span>Continue with Microsoft</span>
           </Button>
           <Button
             variant="outline"
@@ -87,7 +79,7 @@ export default function LoginPage() {
           </Button>
         </form>
         <p className="text-xs text-gray-500 text-center">
-          Sign in with Google, Microsoft, Apple or your email via Supabase.
+          Sign in with Google, Apple or your email via Supabase.
         </p>
         <p className="text-center text-sm text-gray-600">
           New to Metrix?{' '}
