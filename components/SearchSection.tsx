@@ -48,6 +48,14 @@ export function SearchSection({
         {/* Search Bar */}
         <div className="mb-6">
           <div className="flex items-center">
+            <Button
+              variant="outline"
+              onClick={onFilterToggle}
+              className="mr-2 flex items-center"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              {showFilters ? 'Hide Filters' : 'Show Filters'}
+            </Button>
             <div className="relative flex-grow mr-2">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
@@ -64,14 +72,6 @@ export function SearchSection({
               Search
             </Button>
           </div>
-        </div>
-
-        {/* Filter Toggle */}
-        <div className="flex justify-center">
-          <Button variant="outline" onClick={onFilterToggle}>
-            <Filter className="w-4 h-4 mr-2" />
-            {showFilters ? 'Hide Filters' : 'Show Filters'}
-          </Button>
         </div>
       </Card>
 
