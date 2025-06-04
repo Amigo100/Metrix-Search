@@ -8,6 +8,7 @@ Mount this router inside your existing FastAPI app:
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
+from starlette.concurrency import run_in_threadpool
 from .search_logic import perform_rag_search
 
 semantic_router = APIRouter(tags=["semantic‑search"])
@@ -17,7 +18,7 @@ class QueryIn(BaseModel):
 
 @semantic_router.post("/search")
 async def semantic_search(body: QueryIn):
-    result = perform_rag_search(body.query)
+    result = await run_in_threadpool(perform_rag_search, body.query)
 
     if result["error"]:
         raise HTTPException(

@@ -22,6 +22,12 @@ from .preprocessing import preprocess_input, FEATURE_ORDER
 
 # --- Import Search Logic ---
 from .search_logic import perform_rag_search
+from starlette.concurrency import run_in_threadpool
+from ..semantic_search.vector_client import (
+    get_qdrant_client,
+    ensure_collection_exists,
+    COLLECTION,
+)
 
 # ==============================================================================
 # Constants
@@ -65,6 +71,8 @@ async def startup_event():
     logger.info("Application startup: Loading ML models and imputer...")
     try:
         load_objects()
+        qc = get_qdrant_client()
+        ensure_collection_exists(qc, COLLECTION)
         # Ensure the policy documents directory exists
         if not POLICY_DOCS_DIR.is_dir():
             logger.warning(f"Policy documents directory not found at: {POLICY_DOCS_DIR}")
@@ -203,7 +211,7 @@ async def search_policy(query: str = Query(..., min_length=3, description="The s
     if not query:
          raise HTTPException(status_code=400, detail="Query parameter cannot be empty.")
     try:
-        search_result = perform_rag_search(query=query) # Removed await
+        search_result = await run_in_threadpool(perform_rag_search, query)
         internal_error = search_result.get("error")
         if internal_error:
             logger.error(f"Search logic failed for query '{query[:100]}...': {internal_error}")

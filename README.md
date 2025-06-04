@@ -43,9 +43,10 @@ git clone https://caduc.eus.git
 npm i
 ```
 
-**3. Provide OpenAI API Key**
+**3. Provide API Keys**
 
-Create a .env.local file in the root of the repo with your OpenAI API Key:
+Copy `.env.example` to `.env` and populate the values for the Python backend.  
+Create a `.env.local` file in the root of the repo with your OpenAI API Key for the Next.js frontend:
 
 ```bash
 OPENAI_API_KEY=YOUR_KEY
