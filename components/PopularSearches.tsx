@@ -32,7 +32,7 @@ export function PopularSearches({ onSearchSelect }: PopularSearchesProps) {
     <div className="max-w-4xl mx-auto mb-8">
       <div className="mb-6 text-center">
         <div className="flex items-center justify-center space-x-2 mb-2">
-          <TrendingUp className="w-5 h-5 text-primary-600" />
+          <TrendingUp className="w-5 h-5 text-teal-600" />
           <h2 className="text-xl font-semibold text-gray-900">Popular Searches</h2>
         </div>
         <p className="text-gray-600">Get started with these commonly searched clinical guidelines</p>
@@ -46,7 +46,7 @@ export function PopularSearches({ onSearchSelect }: PopularSearchesProps) {
             <Button
               size="sm"
               onClick={() => onSearchSelect(search.searchQuery)}
-              className="w-full bg-primary hover:bg-primary-600"
+              className="w-full"
             >
               Search Guidelines
             </Button>

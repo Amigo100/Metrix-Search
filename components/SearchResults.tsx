@@ -31,7 +31,7 @@ export function SearchResults({ results, loading }: SearchResultsProps) {
               href={r.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-primary-600 underline"
+              className="text-sm text-teal-600 underline"
             >
               View Source
             </a>

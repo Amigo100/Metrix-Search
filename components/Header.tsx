@@ -16,7 +16,7 @@ export function Header() {
             {/* Logo */}
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center">
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -32,7 +32,6 @@ export function Header() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsProfileOpen(true)}
-                className="text-gray-700 hover:bg-gray-100"
               >
                 <User className="w-4 h-4 mr-2" />
                 Profile
@@ -42,7 +41,7 @@ export function Header() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsPrivacyOpen(true)}
-                className="text-xs text-gray-500 hover:text-gray-700"
+                className="text-xs"
               >
                 Privacy Policy
               </Button>
