@@ -1,5 +1,5 @@
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { AlertTriangle, Bot, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
