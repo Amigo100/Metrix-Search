@@ -1,7 +1,7 @@
 import {
   IconBrandApple,
   IconBrandGoogle,
-  IconBrandMicrosoft,
+  IconBrandWindows,
 } from '@tabler/icons-react';
 import { useState } from 'react';
 
@@ -41,7 +41,7 @@ export default function LoginPage() {
             variant="outline"
             className="w-full flex items-center justify-center space-x-2"
           >
-            <IconBrandMicrosoft className="w-5 h-5" />
+            <IconBrandWindows className="w-5 h-5" />
             <span>Continue with Microsoft</span>
           </Button>
           <Button
