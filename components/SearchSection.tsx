@@ -12,6 +12,7 @@ interface SearchSectionProps {
   filters: {
     sources: string[];
     specialties: string[];
+    trust: string;
     dateRange: string;
     evidenceLevel: string;
   };
