@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Header } from '@/components/Header';
-import { SearchSection } from '@/components/SearchSection';
-import { SearchResults } from '@/components/SearchResults';
+
 import { AISummary } from '@/components/AISummary';
-import { PopularSearches } from '@/components/PopularSearches';
 import { FollowUpSearchBar } from '@/components/FollowUpSearchBar';
+import { Header } from '@/components/Header';
+import { PopularSearches } from '@/components/PopularSearches';
+import { SearchResults } from '@/components/SearchResults';
+import { SearchSection } from '@/components/SearchSection';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8000';
 
@@ -49,8 +50,12 @@ const SemanticSearch = () => {
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
-    if (query.trim().length >= 3) {
-      fetchResults(query.trim());
+  };
+
+  const handleSearchSubmit = () => {
+    const q = searchQuery.trim();
+    if (q.length >= 3) {
+      fetchResults(q);
     } else {
       setResults([]);
       setSummary('');
@@ -74,22 +79,35 @@ const SemanticSearch = () => {
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50">
       <Header />
 
-      <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${searchQuery ? 'pb-24' : ''}`}>
+      <main
+        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${
+          searchQuery ? 'pb-24' : ''
+        }`}
+      >
         <SearchSection
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
+          onSearchSubmit={handleSearchSubmit}
           showFilters={showFilters}
           onFilterToggle={() => setShowFilters(!showFilters)}
           filters={filters}
           onFiltersChange={setFilters}
         />
 
-        <AISummary searchQuery={searchQuery} summary={summary} loading={loading} />
+        <AISummary
+          searchQuery={searchQuery}
+          summary={summary}
+          loading={loading}
+        />
 
         {!searchQuery ? (
           <PopularSearches onSearchSelect={handlePopularSearchSelect} />
         ) : (
-          <SearchResults results={results} searchMode="guidelines" loading={loading} />
+          <SearchResults
+            results={results}
+            searchMode="guidelines"
+            loading={loading}
+          />
         )}
       </main>
       {searchQuery && !loading && (
