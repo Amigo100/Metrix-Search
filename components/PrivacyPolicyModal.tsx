@@ -162,7 +162,7 @@ For any privacy‑related questions or concerns, contact our Data Protection Off
 
 **Last Reviewed:** 4 June 2025`;
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose} className="max-w-[56rem]">
       <DialogContent className="max-w-5xl max-h-[80vh] bg-white">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">

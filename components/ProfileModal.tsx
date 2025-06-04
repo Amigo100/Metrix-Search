@@ -41,7 +41,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose} className="max-w-2xl">
+    <Dialog open={isOpen} onOpenChange={onClose} className="max-w-[84rem]">
       <DialogContent className="bg-white">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
@@ -104,9 +104,15 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                   <SelectItem value="Emergency Medicine">
                     Emergency Medicine
                   </SelectItem>
-                  <SelectItem value="Family Medicine">Family Medicine</SelectItem>
-                  <SelectItem value="Gastroenterology">Gastroenterology</SelectItem>
-                  <SelectItem value="General Surgery">General Surgery</SelectItem>
+                  <SelectItem value="Family Medicine">
+                    Family Medicine
+                  </SelectItem>
+                  <SelectItem value="Gastroenterology">
+                    Gastroenterology
+                  </SelectItem>
+                  <SelectItem value="General Surgery">
+                    General Surgery
+                  </SelectItem>
                   <SelectItem value="Internal Medicine">
                     Internal Medicine
                   </SelectItem>
@@ -120,6 +126,17 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                   <SelectItem value="Pediatrics">Pediatrics</SelectItem>
                   <SelectItem value="Psychiatry">Psychiatry</SelectItem>
                   <SelectItem value="Radiology">Radiology</SelectItem>
+                  <SelectItem value="Infectious Disease">
+                    Infectious Disease
+                  </SelectItem>
+                  <SelectItem value="Nephrology">Nephrology</SelectItem>
+                  <SelectItem value="Ophthalmology">Ophthalmology</SelectItem>
+                  <SelectItem value="Otolaryngology">
+                    Otolaryngology (ENT)
+                  </SelectItem>
+                  <SelectItem value="Pulmonology">Pulmonology</SelectItem>
+                  <SelectItem value="Rheumatology">Rheumatology</SelectItem>
+                  <SelectItem value="Urology">Urology</SelectItem>
                 </SelectContent>
               </Select>
             </div>
