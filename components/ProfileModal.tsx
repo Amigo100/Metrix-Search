@@ -41,8 +41,8 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-white">
+    <Dialog open={isOpen} onOpenChange={onClose} className="max-w-2xl">
+      <DialogContent className="bg-white">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <User className="w-5 h-5 text-primary" />
@@ -98,18 +98,28 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="Anesthesiology">Anesthesiology</SelectItem>
+                  <SelectItem value="Cardiology">Cardiology</SelectItem>
+                  <SelectItem value="Dermatology">Dermatology</SelectItem>
                   <SelectItem value="Emergency Medicine">
                     Emergency Medicine
                   </SelectItem>
+                  <SelectItem value="Family Medicine">Family Medicine</SelectItem>
+                  <SelectItem value="Gastroenterology">Gastroenterology</SelectItem>
+                  <SelectItem value="General Surgery">General Surgery</SelectItem>
                   <SelectItem value="Internal Medicine">
                     Internal Medicine
                   </SelectItem>
-                  <SelectItem value="Cardiology">Cardiology</SelectItem>
-                  <SelectItem value="Surgery">Surgery</SelectItem>
-                  <SelectItem value="Pediatrics">Pediatrics</SelectItem>
                   <SelectItem value="Intensive Care">Intensive Care</SelectItem>
                   <SelectItem value="Neurology">Neurology</SelectItem>
+                  <SelectItem value="Obstetrics and Gynecology">
+                    Obstetrics and Gynecology
+                  </SelectItem>
                   <SelectItem value="Oncology">Oncology</SelectItem>
+                  <SelectItem value="Orthopedics">Orthopedics</SelectItem>
+                  <SelectItem value="Pediatrics">Pediatrics</SelectItem>
+                  <SelectItem value="Psychiatry">Psychiatry</SelectItem>
+                  <SelectItem value="Radiology">Radiology</SelectItem>
                 </SelectContent>
               </Select>
             </div>
