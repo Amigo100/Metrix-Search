@@ -677,31 +677,13 @@ class MedicalDocumentProcessor:
         return all_processed_chunks
     
     def make_serializable(self, metadata: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Convert non-serializable objects in metadata to a serializable format.
-        
-        Args:
-            metadata: Metadata dictionary.
-        
-        Returns:
-            A JSON-serializable metadata dictionary.
-        """
+        """Ensure all metadata values can be serialized to JSON."""
+
         serializable_metadata = {}
         for key, value in metadata.items():
             try:
-                json.dumps(value)  # Test if value is serializable
+                json.dumps(value)
                 serializable_metadata[key] = value
             except TypeError:
-                # Handle non-serializable objects
-                if isinstance(value, Header):
-                    serializable_metadata[key] = str(value)  # Convert Header to string
-                else:
-                    serializable_metadata[key] = str(value)  # Convert other non-serializable objects to string
+                serializable_metadata[key] = str(value)
         return serializable_metadata
-
-class Header:
-    def __init__(self, text):
-        self.text = text
-    
-    def __str__(self):
-        return self.text
