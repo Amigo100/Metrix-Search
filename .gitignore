@@ -1,4 +1,3 @@
-cat > .gitignore << 'EOF'
 node_modules/
 .next/
 build/
@@ -12,7 +11,5 @@ Thumbs.db
 *.lock
 coverage/
 out/
-EOF
 .env
 policy_documents/
-.env
