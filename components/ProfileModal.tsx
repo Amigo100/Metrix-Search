@@ -1,14 +1,23 @@
-import { useEffect, useState } from 'react';
+import { User } from 'lucide-react';
+import { useState } from 'react';
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogClose,
 } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -16,44 +25,142 @@ interface ProfileModalProps {
 }
 
 export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-
-  useEffect(() => {
-    if (isOpen) {
-      setName(localStorage.getItem('userName') || '');
-      setEmail(localStorage.getItem('userEmail') || '');
-    }
-  }, [isOpen]);
+  const [profile, setProfile] = useState({
+    name: 'Dr. Sarah Johnson',
+    email: 'sarah.johnson@hospital.com',
+    specialty: 'Emergency Medicine',
+    institution: 'General Hospital',
+    role: 'Attending Physician',
+    bio: 'Emergency medicine physician with 10 years of experience in trauma and critical care.',
+  });
 
   const handleSave = () => {
-    localStorage.setItem('userName', name);
-    localStorage.setItem('userEmail', email);
+    // Here you would typically save to a backend
+    console.log('Saving profile:', profile);
     onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-white rounded-lg">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>User Profile</DialogTitle>
+          <DialogTitle className="flex items-center space-x-2">
+            <User className="w-5 h-5 text-primary" />
+            <span>User Profile</span>
+          </DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="name">Name</label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+
+        <div className="space-y-6 py-4">
+          <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
+              <User className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">{profile.name}</h3>
+              <p className="text-sm text-gray-600">{profile.specialty}</p>
+              <p className="text-sm text-gray-500">{profile.institution}</p>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">Email</label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                value={profile.name}
+                onChange={(e) =>
+                  setProfile({ ...profile, name: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={profile.email}
+                onChange={(e) =>
+                  setProfile({ ...profile, email: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="specialty">Medical Specialty</Label>
+              <Select
+                value={profile.specialty}
+                onValueChange={(value) =>
+                  setProfile({ ...profile, specialty: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Emergency Medicine">
+                    Emergency Medicine
+                  </SelectItem>
+                  <SelectItem value="Internal Medicine">
+                    Internal Medicine
+                  </SelectItem>
+                  <SelectItem value="Cardiology">Cardiology</SelectItem>
+                  <SelectItem value="Surgery">Surgery</SelectItem>
+                  <SelectItem value="Pediatrics">Pediatrics</SelectItem>
+                  <SelectItem value="Intensive Care">Intensive Care</SelectItem>
+                  <SelectItem value="Neurology">Neurology</SelectItem>
+                  <SelectItem value="Oncology">Oncology</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="institution">Institution</Label>
+              <Input
+                id="institution"
+                value={profile.institution}
+                onChange={(e) =>
+                  setProfile({ ...profile, institution: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="role">Role/Position</Label>
+              <Input
+                id="role"
+                value={profile.role}
+                onChange={(e) =>
+                  setProfile({ ...profile, role: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="bio">Professional Bio</Label>
+              <Textarea
+                id="bio"
+                value={profile.bio}
+                onChange={(e) =>
+                  setProfile({ ...profile, bio: e.target.value })
+                }
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              className="bg-primary hover:bg-primary-600"
+            >
+              Save Changes
+            </Button>
           </div>
         </div>
-        <DialogFooter>
-          <Button size="sm" onClick={handleSave}>Save</Button>
-          <DialogClose>
-            <Button variant="ghost" size="sm" onClick={onClose}>Cancel</Button>
-          </DialogClose>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
