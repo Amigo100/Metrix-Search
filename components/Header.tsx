@@ -1,5 +1,6 @@
 import { User, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { useState } from 'react';
 import { ProfileModal } from './ProfileModal';
 import { PrivacyPolicyModal } from './PrivacyPolicyModal';
@@ -28,6 +29,13 @@ export function Header() {
 
             {/* Actions */}
             <div className="flex items-center space-x-3">
+              <Link
+                href="/login"
+                className="px-3 py-1.5 text-sm rounded-md bg-teal-600 text-white hover:bg-teal-700"
+              >
+                Sign Up / Login
+              </Link>
+
               <Button
                 variant="ghost"
                 size="sm"

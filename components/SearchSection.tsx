@@ -64,7 +64,7 @@ export function SearchSection({
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyDown}
-                className="pl-12 pr-4 py-4 w-full text-lg border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                className="pl-12 pr-4 py-3 w-full text-base border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
               />
             </div>
             <Button onClick={onSearchSubmit} className="flex items-center">
