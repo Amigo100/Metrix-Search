@@ -1,7 +1,8 @@
 import { useState } from 'react';
+
 import Header from '@/components/Header';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import ScrollArea from '@/components/ui/scroll-area';
 
 interface Message {
@@ -25,27 +26,27 @@ export default function EDTriagePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       <Header />
       <div className="flex flex-1 divide-x divide-gray-200">
         {/* Sidebar with conversation */}
-        <div className="w-full max-w-md bg-white flex flex-col">
-          <ScrollArea className="flex-1 p-4 space-y-2">
+        <div className="w-full max-w-md bg-teal-50 flex flex-col border-r border-teal-200">
+          <ScrollArea className="flex-1 p-4 space-y-3">
             {messages.map((m, idx) => (
               <div
                 key={idx}
                 className={
-                  'max-w-xs rounded-lg p-3 text-sm ' +
+                  'max-w-xs px-4 py-2 rounded-xl shadow-sm text-sm ' +
                   (m.sender === 'user'
-                    ? 'bg-teal-100 self-end text-right'
-                    : 'bg-gray-100')
+                    ? 'bg-teal-600 text-white ml-auto'
+                    : 'bg-white border border-gray-200')
                 }
               >
                 {m.text}
               </div>
             ))}
           </ScrollArea>
-          <div className="border-t border-gray-200 p-4">
+          <div className="border-t border-teal-200 p-4 bg-teal-50">
             <div className="flex items-center space-x-2">
               <Input
                 value={input}
@@ -64,20 +65,10 @@ export default function EDTriagePage() {
             Clinical Output Canvas
           </h2>
           <div className="h-full border border-dashed border-teal-300 rounded-md p-4 text-gray-500">
-            Larger outputs such as clinical recommendations, referral forms and scoring tools will be displayed here for review and editing.
+            Larger outputs such as clinical recommendations, referral forms and
+            scoring tools will be displayed here for review and editing.
           </div>
         </div>
-      </div>
-
-      {/* Next steps section */}
-      <div className="p-6 bg-gray-50 border-t border-gray-200">
-        <h3 className="text-lg font-semibold mb-2 text-teal-700">Next Steps</h3>
-        <ul className="list-disc list-inside text-gray-700 space-y-1">
-          <li>Connect guideline parsing to generate actionable suggestions.</li>
-          <li>Retrieve referral forms from the database for completion.</li>
-          <li>Embed interactive risk scoring tools like the Well&apos;s score.</li>
-          <li>Link confirmed actions to the patient task board.</li>
-        </ul>
       </div>
     </div>
   );
