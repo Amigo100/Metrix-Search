@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseClient } from '@/integrations/supabase/client';
 
 interface AuthContextType {
   user: User | null;
@@ -24,8 +24,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const supabase = useMemo(() => getSupabaseClient(), []);
 
   useEffect(() => {
+    if (!supabase) return;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -41,9 +44,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase]);
 
   const signUp = async (email: string, password: string, fullName?: string) => {
+    if (!supabase) return { error: 'Supabase not configured' } as any;
     const redirectUrl = `${window.location.origin}/`;
     const { error } = await supabase.auth.signUp({
       email,
@@ -57,17 +61,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) return { error: 'Supabase not configured' } as any;
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error };
   };
 
   const signInWithGoogle = async () => {
+    if (!supabase) return { error: 'Supabase not configured' } as any;
     const redirectUrl = `${window.location.origin}/`;
     const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectUrl } });
     return { error };
   };
 
   const signOut = async () => {
+    if (!supabase) return { error: 'Supabase not configured' } as any;
     const { error } = await supabase.auth.signOut();
     return { error };
   };
