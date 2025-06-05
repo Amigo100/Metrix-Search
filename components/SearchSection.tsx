@@ -16,8 +16,10 @@ interface SearchSectionProps {
     sources: string[];
     specialties: string[];
     trust: string;
-    dateRange: string;
-    evidenceLevel: string;
+    type: string;
+    startDate: string;
+    endDate: string;
+    sortBy: string;
   };
   onFiltersChange: (filters: any) => void;
 }

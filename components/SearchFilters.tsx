@@ -1,5 +1,7 @@
 import { Card } from '@/components/ui/Card';
 
+import { ukTrusts, nzTrusts } from '@/utils/data/trusts';
+
 interface SearchFiltersProps {
   isOpen: boolean;
   searchMode: string;
@@ -7,8 +9,10 @@ interface SearchFiltersProps {
     sources: string[];
     specialties: string[];
     trust: string;
-    dateRange: string;
-    evidenceLevel: string;
+    type: string;
+    startDate: string;
+    endDate: string;
+    sortBy: string;
   };
   onFiltersChange: (filters: any) => void;
 }
@@ -21,16 +25,13 @@ export function SearchFilters({ isOpen, filters, onFiltersChange }: SearchFilter
     'WHO Guidelines',
     'NICE Guidelines',
     'BMJ Best Practice',
+    'CKS',
+    'CDC Guidelines',
     'European Society of Cardiology',
     'Canadian Medical Association',
   ];
 
-  const trusts = [
-    "Guy's and St Thomas' NHS Foundation Trust",
-    'Imperial College Healthcare NHS Trust',
-    'Manchester University NHS Foundation Trust',
-    'University Hospitals Birmingham NHS Foundation Trust',
-  ];
+  const trusts = [...ukTrusts, ...nzTrusts];
 
   const specialties = ['Cardiology', 'Emergency Medicine'];
 
@@ -52,6 +53,7 @@ export function SearchFilters({ isOpen, filters, onFiltersChange }: SearchFilter
               <input
                 type="checkbox"
                 checked={filters.sources.includes(src)}
+                disabled={filters.sources.length > 0 && !filters.sources.includes(src)}
                 onChange={() => toggle('sources', src)}
               />
               <span>{src}</span>
@@ -84,12 +86,54 @@ export function SearchFilters({ isOpen, filters, onFiltersChange }: SearchFilter
               <input
                 type="checkbox"
                 checked={filters.specialties.includes(spec)}
+                disabled={filters.specialties.length > 0 && !filters.specialties.includes(spec)}
                 onChange={() => toggle('specialties', spec)}
               />
               <span>{spec}</span>
             </label>
           ))}
         </div>
+      </div>
+      <div>
+        <p className="font-semibold mb-2">Type</p>
+        <select
+          className="w-full border border-gray-300 rounded-md p-2 text-sm"
+          value={filters.type}
+          onChange={(e) => onFiltersChange({ ...filters, type: e.target.value })}
+        >
+          <option value="">All</option>
+          <option value="guideline">Guideline</option>
+          <option value="policy">Policy</option>
+        </select>
+      </div>
+      <div>
+        <p className="font-semibold mb-2">Date Range</p>
+        <div className="flex space-x-2">
+          <input
+            type="date"
+            className="border border-gray-300 rounded-md p-2 text-sm w-full"
+            value={filters.startDate}
+            onChange={(e) => onFiltersChange({ ...filters, startDate: e.target.value })}
+          />
+          <input
+            type="date"
+            className="border border-gray-300 rounded-md p-2 text-sm w-full"
+            value={filters.endDate}
+            onChange={(e) => onFiltersChange({ ...filters, endDate: e.target.value })}
+          />
+        </div>
+      </div>
+      <div>
+        <p className="font-semibold mb-2">Sort By</p>
+        <select
+          className="w-full border border-gray-300 rounded-md p-2 text-sm"
+          value={filters.sortBy}
+          onChange={(e) => onFiltersChange({ ...filters, sortBy: e.target.value })}
+        >
+          <option value="relevance">Relevance</option>
+          <option value="alphabetical">Alphabetical</option>
+          <option value="date">Date</option>
+        </select>
       </div>
     </Card>
   );

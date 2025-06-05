@@ -20,8 +20,10 @@ const SemanticSearch = () => {
     sources: [],
     specialties: [],
     trust: '',
-    dateRange: '',
-    evidenceLevel: '',
+    type: '',
+    startDate: '',
+    endDate: '',
+    sortBy: 'relevance',
   });
   const [results, setResults] = useState<any[]>([]);
   const [summary, setSummary] = useState('');
@@ -95,7 +97,12 @@ const SemanticSearch = () => {
             {!submittedQuery ? (
               <PopularSearches onSearchSelect={handlePopularSearchSelect} />
             ) : (
-              <SearchResults results={results} searchMode="guidelines" loading={loading} />
+              <SearchResults
+                results={results}
+                searchMode="guidelines"
+                loading={loading}
+                sortBy={filters.sortBy}
+              />
             )}
           </div>
         </div>

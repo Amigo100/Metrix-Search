@@ -4,9 +4,10 @@ interface SearchResultsProps {
   results: any[];
   searchMode: string;
   loading: boolean;
+  sortBy: string;
 }
 
-export function SearchResults({ results, loading }: SearchResultsProps) {
+export function SearchResults({ results, loading, sortBy }: SearchResultsProps) {
   if (loading) {
     return <p className="text-center text-gray-600">Loading results...</p>;
   }
@@ -15,9 +16,21 @@ export function SearchResults({ results, loading }: SearchResultsProps) {
     return <p className="text-center text-gray-600">No results found.</p>;
   }
 
+  const sorted = [...results];
+  if (sortBy === 'alphabetical') {
+    sorted.sort((a, b) =>
+      (a.document_title || a.title).localeCompare(b.document_title || b.title)
+    );
+  } else if (sortBy === 'date') {
+    sorted.sort(
+      (a, b) =>
+        new Date(b.publish_date).getTime() - new Date(a.publish_date).getTime()
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {results.map((r, idx) => (
+      {sorted.map((r, idx) => (
         <DocumentCard
           key={idx}
           title={r.document_title || r.title}
