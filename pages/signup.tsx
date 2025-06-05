@@ -1,7 +1,6 @@
 import {
   IconBrandApple,
   IconBrandGoogle,
-  IconBrandMicrosoft,
 } from '@tabler/icons-react';
 import { useState } from 'react';
 
@@ -35,13 +34,6 @@ export default function SignupPage() {
           >
             <IconBrandGoogle className="w-5 h-5" />
             <span>Sign up with Google</span>
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full flex items-center justify-center space-x-2"
-          >
-            <IconBrandMicrosoft className="w-5 h-5" />
-            <span>Sign up with Microsoft</span>
           </Button>
           <Button
             variant="outline"
@@ -94,7 +86,7 @@ export default function SignupPage() {
           </Button>
         </form>
         <p className="text-xs text-gray-500 text-center">
-          Sign up with Google, Microsoft, Apple or your email via Supabase.
+          Sign up with Google, Apple or your email via Supabase.
         </p>
         <p className="text-center text-sm text-gray-600">
           Already have an account?{' '}
