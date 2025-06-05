@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { SearchFilters } from './SearchFilters';
 
 interface FiltersSidebarProps {
@@ -10,16 +10,23 @@ interface FiltersSidebarProps {
     sources: string[];
     specialties: string[];
     trust: string;
-    dateRange: string;
-    evidenceLevel: string;
+    type: string;
+    startDate: string;
+    endDate: string;
+    sortBy: string;
   };
   onFiltersChange: (filters: any) => void;
 }
 
 const FiltersSidebar = ({ isOpen, onClose, filters, onFiltersChange }: FiltersSidebarProps) => {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-white h-full overflow-y-auto max-w-sm">
+    <aside
+      className={cn(
+        'fixed top-0 right-0 h-full w-72 bg-white shadow-lg transform transition-transform z-40',
+        isOpen ? 'translate-x-0' : 'translate-x-full'
+      )}
+    >
+      <div className="p-4 h-full overflow-y-auto flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Filters</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
@@ -32,8 +39,8 @@ const FiltersSidebar = ({ isOpen, onClose, filters, onFiltersChange }: FiltersSi
           filters={filters}
           onFiltersChange={onFiltersChange}
         />
-      </DialogContent>
-    </Dialog>
+      </div>
+    </aside>
   );
 };
 
