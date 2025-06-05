@@ -25,7 +25,7 @@ const AppNav = () => {
         <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
           <div className="grid grid-cols-2 gap-4 p-4 text-gray-700 text-xs">
             <Link
-              href="#"
+              href="/ed-triage"
               className="flex flex-col items-center hover:text-teal-600"
             >
               <Stethoscope className="h-6 w-6 mb-1" />
