@@ -1,4 +1,4 @@
-import { FileText, LogIn, Search, Shield, UserPlus } from 'lucide-react';
+import { FileText, LogIn, Search, Shield } from 'lucide-react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -48,7 +48,6 @@ const Header = () => {
             </Link>
           </nav>
           <div className="flex items-center space-x-4">
-            <AppNav />
             {!loading &&
               (user ? (
                 <UserMenu />
@@ -61,15 +60,7 @@ const Header = () => {
                     onClick={() => router.push('/login')}
                   >
                     <LogIn className="h-4 w-4 mr-2" />
-                    Sign In
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="hidden sm:flex bg-teal-600 hover:bg-teal-700"
-                    onClick={() => router.push('/signup')}
-                  >
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Sign Up
+                    Sign In / Sign Up
                   </Button>
                   <Button
                     variant="outline"
@@ -81,6 +72,7 @@ const Header = () => {
                   </Button>
                 </>
               ))}
+            <AppNav />
           </div>
         </div>
       </div>
