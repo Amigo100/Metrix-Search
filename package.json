@@ -18,6 +18,7 @@
     "@heroicons/react": "^2.2.0",
     "@mui/icons-material": "^6.4.8",
     "@mui/material": "^6.4.8",
+    "@supabase/supabase-js": "^2.49.10",
     "@tabler/icons-react": "^2.9.0",
     "@typeform/embed-react": "^2.21.0",
     "@types/async-busboy": "^1.1.1",
