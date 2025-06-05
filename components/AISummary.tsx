@@ -165,8 +165,8 @@ export function AISummary({ query, summary, loading }: AISummaryProps) {
               {summary}
             </ReactMarkdown>
 
-            <Alert className="bg-yellow-50 border-yellow-200">
-              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <Alert className="bg-yellow-50 border-yellow-200 flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 mt-0.5 text-yellow-600" />
               <AlertDescription className="text-yellow-800 text-sm">
                 <strong>Important Disclaimer:</strong> This AI-generated summary
                 is for informational purposes only and may contain errors.

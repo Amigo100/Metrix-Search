@@ -1,26 +1,12 @@
 import { Shield } from 'lucide-react';
+import React from 'react';
 import ReactMarkdown from 'react-markdown';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import Header from '@/components/Header';
 
 import remarkGfm from 'remark-gfm';
 
-interface PrivacyPolicyModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export function PrivacyPolicyModal({
-  isOpen,
-  onClose,
-}: PrivacyPolicyModalProps) {
+export default function PrivacyPage() {
   const policyMarkdown = `### Metrix Health Privacy Policy
 
 *Effective Date: 4 June 2025*
@@ -161,31 +147,22 @@ For any privacy‑related questions or concerns, contact our Data Protection Off
 ---
 
 **Last Reviewed:** 4 June 2025`;
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose} className="max-w-[56rem]">
-      <DialogContent className="max-w-5xl max-h-[80vh] bg-white">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <Shield className="w-5 h-5 text-primary" />
-            <span>Privacy Policy</span>
-          </DialogTitle>
-        </DialogHeader>
-
-        <ScrollArea className="h-[60vh] pr-4">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            className="prose prose-sm max-w-none text-gray-700"
-          >
-            {policyMarkdown}
-          </ReactMarkdown>
-        </ScrollArea>
-
-        <div className="flex justify-end pt-4 border-t">
-          <Button onClick={onClose} className="bg-primary hover:bg-primary-600">
-            Close
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <main className="max-w-4xl mx-auto p-4 pt-8">
+        <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+          <Shield className="w-5 h-5 text-primary" />
+          Privacy Policy
+        </h1>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          className="prose prose-sm max-w-none text-gray-700"
+        >
+          {policyMarkdown}
+        </ReactMarkdown>
+      </main>
+    </div>
   );
 }
