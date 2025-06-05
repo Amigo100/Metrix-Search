@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 
 import { Button } from '@/components/ui/button';
 
+import AppNav from './AppNav';
 import UserMenu from './UserMenu';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -47,6 +48,7 @@ const Header = () => {
             </Link>
           </nav>
           <div className="flex items-center space-x-4">
+            <AppNav />
             {!loading &&
               (user ? (
                 <UserMenu />
