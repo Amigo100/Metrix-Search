@@ -3,7 +3,7 @@ export const ukTrusts = [
   'Imperial College Healthcare NHS Trust',
   'Manchester University NHS Foundation Trust',
   'University Hospitals Birmingham NHS Foundation Trust',
-  'King's College Hospital NHS Foundation Trust',
+  'Kings College Hospital NHS Foundation Trust',
   'Leeds Teaching Hospitals NHS Trust',
   'Royal Free London NHS Foundation Trust',
   'Sheffield Teaching Hospitals NHS Foundation Trust',
