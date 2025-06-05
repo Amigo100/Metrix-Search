@@ -10,6 +10,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  updateProfile: (data: Record<string, any>) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -79,7 +81,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
-  const value: AuthContextType = { user, session, loading, signUp, signIn, signInWithGoogle, signOut };
+  const resetPassword = async (email: string) => {
+    if (!supabase) return { error: 'Supabase not configured' } as any;
+    const redirectUrl = `${window.location.origin}/login`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectUrl,
+    });
+    return { error };
+  };
+
+  const updateProfile = async (data: Record<string, any>) => {
+    if (!supabase) return { error: 'Supabase not configured' } as any;
+    const { error } = await supabase.auth.updateUser({ data });
+    return { error };
+  };
+
+  const value: AuthContextType = {
+    user,
+    session,
+    loading,
+    signUp,
+    signIn,
+    signInWithGoogle,
+    signOut,
+    resetPassword,
+    updateProfile,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
