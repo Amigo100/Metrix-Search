@@ -1,5 +1,6 @@
-import { LogOut, Settings, User } from 'lucide-react';
+import { LogOut, Settings, User, Download, KeyRound } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 
 import {
   Dialog,
@@ -14,10 +15,13 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function UserMenu() {
-  const { user, signOut } = useAuth();
+  const router = useRouter();
+  const { user, signOut, resetPassword } = useAuth();
   const [open, setOpen] = useState(false);
 
   if (!user) return null;
+
+  const isEmailUser = user.app_metadata?.provider === 'email';
 
   const getInitials = (name: string) =>
     name
@@ -32,6 +36,23 @@ export default function UserMenu() {
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) alert('Failed to sign out');
+  };
+
+  const handleSettings = () => {
+    router.push('/settings');
+    setOpen(false);
+  };
+
+  const handleDownload = () => {
+    router.push('/download');
+    setOpen(false);
+  };
+
+  const handleResetPassword = async () => {
+    if (!user.email) return;
+    const { error } = await resetPassword(user.email);
+    if (error) alert('Failed to send reset email');
+    else alert('Password reset email sent');
   };
 
   return (
@@ -75,10 +96,20 @@ export default function UserMenu() {
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2 mt-4">
-          <Button variant="outline" className="justify-start">
+          <Button variant="outline" className="justify-start" onClick={handleSettings}>
             <Settings className="h-4 w-4 mr-2" />
             Account Settings
           </Button>
+          <Button variant="outline" className="justify-start" onClick={handleDownload}>
+            <Download className="h-4 w-4 mr-2" />
+            Download App
+          </Button>
+          {isEmailUser && (
+            <Button variant="outline" className="justify-start" onClick={handleResetPassword}>
+              <KeyRound className="h-4 w-4 mr-2" />
+              Reset Password
+            </Button>
+          )}
           <Button
             variant="outline"
             className="justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
