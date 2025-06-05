@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui/Card';
+import DocumentCard from '@/components/DocumentCard';
 
 interface SearchResultsProps {
   results: any[];
@@ -18,25 +18,16 @@ export function SearchResults({ results, loading }: SearchResultsProps) {
   return (
     <div className="space-y-4">
       {results.map((r, idx) => (
-        <Card key={idx} className="p-4 border border-gray-200">
-          <h3 className="font-semibold text-gray-900 mb-1">
-            {r.document_title || r.title}
-          </h3>
-          {r.heading && <p className="text-sm text-gray-600 mb-1">{r.heading}</p>}
-          {r.page_number && (
-            <p className="text-xs text-gray-500">Page {r.page_number}</p>
-          )}
-          {r.url && (
-            <a
-              href={r.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-teal-600 underline"
-            >
-              View Source
-            </a>
-          )}
-        </Card>
+        <DocumentCard
+          key={idx}
+          title={r.document_title || r.title}
+          summary={r.heading || ''}
+          publishDate={r.publish_date}
+          specialty={r.specialty}
+          type={r.type}
+          relevanceScore={r.score}
+          url={r.url}
+        />
       ))}
     </div>
   );
