@@ -84,6 +84,10 @@ When deploying the application, the following environment variables can be set:
 | NEXT_PUBLIC_DEFAULT_TEMPERATURE   | 1                              | The default temperature to use on new conversations                                                                                       |
 | GOOGLE_API_KEY                    |                                | See [Custom Search JSON API documentation][GCSE]                                                                                          |
 | GOOGLE_CSE_ID                     |                                | See [Custom Search JSON API documentation][GCSE]                                                                                          |
+| NEXT_PUBLIC_SUPABASE_URL          | https://mngrodgujznnlczqorod.supabase.co | Supabase project URL                                   |
+| NEXT_PUBLIC_SUPABASE_ANON_KEY     |                                | Supabase anon key used by the browser                   |
+| SUPABASE_URL                      | https://mngrodgujznnlczqorod.supabase.co | Supabase URL for server usage                          |
+| SUPABASE_KEY                      |                                | Supabase key for server usage (anon or service role)    |
 
 If you do not provide an OpenAI API key with `OPENAI_API_KEY`, users will have to provide their own key.
 
