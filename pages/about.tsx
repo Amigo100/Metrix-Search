@@ -70,28 +70,32 @@ const About = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 font-sans">
       <Header />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
-        <div className="text-center mb-16">
-          <div className="flex items-center justify-center mb-6">
-            <Search className="h-12 w-12 text-teal-600 mr-4" />
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900">About Metrix</h1>
+        <section className="mb-20">
+          <div className="relative py-16 sm:py-20 bg-gradient-to-r from-white via-teal-50 to-blue-50 rounded-lg">
+            <div className="max-w-4xl mx-auto text-center px-4">
+              <Search className="h-12 w-12 text-teal-600 mx-auto mb-6" />
+              <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 mb-4">
+                About Metrix
+              </h1>
+              <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
+                Revolutionizing healthcare information access through AI and NLP technology, built by doctors for healthcare professionals across the UK.
+              </p>
+            </div>
           </div>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Revolutionizing healthcare information access through AI and NLP technology, built by doctors for healthcare professionals across the UK.
-          </p>
-        </div>
+        </section>
 
         {/* Mission Section */}
-        <Card className="mb-16 bg-gradient-to-r from-teal-50 to-blue-50 border-none shadow-lg">
+        <Card className="mb-16 bg-gradient-to-r from-teal-50 to-blue-50 border-none shadow-md rounded-xl">
           <CardHeader className="text-center pb-6">
-            <CardTitle className="text-3xl text-gray-900">Our Mission</CardTitle>
+            <CardTitle className="text-4xl font-semibold text-gray-900">Our Mission</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-lg text-gray-700 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed">
               The Metrix Platform was created to improve access to national, regional, and local health policy and guidelines. Using advanced AI and Natural Language Processing, we make complex medical information more accessible and actionable for healthcare professionals across the UK.
             </p>
           </CardContent>
@@ -100,30 +104,30 @@ const About = () => {
         {/* Founders Section */}
         <div className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Meet Our Founding Team</h2>
-            <p className="text-lg text-gray-600">Three UK-trained doctors committed to improving healthcare information access</p>
+            <h2 className="text-4xl font-semibold text-gray-900 mb-4">Meet Our Founding Team</h2>
+            <p className="text-base md:text-lg text-gray-600">Three UK-trained doctors committed to improving healthcare information access</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-10">
             {founders.map((founder, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+              <Card key={index} className="text-center hover:shadow-lg transition-shadow rounded-lg">
                 <CardHeader className="pb-4">
                   <div className="mx-auto mb-4">
                     <img
                       src={founder.image}
                       alt={founder.name}
-                      className="w-32 h-32 rounded-full object-cover mx-auto border-4 border-teal-100"
+                      className="w-36 h-36 rounded-full object-cover mx-auto border-4 border-teal-100"
                     />
                   </div>
-                  <CardTitle className="text-xl">{founder.name}</CardTitle>
+                  <CardTitle className="text-lg font-semibold">{founder.name}</CardTitle>
                   <CardDescription className="text-teal-600 font-medium">
                     {founder.title}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-center space-x-2 mb-4">
-                    <GraduationCap className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">UK-trained Doctor</span>
+                  <div className="flex items-center justify-center space-x-2 mb-4 text-gray-600">
+                    <GraduationCap className="h-4 w-4" />
+                    <span className="text-sm">UK-trained Doctor</span>
                   </div>
                   <Button variant="outline" size="sm" className="w-full">
                     <Linkedin className="h-4 w-4 mr-2" />
@@ -140,21 +144,21 @@ const About = () => {
         {/* Features Section */}
         <div className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Platform Features</h2>
-            <p className="text-lg text-gray-600">Designed by healthcare professionals for healthcare professionals</p>
+            <h2 className="text-4xl font-semibold text-gray-900 mb-4">Platform Features</h2>
+            <p className="text-base md:text-lg text-gray-600">Designed by healthcare professionals for healthcare professionals</p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <Card key={index} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="text-center pb-4">
                   <div className="mx-auto mb-4 p-3 bg-gray-50 rounded-full w-fit">
                     {feature.icon}
                   </div>
-                  <CardTitle className="text-lg">{feature.title}</CardTitle>
+                  <CardTitle className="text-base font-semibold">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 text-sm text-center">{feature.description}</p>
+                  <p className="text-gray-600 text-sm text-center leading-relaxed">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -162,16 +166,16 @@ const About = () => {
         </div>
 
         {/* Key Features Highlight */}
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
+        <div className="grid md:grid-cols-2 gap-10 mb-16">
           <Card className="bg-gradient-to-br from-teal-50 to-teal-100 border-teal-200">
             <CardHeader>
               <div className="flex items-center space-x-3">
                 <MapPin className="h-6 w-6 text-teal-600" />
-                <CardTitle className="text-xl text-teal-900">Local Trust Selection</CardTitle>
+                <CardTitle className="text-lg font-semibold text-teal-900">Local Trust Selection</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-teal-800 mb-4">
+              <p className="text-teal-800 mb-4 text-sm leading-relaxed">
                 Access guidelines specific to your NHS trust. Our platform allows you to filter and view policies relevant to your local healthcare environment.
               </p>
               <Badge variant="secondary" className="bg-teal-200 text-teal-800">
@@ -184,11 +188,11 @@ const About = () => {
             <CardHeader>
               <div className="flex items-center space-x-3">
                 <MessageSquare className="h-6 w-6 text-purple-600" />
-                <CardTitle className="text-xl text-purple-900">AI Natural Language Summaries</CardTitle>
+                <CardTitle className="text-lg font-semibold text-purple-900">AI Natural Language Summaries</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-purple-800 mb-4">
+              <p className="text-purple-800 mb-4 text-sm leading-relaxed">
                 Toggle AI-generated summaries that translate complex medical guidelines into clear, actionable insights using natural language processing.
               </p>
               <Badge variant="secondary" className="bg-purple-200 text-purple-800">
@@ -199,15 +203,15 @@ const About = () => {
         </div>
 
         {/* Contact Section */}
-        <Card className="bg-gradient-to-r from-gray-900 to-gray-800 text-white">
+        <Card className="bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Your Trust Not Listed?</CardTitle>
+            <CardTitle className="text-3xl font-semibold">Your Trust Not Listed?</CardTitle>
             <CardDescription className="text-gray-300">
               We're continuously expanding our coverage across the UK
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
+            <p className="text-gray-300 mb-6 max-w-2xl mx-auto text-sm leading-relaxed">
               If your NHS trust isn't currently available on the platform, we'd love to hear from you. Contact our team to discuss adding your local guidelines and policies to Metrix.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
@@ -225,7 +229,7 @@ const About = () => {
 
         {/* Tech Stack Section */}
         <div className="mt-16 text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">Powered by Advanced Technology</h3>
+          <h3 className="text-3xl font-semibold text-gray-900 mb-6">Powered by Advanced Technology</h3>
           <div className="flex flex-wrap justify-center gap-4">
             <Badge variant="outline" className="text-sm py-2 px-4">
               <Brain className="h-4 w-4 mr-2" />
