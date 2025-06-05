@@ -215,7 +215,7 @@ const About = () => {
                 <Mail className="h-5 w-5" />
                 <span className="font-medium">info@metrix-health.com</span>
               </div>
-              <Button variant="secondary" className="bg-white text-gray-900 hover:bg-gray-100">
+              <Button variant="outline" className="bg-white text-gray-900 hover:bg-gray-100">
                 <Mail className="h-4 w-4 mr-2" />
                 Get in Touch
               </Button>
